@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Botânica Johnsons · Calculadora de produção</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="./">❧ <span>BOTÂNICA<br><strong>JOHNSONS</strong></span></a><span class="header-note">DO CAMPO À SUA BANCADA</span></header>
+<main><div class="intro"><div><p class="eyebrow">CADERNO DE PRODUÇÃO · Nº 01</p><h1>Cultive um plano.<br><em>Prepare cada ingrediente.</em></h1><p class="description">Escolha o que deseja produzir. Nós fazemos as contas<br class="desktop"> para você chegar à bancada com tudo em mãos.</p></div><div class="seal">FEITO À MÃO<br><span>❧</span><br>DESDE A RAIZ</div></div>
+<div class="workspace"><section class="recipes"><div class="section-heading"><div><p class="eyebrow">01 / SUA PRODUÇÃO</p><h2>O que vamos preparar?</h2></div><button id="clear" class="text-button">Limpar</button></div><p class="hint">Informe a quantidade de unidades de cada produto.</p><div id="products"></div><div class="batch-note">↗ Produção em lotes completos. Quantidades são arredondadas para o próximo lote.</div></section>
+<aside><div class="shopping"><p class="eyebrow">02 / LISTA DA BANCADA</p><h2>Ingredientes necessários</h2><label class="toggle"><input type="checkbox" id="expand"><span>Produzir também os ingredientes compostos<small>Desmonta combo, perfume, buquê e óleo nas receitas disponíveis.</small></span></label><div class="summary"><div><strong id="units">0</strong><span>unidades produzidas</span></div><div><strong id="batches">0</strong><span>lotes de produção</span></div></div><div id="ingredients" aria-live="polite"></div><div id="details"></div><button id="copy" class="copy" disabled>Copiar lista <span>↗</span></button><p id="copy-status" role="status"></p></div><p class="aside-note">Cada receita leva 30 segundos por lote.<br>O tempo estimado considera produção sequencial.</p></aside></div>
+<footer><span>❧ BOTÂNICA JOHNSONS</span><span>Uma boa colheita começa com um bom plano.</span></footer></main><script src="app.js"></script>
+</body></html>
