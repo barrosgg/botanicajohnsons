@@ -132,3 +132,22 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
   .ingredient { font-size: 10px; }
 }
 @media (prefers-reduced-motion: no-preference) { button { transition: filter .15s; } }
+
+/* Focus and preparation feedback keep the current step easy to find. */
+.hint kbd { font: inherit; color: var(--ink); background: #fff5dd66; border: 1px solid var(--line); border-radius: 2px; padding: 1px 3px; }
+#keyboard-hint { display: inline-block; margin-left: 4px; }
+.product.selected { background: #fff3d633; box-shadow: inset 2px 0 #993b2c66; padding-left: 8px; }
+.product:focus-within { background: #fff8e999; box-shadow: inset 3px 0 var(--accent); padding-left: 8px; }
+.stepper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: #fff6df; }
+.product small { display: block; line-height: 1.4; }
+#save-status { display: block; }
+#gather-progress { font-size: 10px; color: var(--muted); margin: 8px 0 2px; }
+#gather-progress:empty { display: none; }
+.ingredient { cursor: pointer; align-items: center; gap: 6px; }
+.ingredient input { flex-shrink: 0; width: 13px; height: 13px; margin: 0; accent-color: #4d6540; }
+.ingredient span { flex: 1; }
+.ingredient.gathered { color: #596348; background: #65734f12; }
+.ingredient.gathered span { text-decoration: line-through; }
+.ingredient.gathered strong { color: #4d6540; }
+.ingredient:focus-within { outline: 1px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 700px) { #keyboard-hint { margin: 4px 0 0; display: block; } }
