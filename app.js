@@ -38,8 +38,8 @@ function estimateCosts(totals) {
  // Keep the midpoint precise until formatting the final totals.
  return {min:min/100, median:(min+max)/200, max:max/100, priced, missing};
 }
-function formatCost(value) {
- return '$' + value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+function formatCost(value, maximumFractionDigits=2) {
+ return '$' + value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits});
 }
 if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts};
 if (typeof document !== 'undefined') {
@@ -99,9 +99,36 @@ if (typeof document !== 'undefined') {
       + (cost.missing.length ? `\nSem preço (não incluídos): ${cost.missing.join(', ')}.` : '');
   }
 
+  function costBreakdown() {
+    return Object.entries(result.totals).sort((a,b) => a[0].localeCompare(b[0], 'pt-BR')).map(([name, quantity]) => {
+      const price = ingredientPrices[name];
+      if (!price) return {name, lines: [`${fmt(quantity)} un. · Sem preço cadastrado; não incluído no subtotal.`]};
+      const values = [price[0]/100, (price[0]+price[1])/200, price[1]/100];
+      return {name, lines: [`${fmt(quantity)} un. · ` + values.map((value, i) => `${['Mín', 'Med', 'Máx'][i]}: ${formatCost(value,3)} × ${fmt(quantity)} = ${formatCost(quantity*value,3)}`).join(' · ')]};
+    });
+  }
+
   function showCosts() {
     const cost = estimateCosts(result.totals);
     const hasItems = Object.keys(result.totals).length > 0;
+    const memory = document.getElementById('cost-memory');
+    memory.hidden = !hasItems;
+    const rows = document.getElementById('cost-memory-rows');
+    rows.replaceChildren();
+    for (const item of costBreakdown()) {
+      const row = document.createElement('div');
+      row.className = 'cost-memory-row';
+      const title = document.createElement('strong');
+      title.textContent = item.name;
+      row.append(title);
+      for (const line of item.lines) {
+        const text = document.createElement('div');
+        text.textContent = line;
+        row.append(text);
+      }
+      rows.append(row);
+    }
+    document.getElementById('cost-memory-total').textContent = costSummary();
     document.getElementById('cost-heading').textContent = cost.missing.length ? 'Custos da encomenda · parcial' : 'Custos estimados da encomenda';
     for (const key of ['min', 'median', 'max']) {
       document.getElementById(`cost-${key}`).textContent = !hasItems || !cost.priced ? '—' : formatCost(cost[key]);
@@ -191,6 +218,7 @@ if (typeof document !== 'undefined') {
     const text = 'Botânica Johnsons — Lista de ingredientes\n' + Object.entries(result.totals)
       .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
       .map(([name, n]) => `${fmt(n)} × ${name}`).join('\n')
+      + '\n\nMemória de cálculo\n' + costBreakdown().map(item => item.name + '\n' + item.lines.join('\n')).join('\n\n')
       + '\n\n' + costSummary() + '\nMediano estimado: ponto médio entre mínimo e máximo.';
     try {
       await navigator.clipboard.writeText(text);

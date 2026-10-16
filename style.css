@@ -160,3 +160,9 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .cost-grid strong { display: block; font-size: 15px; color: var(--accent); overflow-wrap: anywhere; }
 #cost-status { font-size: 11px; line-height: 1.5; }
 .cost-note { font-size: 10px; line-height: 1.5; color: var(--muted); }
+
+.cost-memory { border-top: 1px solid var(--line); padding-top: 10px; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.cost-memory summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.cost-memory > p { color: var(--muted); white-space: pre-line; }
+.cost-memory-row { border-bottom: 1px dotted var(--line); padding: 8px 0; }
+.cost-memory-row strong { display: block; }
