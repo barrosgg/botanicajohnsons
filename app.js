@@ -24,6 +24,11 @@ const ingredientPrices = {
  'Cera de Abelha':[12,15], 'Garrafa de Álcool':[4,6], 'Embalagem de Papel':[6,8],
  'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6]
 };
+// Selling prices per finished unit, in cents (Gazeta Comercial, Botânicos).
+const salePrices = {
+ perfume:[12,16], oleo:[10,15], fertilizante:[1,2], combo:[18,23],
+ defumacao:[5,7], aromaticas:[6,8], medicinais:[4,6], buque:[10,15]
+};
 function estimateCosts(totals) {
  let min=0, max=0, priced=0;
  const missing=[];
@@ -41,7 +46,7 @@ function estimateCosts(totals) {
 function formatCost(value, maximumFractionDigits=2) {
  return '$' + value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits});
 }
-if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts};
+if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts,salePrices};
 if (typeof document !== 'undefined') {
   const products = document.getElementById('products');
   const ingredients = document.getElementById('ingredients');
@@ -55,7 +60,8 @@ if (typeof document !== 'undefined') {
   products.innerHTML = recipes.map(r => `
     <article class="product">
       <div class="product-info"><h3><label for="${r.id}">${r.name}</label></h3>
-        <small id="${r.id}-feedback">${r.yield} unidades / lote · 30s</small></div>
+        <small id="${r.id}-feedback">${r.yield} unidades / lote · 30s</small>
+        <div class="sale-prices"><span class="sale-label">Venda por unidade</span><span>Mín: ${formatCost(salePrices[r.id][0]/100,3)} · Med: ${formatCost((salePrices[r.id][0]+salePrices[r.id][1])/200,3)} · Máx: ${formatCost(salePrices[r.id][1]/100,3)}</span></div></div>
       <div class="stepper">
         <button data-id="${r.id}" data-step="-1" aria-label="Diminuir ${r.name}">−</button>
         <input id="${r.id}" type="number" inputmode="numeric" min="0" max="1000000" step="1" value="0" aria-label="Quantidade de ${r.name}" aria-describedby="${r.id}-feedback keyboard-hint">

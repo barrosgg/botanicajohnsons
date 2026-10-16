@@ -40,3 +40,5 @@ A lista mostra mínimo, mediano estimado (ponto médio da faixa) e máximo em $,
 Há preços para perfume, buquê, óleo de girassol, cera de abelha, garrafa de álcool, embalagem de papel, frasco vazio, pilão, caixa de madeira e saca vazia. Ingredientes sem preço são identificados e excluídos do subtotal, que aparece como **parcial**; eles nunca são considerados gratuitos. A opção de produzir ingredientes compostos recalcula os custos pela lista expandida, sem somar também os intermediários. Marcar um ingrediente como separado não desconta seu custo. A lista copiada inclui a estimativa e os preços pendentes.
 
 A memória de cálculo fica abaixo dos custos, recolhida por padrão, e detalha preço unitário × quantidade = subtotal para cada cenário e ingrediente. Também acompanha a lista copiada.
+
+Na coluna de produção, cada produto mostra os preços de **venda por unidade** (mínimo, ponto médio estimado e máximo) da Gazeta Comercial, separados dos custos da encomenda. Os valores unitários mantêm até três casas decimais.
