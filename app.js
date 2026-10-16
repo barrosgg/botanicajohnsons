@@ -18,7 +18,30 @@ function calculate(quantities, expand=false) {
  }
  Object.assign(totals,pending);return {totals,production,batches,units};
 }
-if(typeof module!=='undefined')module.exports={recipes,calculate};
+// Unit prices in cents, transcribed from the supplied Gazeta Comercial tables.
+const ingredientPrices = {
+ 'Perfume':[12,16], 'Buquê de Flores':[10,15], 'Óleo de Girassol':[10,15],
+ 'Cera de Abelha':[12,15], 'Garrafa de Álcool':[4,6], 'Embalagem de Papel':[6,8],
+ 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6]
+};
+function estimateCosts(totals) {
+ let min=0, max=0, priced=0;
+ const missing=[];
+ for(const [name,quantity] of Object.entries(totals)) {
+  if(!quantity) continue;
+  const price=ingredientPrices[name];
+  if(!price) { missing.push(name); continue; }
+  priced++;
+  min+=price[0]*quantity;
+  max+=price[1]*quantity;
+ }
+ // Keep the midpoint precise until formatting the final totals.
+ return {min:min/100, median:(min+max)/200, max:max/100, priced, missing};
+}
+function formatCost(value) {
+ return '$' + value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts};
 if (typeof document !== 'undefined') {
   const products = document.getElementById('products');
   const ingredients = document.getElementById('ingredients');
@@ -68,6 +91,28 @@ if (typeof document !== 'undefined') {
     document.getElementById('gather-progress').textContent = total ? `${ready} de ${total} ingredientes separados` : '';
   }
 
+  function costSummary() {
+    const cost = estimateCosts(result.totals);
+    if (!Object.keys(result.totals).length) return 'Selecione uma produção para estimar os custos.';
+    if (!cost.priced) return `Estimativa indisponível. Sem preço: ${cost.missing.join(', ')}.`;
+    return `${cost.missing.length ? 'Subtotal parcial' : 'Total estimado'} — Mínimo: ${formatCost(cost.min)} · Mediano estimado: ${formatCost(cost.median)} · Máximo: ${formatCost(cost.max)}`
+      + (cost.missing.length ? `\nSem preço (não incluídos): ${cost.missing.join(', ')}.` : '');
+  }
+
+  function showCosts() {
+    const cost = estimateCosts(result.totals);
+    const hasItems = Object.keys(result.totals).length > 0;
+    document.getElementById('cost-heading').textContent = cost.missing.length ? 'Custos da encomenda · parcial' : 'Custos estimados da encomenda';
+    for (const key of ['min', 'median', 'max']) {
+      document.getElementById(`cost-${key}`).textContent = !hasItems || !cost.priced ? '—' : formatCost(cost[key]);
+    }
+    document.getElementById('cost-status').textContent = !hasItems
+      ? 'Selecione uma produção para estimar os custos.'
+      : cost.missing.length
+        ? `${cost.priced ? 'Subtotal apenas dos ingredientes com preço conhecido.' : 'Estimativa indisponível.'} Sem preço (não incluídos): ${cost.missing.join(', ')}.`
+        : 'Todos os ingredientes desta encomenda têm preço cadastrado.';
+  }
+
   function update() {
     const amounts = quantities();
     result = calculate(amounts, expand.checked);
@@ -91,6 +136,7 @@ if (typeof document !== 'undefined') {
         <span>${name}</span><strong>${fmt(n)}</strong>
       </label>`).join('') : '<div class="empty">Sua bancada ainda está vazia.<br>Escolha uma quantidade para começar.</div>';
     showProgress();
+    showCosts();
     document.getElementById('details').innerHTML = result.batches ? `
       <section class="details" aria-label="Plano de produção">
         <h3>Plano de produção · ${fmt(Math.floor(result.batches * 30 / 60))} min ${result.batches * 30 % 60}s</h3>
@@ -144,7 +190,8 @@ if (typeof document !== 'undefined') {
   document.getElementById('copy').addEventListener('click', async () => {
     const text = 'Botânica Johnsons — Lista de ingredientes\n' + Object.entries(result.totals)
       .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
-      .map(([name, n]) => `${fmt(n)} × ${name}`).join('\n');
+      .map(([name, n]) => `${fmt(n)} × ${name}`).join('\n')
+      + '\n\n' + costSummary() + '\nMediano estimado: ponto médio entre mínimo e máximo.';
     try {
       await navigator.clipboard.writeText(text);
       document.getElementById('copy-status').textContent = 'Lista copiada!';

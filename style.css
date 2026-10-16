@@ -151,3 +151,12 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .ingredient.gathered strong { color: #4d6540; }
 .ingredient:focus-within { outline: 1px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 700px) { #keyboard-hint { margin: 4px 0 0; display: block; } }
+
+.costs { border-top: 3px double var(--line); margin-top: 14px; padding-top: 12px; }
+.costs h3 { font-family: var(--serif); font-size: 13px; margin: 0 0 10px; }
+.cost-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cost-grid > div { padding: 9px 5px; background: #fff5dd66; border: 1px solid var(--line); text-align: center; min-width: 0; }
+.cost-grid span { display: block; font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.cost-grid strong { display: block; font-size: 15px; color: var(--accent); overflow-wrap: anywhere; }
+#cost-status { font-size: 11px; line-height: 1.5; }
+.cost-note { font-size: 10px; line-height: 1.5; color: var(--muted); }
