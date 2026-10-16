@@ -70,17 +70,21 @@ if (typeof document !== 'undefined') {
   let gathered = {};
   let result;
 
+  let scenario = 'median';
   products.innerHTML = recipes.map(r => `
     <article class="product">
-      <div class="product-info"><h3><label for="${r.id}">${r.name}</label></h3>
-        <small id="${r.id}-feedback">${r.yield} unidades / lote · 30s</small>
-        <div class="sale-prices"><span class="sale-label">Venda por unidade</span><span>Mín: ${formatCost(salePrices[r.id][0]/100,3)} · Med: ${formatCost((salePrices[r.id][0]+salePrices[r.id][1])/200,3)} · Máx: ${formatCost(salePrices[r.id][1]/100,3)}</span></div><div class="product-profit" id="${r.id}-profit"></div></div>
-      <div class="stepper">
-        <button data-id="${r.id}" data-step="-1" aria-label="Diminuir ${r.name}">−</button>
-        <input id="${r.id}" type="number" inputmode="numeric" min="0" max="1000000" step="1" value="0" aria-label="Quantidade de ${r.name}" aria-describedby="${r.id}-feedback keyboard-hint">
-        <button data-id="${r.id}" data-step="1" aria-label="Aumentar ${r.name}">+</button>
-      </div>
+      <div class="product-info"><h3><label for="${r.id}">${r.name}</label></h3><small id="${r.id}-feedback"></small></div>
+      <div class="stepper"><button data-id="${r.id}" data-step="-1" aria-label="Diminuir ${r.name}">−</button><input id="${r.id}" type="number" inputmode="numeric" min="0" max="1000000" step="1" value="0" aria-label="Quantidade de ${r.name}" aria-describedby="${r.id}-feedback keyboard-hint"><button data-id="${r.id}" data-step="1" aria-label="Aumentar ${r.name}">+</button></div>
+      <span class="row-money sale-value" id="${r.id}-sale"></span><span class="row-money" id="${r.id}-revenue"></span><span class="row-money row-profit" id="${r.id}-profit"></span>
     </article>`).join('');
+
+  document.querySelectorAll('input[name="scenario"]').forEach(input => input.addEventListener('change', () => { scenario=input.value; update(); }));
+  document.querySelectorAll('[data-dialog]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.dialog).showModal()));
+  document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
+  document.querySelectorAll('nav [data-panel]').forEach(button => button.addEventListener('click', () => {
+    document.querySelector('.workspace').dataset.panel=button.dataset.panel;
+    document.querySelectorAll('nav [data-panel]').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
+  }));
 
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -155,20 +159,22 @@ if (typeof document !== 'undefined') {
     document.getElementById('cost-status').textContent = !hasItems
       ? 'Selecione uma produção para estimar os custos.'
       : cost.missing.length
-        ? `${cost.priced ? 'Subtotal apenas dos ingredientes com preço conhecido.' : 'Estimativa indisponível.'} Sem preço (não incluídos): ${cost.missing.join(', ')}.`
+        ? `${cost.priced ? 'Custo parcial.' : 'Estimativa indisponível.'} Sem preço: ${cost.missing.join(', ')}.`
         : 'Todos os ingredientes desta encomenda têm preço cadastrado.';
   }
 
   function showProfit() {
     const estimate=estimateProfit(result);
     const active=result.units>0;
-    document.getElementById('profit-heading').textContent=estimate.missing.length ? 'Faturamento e lucro bruto · lucro parcial' : 'Faturamento e lucro bruto';
+    document.getElementById('profit-heading').textContent='Faturamento e lucro bruto';
     for (const key of ['min','median','max']) {
       document.getElementById(`revenue-${key}`).textContent=active ? formatCost(estimate.revenue[key]) : '—';
       document.getElementById(`profit-${key}`).textContent=active ? formatCost(estimate.profit[key]) : '—';
+      document.getElementById(`profit-${key}`).classList.toggle('negative', active && estimate.profit[key]<0);
+      document.getElementById(`profit-${key}`).closest('tr').classList.toggle('median-row', key===scenario);
     }
     document.getElementById('profit-status').textContent=!active ? 'Informe a produção para simular a venda.' : estimate.missing.length
-      ? `Resultado superestimado: faltam custos de ${estimate.missing.join(', ')}. Esses custos ainda precisam ser descontados.`
+      ? 'Lucro parcial e superestimado. Desconte os ingredientes sem preço antes de decidir.'
       : 'Receita menos custo dos ingredientes. Não inclui outras despesas.';
   }
 
@@ -180,27 +186,17 @@ if (typeof document !== 'undefined') {
       input.closest('.product').classList.toggle('selected', amounts[r.id] > 0);
       const batches = Math.ceil(amounts[r.id] / r.yield);
       const surplus = batches * r.yield - amounts[r.id];
-      const profitBox = document.getElementById(`${r.id}-profit`);
       const individual = estimateProfit(calculate({[r.id]:amounts[r.id]}, expand.checked));
-      profitBox.replaceChildren();
-      const label = document.createElement('strong');
-      label.textContent = `Lucro bruto da produção${individual.missing.length ? ' · parcial' : ''}`;
-      const values = document.createElement('span');
-      values.textContent = batches
-        ? `Mín: ${formatCost(individual.profit.min)} · Med: ${formatCost(individual.profit.median)} · Máx: ${formatCost(individual.profit.max)}`
-        : 'Informe a quantidade para estimar.';
-      const revenueLabel = document.createElement('strong');
-      revenueLabel.textContent = 'Faturamento da produção';
-      const revenueValues = document.createElement('span');
-      revenueValues.textContent = batches
-        ? `Mín: ${formatCost(individual.revenue.min)} · Med: ${formatCost(individual.revenue.median)} · Máx: ${formatCost(individual.revenue.max)}`
-        : 'Informe a quantidade para estimar.';
-      profitBox.append(revenueLabel, revenueValues, label, values);
-      if (individual.missing.length) {
-        const warning = document.createElement('small');
-        warning.textContent = `Falta descontar: ${individual.missing.join(', ')}.`;
-        profitBox.append(warning);
-      }
+      const price=salePrices[r.id];
+      const sale={min:price[0]/100,median:(price[0]+price[1])/200,max:price[1]/100};
+      document.getElementById(`${r.id}-sale`).textContent=formatCost(sale[scenario],3);
+      document.getElementById(`${r.id}-sale`).setAttribute('aria-label',`Venda por unidade no cenário ${scenario === 'min' ? 'mínimo' : scenario === 'max' ? 'máximo' : 'mediano'}: ${formatCost(sale[scenario],3)}`);
+      document.getElementById(`${r.id}-revenue`).textContent=batches ? formatCost(individual.revenue[scenario]) : '—';
+      const profitBox=document.getElementById(`${r.id}-profit`);
+      profitBox.textContent=batches ? formatCost(individual.profit[scenario]) + (individual.missing.length ? ' *' : '') : '—';
+      profitBox.classList.toggle('negative',batches>0 && individual.profit[scenario]<0);
+      profitBox.title=individual.missing.length ? `Lucro parcial. Falta descontar: ${individual.missing.join(', ')}.` : 'Lucro bruto da produção';
+      profitBox.setAttribute('aria-label',profitBox.textContent + '. ' + profitBox.title);
       document.getElementById(`${r.id}-feedback`).textContent = batches
         ? `${fmt(batches)} ${batches === 1 ? 'lote' : 'lotes'} · ${fmt(batches * r.yield)} un.${surplus ? ` · +${fmt(surplus)} ${surplus === 1 ? 'excedente' : 'excedentes'}` : ''}`
         : `${r.yield} unidades / lote · 30s`;
