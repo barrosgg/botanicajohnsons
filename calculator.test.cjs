@@ -22,3 +22,19 @@ test('unknown prices stay missing and a midpoint is not rounded per unit',()=>{
  assert.equal(estimateCosts({'Frasco Vazio':100}).median,2.5);
  assert.deepEqual(estimateCosts({}),{min:0,median:0,max:0,priced:0,missing:[]});
 });
+
+const {estimateProfit}=require('./app.js');
+test('profit includes full rounded output and permits a loss',()=>{
+ const r=estimateProfit(calculate({combo:1}));
+ assert.equal(r.revenue.min,0.9);assert.equal(r.revenue.max,1.15);
+ assert.ok(Math.abs(r.profit.min-(-0.16))<1e-10);
+ assert.ok(Math.abs(r.profit.median-0.12)<1e-10);
+ assert.ok(Math.abs(r.profit.max-0.4)<1e-10);
+ assert.deepEqual(r.missing,[]);
+});
+test('expanded intermediates generate no extra sales and flag missing costs',()=>{
+ const r=estimateProfit(calculate({combo:5},true));
+ assert.equal(r.revenue.min,0.9);assert.equal(r.revenue.max,1.15);
+ assert.ok(r.missing.includes('Rosa'));
+ assert.equal(estimateProfit(calculate({})).profit.min,0);
+});

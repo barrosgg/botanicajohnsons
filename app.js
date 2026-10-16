@@ -43,10 +43,23 @@ function estimateCosts(totals) {
  // Keep the midpoint precise until formatting the final totals.
  return {min:min/100, median:(min+max)/200, max:max/100, priced, missing};
 }
+function estimateProfit(result) {
+ const cost=estimateCosts(result.totals);
+ let min=0, max=0;
+ for (const item of result.production) {
+  if (item.intermediate) continue;
+  const recipe=recipes.find(r=>r.name===item.name);
+  const price=salePrices[recipe.id];
+  min+=item.produced*price[0];
+  max+=item.produced*price[1];
+ }
+ const revenue={min:min/100,median:(min+max)/200,max:max/100};
+ return {revenue, profit:{min:revenue.min-cost.max,median:revenue.median-cost.median,max:revenue.max-cost.min}, missing:cost.missing};
+}
 function formatCost(value, maximumFractionDigits=2) {
  return '$' + value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits});
 }
-if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts,salePrices};
+if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts,salePrices,estimateProfit};
 if (typeof document !== 'undefined') {
   const products = document.getElementById('products');
   const ingredients = document.getElementById('ingredients');
@@ -146,6 +159,19 @@ if (typeof document !== 'undefined') {
         : 'Todos os ingredientes desta encomenda têm preço cadastrado.';
   }
 
+  function showProfit() {
+    const estimate=estimateProfit(result);
+    const active=result.units>0;
+    document.getElementById('profit-heading').textContent=estimate.missing.length ? 'Lucro bruto · cálculo parcial' : 'Lucro bruto estimado';
+    for (const key of ['min','median','max']) {
+      document.getElementById(`revenue-${key}`).textContent=active ? formatCost(estimate.revenue[key]) : '—';
+      document.getElementById(`profit-${key}`).textContent=active ? formatCost(estimate.profit[key]) : '—';
+    }
+    document.getElementById('profit-status').textContent=!active ? 'Informe a produção para simular a venda.' : estimate.missing.length
+      ? `Resultado superestimado: faltam custos de ${estimate.missing.join(', ')}. Esses custos ainda precisam ser descontados.`
+      : 'Receita menos custo dos ingredientes. Não inclui outras despesas.';
+  }
+
   function update() {
     const amounts = quantities();
     result = calculate(amounts, expand.checked);
@@ -170,6 +196,7 @@ if (typeof document !== 'undefined') {
       </label>`).join('') : '<div class="empty">Sua bancada ainda está vazia.<br>Escolha uma quantidade para começar.</div>';
     showProgress();
     showCosts();
+    showProfit();
     document.getElementById('details').innerHTML = result.batches ? `
       <section class="details" aria-label="Plano de produção">
         <h3>Plano de produção · ${fmt(Math.floor(result.batches * 30 / 60))} min ${result.batches * 30 % 60}s</h3>

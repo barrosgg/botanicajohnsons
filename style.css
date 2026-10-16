@@ -171,3 +171,12 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .sale-prices { font-size: 10px; line-height: 1.6; margin-top: 5px; color: #405334; }
 .sale-prices span { display: block; }
 .sale-label { font-weight: 700; }
+
+.profit { margin-top: 12px; padding: 12px; border: 1px solid var(--line); background: #fff5dd44; }
+.profit h3 { font-family: var(--serif); font-size: 13px; margin: 0 0 8px; }
+.profit-scroll { overflow-x: auto; }
+.profit table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.profit th, .profit td { padding: 6px 4px; border-bottom: 1px dotted var(--line); text-align: right; }
+.profit th:first-child { text-align: left; }
+.profit td { white-space: nowrap; }
+#profit-status { font-size: 11px; line-height: 1.5; }
