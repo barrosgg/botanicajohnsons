@@ -162,7 +162,7 @@ if (typeof document !== 'undefined') {
   function showProfit() {
     const estimate=estimateProfit(result);
     const active=result.units>0;
-    document.getElementById('profit-heading').textContent=estimate.missing.length ? 'Lucro bruto · cálculo parcial' : 'Lucro bruto estimado';
+    document.getElementById('profit-heading').textContent=estimate.missing.length ? 'Faturamento e lucro bruto · lucro parcial' : 'Faturamento e lucro bruto';
     for (const key of ['min','median','max']) {
       document.getElementById(`revenue-${key}`).textContent=active ? formatCost(estimate.revenue[key]) : '—';
       document.getElementById(`profit-${key}`).textContent=active ? formatCost(estimate.profit[key]) : '—';
@@ -189,7 +189,13 @@ if (typeof document !== 'undefined') {
       values.textContent = batches
         ? `Mín: ${formatCost(individual.profit.min)} · Med: ${formatCost(individual.profit.median)} · Máx: ${formatCost(individual.profit.max)}`
         : 'Informe a quantidade para estimar.';
-      profitBox.append(label, values);
+      const revenueLabel = document.createElement('strong');
+      revenueLabel.textContent = 'Faturamento da produção';
+      const revenueValues = document.createElement('span');
+      revenueValues.textContent = batches
+        ? `Mín: ${formatCost(individual.revenue.min)} · Med: ${formatCost(individual.revenue.median)} · Máx: ${formatCost(individual.revenue.max)}`
+        : 'Informe a quantidade para estimar.';
+      profitBox.append(revenueLabel, revenueValues, label, values);
       if (individual.missing.length) {
         const warning = document.createElement('small');
         warning.textContent = `Falta descontar: ${individual.missing.join(', ')}.`;

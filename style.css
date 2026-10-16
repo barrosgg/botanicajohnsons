@@ -185,3 +185,5 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid 
 .product-profit strong, .product-profit span { display: block; }
 .product-profit strong { color: var(--ink); }
 .product-profit small { font-size: 9px; color: var(--muted); }
+
+.product-profit span + strong { margin-top: 4px; }
