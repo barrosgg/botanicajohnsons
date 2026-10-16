@@ -74,7 +74,7 @@ if (typeof document !== 'undefined') {
     <article class="product">
       <div class="product-info"><h3><label for="${r.id}">${r.name}</label></h3>
         <small id="${r.id}-feedback">${r.yield} unidades / lote · 30s</small>
-        <div class="sale-prices"><span class="sale-label">Venda por unidade</span><span>Mín: ${formatCost(salePrices[r.id][0]/100,3)} · Med: ${formatCost((salePrices[r.id][0]+salePrices[r.id][1])/200,3)} · Máx: ${formatCost(salePrices[r.id][1]/100,3)}</span></div></div>
+        <div class="sale-prices"><span class="sale-label">Venda por unidade</span><span>Mín: ${formatCost(salePrices[r.id][0]/100,3)} · Med: ${formatCost((salePrices[r.id][0]+salePrices[r.id][1])/200,3)} · Máx: ${formatCost(salePrices[r.id][1]/100,3)}</span></div><div class="product-profit" id="${r.id}-profit"></div></div>
       <div class="stepper">
         <button data-id="${r.id}" data-step="-1" aria-label="Diminuir ${r.name}">−</button>
         <input id="${r.id}" type="number" inputmode="numeric" min="0" max="1000000" step="1" value="0" aria-label="Quantidade de ${r.name}" aria-describedby="${r.id}-feedback keyboard-hint">
@@ -180,6 +180,21 @@ if (typeof document !== 'undefined') {
       input.closest('.product').classList.toggle('selected', amounts[r.id] > 0);
       const batches = Math.ceil(amounts[r.id] / r.yield);
       const surplus = batches * r.yield - amounts[r.id];
+      const profitBox = document.getElementById(`${r.id}-profit`);
+      const individual = estimateProfit(calculate({[r.id]:amounts[r.id]}, expand.checked));
+      profitBox.replaceChildren();
+      const label = document.createElement('strong');
+      label.textContent = `Lucro bruto da produção${individual.missing.length ? ' · parcial' : ''}`;
+      const values = document.createElement('span');
+      values.textContent = batches
+        ? `Mín: ${formatCost(individual.profit.min)} · Med: ${formatCost(individual.profit.median)} · Máx: ${formatCost(individual.profit.max)}`
+        : 'Informe a quantidade para estimar.';
+      profitBox.append(label, values);
+      if (individual.missing.length) {
+        const warning = document.createElement('small');
+        warning.textContent = `Falta descontar: ${individual.missing.join(', ')}.`;
+        profitBox.append(warning);
+      }
       document.getElementById(`${r.id}-feedback`).textContent = batches
         ? `${fmt(batches)} ${batches === 1 ? 'lote' : 'lotes'} · ${fmt(batches * r.yield)} un.${surplus ? ` · +${fmt(surplus)} ${surplus === 1 ? 'excedente' : 'excedentes'}` : ''}`
         : `${r.yield} unidades / lote · 30s`;
