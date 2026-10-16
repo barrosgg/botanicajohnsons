@@ -14,8 +14,8 @@ test('combo prices all purchased intermediates with a precise midpoint',()=>{
 });
 test('expanded combo charges raw ingredients without double counting intermediates',()=>{
  const cost=estimateCosts(calculate({combo:5},true).totals);
- assert.equal(cost.min,0.57);assert.equal(cost.median,0.67);assert.equal(cost.max,0.77);
- assert.deepEqual(cost.missing.sort(),['Rosa','Girassol','Papoula-da-pradaria','Linha de Algodão','Mel'].sort());
+ assert.equal(cost.min,0.72);assert.equal(cost.median,0.87);assert.equal(cost.max,1.02);
+ assert.deepEqual(cost.missing.sort(),['Rosa','Girassol','Papoula-da-pradaria','Mel'].sort());
 });
 test('unknown prices stay missing and a midpoint is not rounded per unit',()=>{
  assert.deepEqual(estimateCosts({'Rosa':10}),{min:0,median:0,max:0,priced:0,missing:['Rosa']});

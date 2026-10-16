@@ -22,7 +22,7 @@ function calculate(quantities, expand=false) {
 const ingredientPrices = {
  'Perfume':[12,16], 'Buquê de Flores':[10,15], 'Óleo de Girassol':[10,15],
  'Cera de Abelha':[12,15], 'Garrafa de Álcool':[4,6], 'Embalagem de Papel':[6,8],
- 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6]
+ 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6], 'Linha de Algodão':[3,5]
 };
 // Selling prices per finished unit, in cents (Gazeta Comercial, Botânicos).
 const salePrices = {

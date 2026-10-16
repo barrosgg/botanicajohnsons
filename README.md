@@ -37,7 +37,7 @@ Após a publicação, o endereço esperado é https://barrosgg.github.io/botanic
 
 A lista mostra mínimo, mediano estimado (ponto médio da faixa) e máximo em $, com base nos preços unitários das tabelas da Gazeta Comercial enviadas. Os preços estão em `ingredientPrices` no `app.js`, em centavos. O ponto médio mantém a precisão e apenas os totais exibidos são arredondados para duas casas.
 
-Há preços para perfume, buquê, óleo de girassol, cera de abelha, garrafa de álcool, embalagem de papel, frasco vazio, pilão, caixa de madeira e saca vazia. Ingredientes sem preço são identificados e excluídos do subtotal, que aparece como **parcial**; eles nunca são considerados gratuitos. A opção de produzir ingredientes compostos recalcula os custos pela lista expandida, sem somar também os intermediários. Marcar um ingrediente como separado não desconta seu custo. A lista copiada inclui a estimativa e os preços pendentes.
+Há preços para perfume, buquê, óleo de girassol, cera de abelha, garrafa de álcool, embalagem de papel, frasco vazio, pilão, caixa de madeira, saca vazia e linha de algodão. Ingredientes sem preço são identificados e excluídos do subtotal, que aparece como **parcial**; eles nunca são considerados gratuitos. A opção de produzir ingredientes compostos recalcula os custos pela lista expandida, sem somar também os intermediários. Marcar um ingrediente como separado não desconta seu custo. A lista copiada inclui a estimativa e os preços pendentes.
 
 A memória de cálculo fica abaixo dos custos, recolhida por padrão, e detalha preço unitário × quantidade = subtotal para cada cenário e ingrediente. Também acompanha a lista copiada.
 
