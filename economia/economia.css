@@ -14,8 +14,8 @@
 .precision-control input {margin:0}
 .catalog-panel {background:#fffaf044;border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;flex:1;min-height:0}
 .catalog-filters {display:grid;grid-template-columns:2fr 1fr 1.3fr 1fr;gap:12px}
-.catalog-filters label,.simulation-inputs label {display:grid;gap:5px;font-size:10px;color:var(--muted)}
-.catalog-filters input,.catalog-filters select,.catalog-order select,.simulation-inputs select,.simulation-inputs input {font:12px Arial,sans-serif;width:100%;min-width:0;color:var(--ink);border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;padding:7px 8px}
+.catalog-filters label {display:grid;gap:5px;font-size:10px;color:var(--muted)}
+.catalog-filters input,.catalog-filters select,.catalog-order select {font:12px Arial,sans-serif;width:100%;min-width:0;color:var(--ink);border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;padding:7px 8px}
 .catalog-filters select:focus-visible,summary:focus-visible {outline:2px solid var(--green);outline-offset:3px}
 .catalog-order {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0}
 #result-count {font-size:10px;color:var(--muted);margin:0}
@@ -60,11 +60,6 @@
 .note-body li {margin-bottom:10px}
 .raw-detail {color:var(--muted);font-size:11px}
 .note-result {background:#e8dfcb;padding:10px;border-radius:4px;color:var(--green)}
-.simulation-inputs {display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}
-.simulation-result {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
-.simulation-result>div {padding:12px;background:#e8dfcb;border-radius:4px}
-.simulation-result span {display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-bottom:6px}
-.simulation-result strong {font-size:14px;color:var(--green);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 .study-hint {font-size:11px;color:var(--muted);line-height:1.7}
 #reference-body p {overflow-wrap:anywhere}
 @media(max-width:1099px) {.economy-page {height:calc(100dvh - 16px)}}
@@ -102,7 +97,48 @@
  .pagination>div {gap:6px}
  .pagination button {padding:5px;font-size:9px}
  .economy-page footer {font-size:8px;padding:7px 0;letter-spacing:0}
- .simulation-inputs,.simulation-result {grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media(min-width:601px) and (max-width:700px) {.economy-page {height:calc(100dvh - 16px)}}
+
+.catalog-table .lot-price {color:var(--accent);font-size:10px;font-weight:normal}
+.catalog-table .lot-quantity {color:var(--muted);font-size:10px;font-weight:normal}
+@media(max-width:700px) {.catalog-table .lot-price,.catalog-table .lot-quantity {font-size:8px}}
+
+.economy-page #shopping-dialog {width:min(950px,calc(100% - 24px))}
+.shopping-form {display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr auto;gap:10px;align-items:end}
+.shopping-form label {display:grid;gap:5px;color:var(--muted);font-size:10px}
+.shopping-form input,.shopping-form select,.shopping-table input {width:100%;min-width:0;border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;color:var(--ink);padding:8px;font:12px Arial,sans-serif}
+.add-item {background:var(--green);color:white;border-color:var(--green);height:34px;white-space:nowrap}
+.add-item:hover {background:#2d4435}
+.shopping-table-wrap {max-height:40dvh;overflow:auto;border-top:1px solid var(--line)}
+.shopping-table {width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.shopping-table th,.shopping-table td {padding:9px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.shopping-table thead {position:sticky;top:0;background:var(--paper);color:var(--muted);font-size:10px}
+.shopping-table th:first-child {width:30%}
+.shopping-table th:last-child {width:36px}
+.shopping-table tbody th {font-weight:normal}
+.shopping-table small {display:block;color:var(--muted);font-size:10px;line-height:1.5}
+.shopping-table .line-subtotal {text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;color:var(--green);font-weight:bold}
+.shopping-table td:last-child button {padding:4px 7px;font-size:15px}
+.shopping-table .invalid-line {background:#f2dcd1}
+.shopping-total {display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:14px}
+.shopping-total p {margin:0;text-align:right}
+.shopping-total span {display:block;color:var(--muted);font-size:11px}
+.shopping-total strong {display:block;font:24px var(--serif);color:var(--green);overflow-wrap:anywhere}
+#shopping-message:empty {display:none}
+@media(max-width:700px) {
+ .shopping-form {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .shopping-form>label:first-child {grid-column:1/-1}
+ .shopping-form .add-item {align-self:end}
+ .shopping-table {font-size:10px}
+ .shopping-table th,.shopping-table td {padding:8px 3px}
+ .shopping-table input {font-size:10px;padding:6px 3px}
+ .shopping-table th:first-child {width:29%}
+ .shopping-table th:last-child {width:27px}
+ .shopping-table td:last-child button {padding:3px 5px}
+ .shopping-total strong {font-size:21px}
+}
+
+.economy-page .brand span {letter-spacing:.2px;line-height:1.3;max-width:480px}
+@media(max-width:700px) {.economy-page .brand span {max-width:220px;font-size:9px}}

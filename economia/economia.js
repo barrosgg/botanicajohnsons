@@ -1,6 +1,6 @@
 const catalog = buildEconomyCatalog();
 const money = (cents, fullPrecision = document.getElementById('full-precision').checked) => {
-  if (!fullPrecision && cents !== 0 && Math.abs(cents) < 0.5) return cents > 0 ? '< $0,01' : '> -$0,01';
+  if (!fullPrecision && Number(cents) !== 0 && Math.abs(cents) < 0.5) return cents > 0 ? '< $0,01' : '> -$0,01';
   // Shift the decimal as a string so formatting 0.325 cents yields $0.00325,
   // without introducing a binary division tail in the full precision view.
   const [coefficient, exponent = '0'] = String(cents).split('e');
@@ -62,8 +62,12 @@ function renderCatalog() {
   const first = currentPage * pageSize;
   document.getElementById('price-rows').innerHTML = visible.slice(first, first + pageSize).map(item => {
     const suggested = item.status === 'suggested';
+    const hasLot = !suggested && item.lotSize > 1 && Number.isFinite(item.sourceMin) && Number.isFinite(item.sourceMax);
+    const lotMinimum = hasLot ? money(item.sourceMin) : '—';
+    const lotMaximum = hasLot ? money(item.sourceMax) : '—';
+    const lotQuantity = hasLot ? `${item.lotSize.toLocaleString('pt-BR')} un./lote` : 'Sem lote';
     const action = suggested ? `data-note="${noteId(item.name)}"` : `data-source="${catalog.indexOf(item)}"`;
-    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Sugerido' : 'Cadastrado'}</span></td><td class="price-number">${suggested ? '—' : money(item.min)}</td><td class="price-number price-main">${money(suggested ? item.suggested : item.median)}</td><td class="price-number">${suggested ? '—' : money(item.max)}</td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
+    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Sugerido' : 'Cadastrado'}</span></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity">${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
   }).join('');
   document.getElementById('page-range').textContent = visible.length ? `${first + 1}–${Math.min(first + pageSize, visible.length)} de ${visible.length}` : '0 resultados';
   document.getElementById('page-count').textContent = `${currentPage + 1} / ${pages}`;
@@ -90,7 +94,7 @@ document.getElementById('price-rows').addEventListener('click', event => {
   const item = catalog[Number(sourceButton.dataset.source)];
   document.getElementById('reference-title').textContent = item.name;
   const body = document.getElementById('reference-body'); body.replaceChildren();
-  for (const line of [`${item.section} · ${item.origin}`, `${item.source}. Mínimo: ${money(item.min, true)} / un. · Referência: ${money(item.median, true)} / un. · Máximo: ${money(item.max, true)} / un.`, item.sourceNote || 'Faixa cadastrada da Gazeta Comercial. Referência = ponto médio entre mínimo e máximo.']) {
+  for (const line of [`${item.section} · ${item.origin}`, `${item.source}. Mínimo: ${money(item.min, true)} / un. · Mediano: ${money(item.median, true)} / un. · Máximo: ${money(item.max, true)} / un.`, item.sourceNote || 'Faixa cadastrada da Gazeta Comercial. Mediano = ponto médio entre mínimo e máximo.']) {
     const paragraph = document.createElement('p'); paragraph.textContent = line; body.append(paragraph);
   }
   showDialog('reference-dialog');
@@ -120,50 +124,81 @@ fitPageToViewport();
 document.getElementById('export-csv').addEventListener('click', () => {
   const decimal = value => value == null ? '' : (value / 100).toFixed(8).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
   const csvCell = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Médio ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
+  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Mediano ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
   const url = URL.createObjectURL(new Blob(['\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'}));
   const link = document.createElement('a'); link.href = url; link.download = 'economia-condado.csv';
   document.body.append(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
-const simulationItem = document.getElementById('sim-item');
-simulationItem.innerHTML = catalog.map((item, index) => `<option value="${index}">${item.name}${item.status === 'suggested' ? ' (sugerido)' : ''}</option>`).join('');
-function setSimulationReference() {
-  document.getElementById('sim-price').value = (referencePrice(catalog[simulationItem.value]) / 100).toFixed(5);
-  updateSimulation();
+const shoppingLines = [];
+const shoppingItem = document.getElementById('shopping-item');
+const shoppingBasis = document.getElementById('shopping-basis');
+shoppingItem.innerHTML = catalog.map((item, index) => `<option value="${index}">${item.name}${item.status === 'suggested' ? ' (sugerido)' : ''}</option>`).join('');
+function setShoppingPrice() {
+  const item = catalog[shoppingItem.value];
+  const lot = shoppingBasis.value === 'lot';
+  const cents = lot ? rangeMidpoint(item.sourceMin, item.sourceMax) : referencePrice(item);
+  document.getElementById('shopping-price').value = (cents / 100).toFixed(5);
+  document.getElementById('quantity-label').textContent = lot ? 'Quantidade de lotes' : 'Quantidade de unidades';
+  document.getElementById('price-label').textContent = lot ? 'Preço por lote ($)' : 'Preço por unidade ($)';
+  document.getElementById('shopping-hint').textContent = `${lot ? `Cada lote contém ${item.lotSize} unidades.` : 'Quantidade em unidades individuais.'} ${item.status === 'suggested' ? 'Preço sugerido; ajuste para o valor combinado.' : 'Preço de referência preenchido; ajuste para o valor combinado.'}`;
 }
-function updateSimulation() {
-  const selected = catalog[simulationItem.value];
-  const quantityField = document.getElementById('sim-quantity');
-  const priceField = document.getElementById('sim-price');
-  const costField = document.getElementById('sim-cost');
-  const resultElement = document.getElementById('simulation-result');
-  const note = document.getElementById('simulation-note');
-  try {
-    if (!quantityField.value || !priceField.value) throw new Error('Informe a quantidade e o preço negociado para simular.');
-    const result = simulateTrade(selected, Number(quantityField.value), Number(priceField.value) * 100, costField.value === '' ? null : Number(costField.value) * 100);
-    const percent = value => value.toLocaleString('pt-BR', {maximumFractionDigits: 2}) + '%';
-    resultElement.innerHTML = [
-      ['Total pela referência', money(result.referenceTotal)],
-      ['Total negociado', money(result.revenue)],
-      ['Diferença da referência', percent(result.deviation)],
-      ['Resultado bruto', result.profit === null ? 'Informe o custo' : money(result.profit)],
-      ['Margem bruta sobre a venda', result.margin === null ? '—' : percent(result.margin)]
-    ].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join('');
-    note.textContent = `${result.minTotal === null ? 'Sem faixa válida de mínimo e máximo.' : `Faixa de referência para a quantidade: ${money(result.minTotal)} a ${money(result.maxTotal)}.`} ${selected.status === 'suggested' ? 'Referência sugerida pela média dos preços de itens correlatos.' : 'Referência central: ponto médio da faixa cadastrada.'} Resultado bruto = total negociado − custo total informado. Margem = resultado bruto ÷ total negociado; não se aplica a venda de valor zero. Não inclui despesas que você não informar.${selected.sourceNote ? ' ' + selected.sourceNote : ''}`;
-  } catch (error) {
-    resultElement.textContent = error.message;
-    note.textContent = '';
+function setShoppingBasis() {
+  const item = catalog[shoppingItem.value];
+  const hasLot = item.lotSize > 1 && Number.isFinite(item.sourceMin) && Number.isFinite(item.sourceMax);
+  shoppingBasis.innerHTML = '<option value="unit">Unidade</option>' + (hasLot ? `<option value="lot">Lote de ${item.lotSize} un.</option>` : '');
+  setShoppingPrice();
+}
+function renderShoppingTotals() {
+  let invalid = false;
+  for (const [index, line] of shoppingLines.entries()) {
+    const row = document.getElementById(`shopping-line-${index}`);
+    try {
+      const result = calculateShoppingList([line]);
+      row.querySelector('.line-subtotal').textContent = money(result.totalCents);
+      row.classList.remove('invalid-line');
+    } catch {
+      invalid = true; row.querySelector('.line-subtotal').textContent = '—'; row.classList.add('invalid-line');
+    }
   }
+  document.getElementById('shopping-total').textContent = invalid ? '—' : money(calculateShoppingList(shoppingLines).totalCents);
+  document.getElementById('shopping-message').textContent = invalid ? 'Corrija as linhas destacadas: quantidade inteira de 1 a 1.000.000 e preço de 0 a 1.000.000, com até cinco casas decimais.' : '';
 }
-simulationItem.addEventListener('change', setSimulationReference);
-for (const id of ['sim-quantity', 'sim-price', 'sim-cost']) document.getElementById(id).addEventListener('input', updateSimulation);
-setSimulationReference();
+function renderShoppingList() {
+  document.getElementById('shopping-rows').innerHTML = shoppingLines.map((line, index) => `<tr id="shopping-line-${index}"><th scope="row"><span>${line.name}</span><small>${line.basis === 'lot' ? `Lote de ${line.lotSize} un.` : 'Unidade'}</small></th><td><input type="number" min="1" max="1000000" step="1" value="${line.quantity}" data-line="${index}" data-field="quantity" aria-label="Quantidade de ${line.name}" required></td><td><input type="number" min="0" max="1000000" step="0.00001" value="${line.price}" data-line="${index}" data-field="price" aria-label="Preço de ${line.name}" required></td><td class="line-subtotal"></td><td><button type="button" data-remove="${index}" aria-label="Remover ${line.name}">×</button></td></tr>`).join('');
+  document.getElementById('shopping-empty').hidden = shoppingLines.length > 0;
+  document.getElementById('clear-shopping').disabled = shoppingLines.length === 0;
+  renderShoppingTotals();
+}
+document.getElementById('shopping-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const item = catalog[shoppingItem.value];
+  const line = {name:item.name, basis:shoppingBasis.value, lotSize:item.lotSize, quantity:document.getElementById('shopping-quantity').value, price:document.getElementById('shopping-price').value};
+  try {
+    calculateShoppingList([line]);
+    shoppingLines.push(line); renderShoppingList();
+    document.getElementById('shopping-quantity').value = '1';
+  } catch (error) { document.getElementById('shopping-message').textContent = error.message; }
+});
+shoppingItem.addEventListener('change', setShoppingBasis);
+shoppingBasis.addEventListener('change', setShoppingPrice);
+document.getElementById('shopping-rows').addEventListener('input', event => {
+  const input = event.target.closest('[data-line][data-field]');
+  if (!input) return;
+  shoppingLines[Number(input.dataset.line)][input.dataset.field] = input.value;
+  renderShoppingTotals();
+});
+document.getElementById('shopping-rows').addEventListener('click', event => {
+  const button = event.target.closest('[data-remove]');
+  if (!button) return;
+  shoppingLines.splice(Number(button.dataset.remove), 1); renderShoppingList();
+});
+document.getElementById('clear-shopping').addEventListener('click', () => { shoppingLines.length = 0; renderShoppingList(); });
+setShoppingBasis();
+renderShoppingList();
 
-// Change presentation only; keep filters, open notes and entered simulation values.
+// Presentation changes preserve filters, open notes and the shopping list.
 document.getElementById('full-precision').addEventListener('change', () => {
-  renderCatalog();
-  renderItemNotes();
-  updateSimulation();
+  renderCatalog(); renderItemNotes(); renderShoppingTotals();
 });

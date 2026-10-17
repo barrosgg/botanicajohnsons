@@ -67,4 +67,23 @@ function simulateTrade(item, quantity, price, totalCost = null) {
   return {referenceTotal: quantity * reference, minTotal: item.status === 'listed' && item.min <= item.max ? quantity * item.min : null, maxTotal: item.status === 'listed' && item.min <= item.max ? quantity * item.max : null, revenue, deviation, profit: totalCost === null ? null : revenue - totalCost, margin: totalCost === null || revenue === 0 ? null : (revenue - totalCost) / revenue * 100};
 }
 
-if (typeof module !== 'undefined') module.exports = {buildPriceCatalog, buildEconomyCatalog, simulateTrade};
+function calculateShoppingList(lines) {
+  // Five decimal dollars cover the supplied unit prices and their midpoints.
+  // Sum integer amounts so small prices and large quantities stay exact.
+  const asCents = amount => `${amount / 1000n}.${String(amount % 1000n).padStart(3, '0')}`;
+  let total = 0n;
+  const items = lines.map(line => {
+    const quantity = Number(line.quantity);
+    const price = String(line.price).trim();
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 1000000) throw new Error('Informe uma quantidade inteira de 1 a 1.000.000.');
+    if (!/^\d+(?:\.\d{1,5})?$/.test(price) || Number(price) > 1000000) throw new Error('Informe um preço de 0 a 1.000.000, com até cinco casas decimais.');
+    const [whole, fraction = ''] = price.split('.');
+    const scaledPrice = BigInt(whole) * 100000n + BigInt(fraction.padEnd(5, '0'));
+    const subtotal = BigInt(quantity) * scaledPrice;
+    total += subtotal;
+    return {subtotalCents: asCents(subtotal)};
+  });
+  return {items, totalCents: asCents(total)};
+}
+
+if (typeof module !== 'undefined') module.exports = {buildPriceCatalog, buildEconomyCatalog, simulateTrade, calculateShoppingList};
