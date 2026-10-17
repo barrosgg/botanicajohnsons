@@ -38,3 +38,12 @@ test('expanded intermediates generate no extra sales and flag missing costs',()=
  assert.ok(r.missing.includes('Rosa'));
  assert.equal(estimateProfit(calculate({})).profit.min,0);
 });
+
+test('aromatic herbs use hummingbird sage and keep desert sage separate',()=>{
+ assert.deepEqual(calculate({aromaticas:5}).totals,{
+  'Orégano':5,'Sálvia-beija-flor':5,'Tomilho':5,'Embalagem de Papel':2,'Pilão':1
+ });
+ const combined=calculate({aromaticas:6,defumacao:5});
+ assert.equal(combined.totals['Sálvia-beija-flor'],10);
+ assert.equal(combined.totals['Sálvia-do-deserto'],5);
+});
