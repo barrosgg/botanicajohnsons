@@ -39,11 +39,20 @@ test('expanded intermediates generate no extra sales and flag missing costs',()=
  assert.equal(estimateProfit(calculate({})).profit.min,0);
 });
 
-test('aromatic herbs use hummingbird sage and keep desert sage separate',()=>{
+test('aromatic and incense herbs aggregate hummingbird sage',()=>{
  assert.deepEqual(calculate({aromaticas:5}).totals,{
   'Orégano':5,'Sálvia-beija-flor':5,'Tomilho':5,'Embalagem de Papel':2,'Pilão':1
  });
  const combined=calculate({aromaticas:6,defumacao:5});
- assert.equal(combined.totals['Sálvia-beija-flor'],10);
- assert.equal(combined.totals['Sálvia-do-deserto'],5);
+ assert.equal(combined.totals['Sálvia-beija-flor'],15);
+ assert.equal(combined.totals['Sálvia-do-deserto'],undefined);
+});
+
+test('incense recipe matches supplied card and rounds full batches',()=>{
+ assert.equal(recipes.find(r=>r.id==='defumacao').yield,5);
+ const expected={'Tabaco':5,'Sálvia-beija-flor':5,'Hortelã-brava':5,'Embalagem de Papel':2};
+ assert.deepEqual(calculate({defumacao:5}).totals,expected);
+ const r=calculate({defumacao:6});
+ assert.equal(r.units,10);assert.equal(r.batches,2);
+ assert.deepEqual(r.totals,Object.fromEntries(Object.entries(expected).map(([k,v])=>[k,v*2])));
 });
