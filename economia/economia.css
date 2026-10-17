@@ -95,3 +95,8 @@
  .item-note summary {padding:13px;gap:10px;font-size:12px}
  .economy-page header .page-link {font-size:10px;padding:6px}
 }
+
+.precision-control {display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 16px;margin:0 0 18px;background:#e8dfcb;border:1px solid var(--line);border-radius:6px}
+.precision-control label {display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;color:var(--green);font-weight:bold;cursor:pointer}
+.precision-control input {margin:0}
+.precision-control p {flex:1;min-width:200px;margin:0;color:var(--muted);font-size:11px;line-height:1.6}

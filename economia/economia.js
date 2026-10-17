@@ -1,5 +1,5 @@
 const catalog = buildPriceCatalog();
-const money = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 5});
+const money = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: document.getElementById('full-precision').checked ? 20 : 2});
 const noteId = name => 'nota-' + name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const suggestedItems = catalog.filter(item => item.status === 'suggested');
 document.getElementById('category').innerHTML = '<option value="all">Todas as seções</option>' + [...new Set(catalog.map(item => item.section))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(section => `<option>${section}</option>`).join('');
@@ -11,7 +11,9 @@ document.getElementById('catalog-summary').innerHTML = [
   [suggestedItems.length, 'preços sugeridos']
 ].map(([count, label]) => `<div><strong>${count}</strong><span>${label}</span></div>`).join('');
 
-document.getElementById('item-notes').innerHTML = suggestedItems.map(item => `
+function renderItemNotes() {
+  const openNotes = new Set([...document.querySelectorAll('#item-notes details[open]')].map(note => note.id));
+  document.getElementById('item-notes').innerHTML = suggestedItems.map(item => `
   <details id="${noteId(item.name)}" class="item-note">
     <summary><span>${item.name}<small>${item.references.map(ref => ref.name).join(' · ')}</small></span><span class="suggested-value">${money(item.suggested)}<small>Preço sugerido / un.</small></span></summary>
     <div class="note-body"><p>Referência indireta: ${item.references.length === 1 ? 'o produto que utiliza este ingrediente' : 'os produtos que utilizam este ingrediente'}. O mesmo valor por unidade é atribuído aos ingredientes sem preço de cada receita.</p>
@@ -19,6 +21,9 @@ document.getElementById('item-notes').innerHTML = suggestedItems.map(item => `
     <p class="note-result">${item.references.length > 1 ? `Média simples: (${item.references.map(ref => money(ref.value)).join(' + ')}) ÷ ${item.references.length}` : 'Resultado da referência única'} = <strong>${money(item.suggested)} / un.</strong></p>
     <p class="raw-detail">Estimativa pelo faturamento bruto, sem desconto de custos ou margem. Valores exibidos são arredondados; a média usa os valores completos.</p></div>
   </details>`).join('');
+  for (const id of openNotes) document.getElementById(id).open = true;
+}
+renderItemNotes();
 
 function openNoteFromHash() {
   const target = document.getElementById(location.hash.slice(1));
@@ -68,7 +73,10 @@ document.getElementById('export-csv').addEventListener('click', () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
-document.getElementById('sector-summary').innerHTML = summarizeSectors(catalog).map(sector => `<article class="sector-card"><h3>${sector.section}</h3><p>${sector.count} mercadorias · ${sector.analyzed} faixas analisadas</p><dl><div><dt>Mediana das referências</dt><dd>${money(sector.median)}</dd></div><div><dt>Menor mínimo / maior máximo</dt><dd>${money(sector.min)} / ${money(sector.max)}</dd></div><div><dt>Amplitude média das faixas</dt><dd>${money(sector.averageSpread)}</dd></div></dl></article>`).join('');
+function renderSectorSummary() {
+  document.getElementById('sector-summary').innerHTML = summarizeSectors(catalog).map(sector => `<article class="sector-card"><h3>${sector.section}</h3><p>${sector.count} mercadorias · ${sector.analyzed} faixas analisadas</p><dl><div><dt>Mediana das referências</dt><dd>${money(sector.median)}</dd></div><div><dt>Menor mínimo / maior máximo</dt><dd>${money(sector.min)} / ${money(sector.max)}</dd></div><div><dt>Amplitude média das faixas</dt><dd>${money(sector.averageSpread)}</dd></div></dl></article>`).join('');
+}
+renderSectorSummary();
 
 const simulationItem = document.getElementById('sim-item');
 simulationItem.innerHTML = catalog.map((item, index) => `<option value="${index}">${item.name}${item.status === 'suggested' ? ' (sugerido)' : ''}</option>`).join('');
@@ -103,3 +111,11 @@ function updateSimulation() {
 simulationItem.addEventListener('change', setSimulationReference);
 for (const id of ['sim-quantity', 'sim-price', 'sim-cost']) document.getElementById(id).addEventListener('input', updateSimulation);
 setSimulationReference();
+
+// Change presentation only; keep filters, open notes and entered simulation values.
+document.getElementById('full-precision').addEventListener('change', () => {
+  renderCatalog();
+  renderItemNotes();
+  renderSectorSummary();
+  updateSimulation();
+});

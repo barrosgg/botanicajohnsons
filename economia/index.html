@@ -20,6 +20,7 @@
     </section>
     <div class="catalog-summary" id="catalog-summary" aria-label="Resumo do catálogo"></div>
     <nav class="economy-nav" aria-label="Economia"><a href="#catalog-title">Tabela de preços</a><a href="#sector-title">Comparar setores</a><a href="#simulation-title">Simular negociação</a><a href="#metodologia">Notas e metodologia</a></nav>
+    <div class="precision-control"><label for="full-precision"><input id="full-precision" type="checkbox" aria-describedby="precision-hint"> Mostrar valores completos</label><p id="precision-hint">Duas casas decimais por padrão. Valores muito pequenos podem aparecer como $0,00; ative para ver todas as casas disponíveis. Os cálculos mantêm a precisão.</p></div>
     <section class="catalog-panel" aria-labelledby="catalog-title">
       <div class="catalog-heading"><div><p class="eyebrow">01 / TABELA DE PREÇOS</p><h2 id="catalog-title">Catálogo completo</h2></div><button id="export-csv" type="button">Exportar CSV ↓</button></div>
       <form class="catalog-filters" role="search" onsubmit="return false">
@@ -45,7 +46,7 @@
         <div><h3>A conta, passo a passo</h3><p>Para cada receita correlata: ponto médio do preço de venda × unidades produzidas no lote ÷ total de unidades dos ingredientes sem preço no lote. Se um item participa de várias receitas, tiramos a média aritmética simples desses resultados.</p></div>
         <div><h3>Como interpretar</h3><p>É uma aproximação que distribui o faturamento bruto entre as matérias-primas sem preço, com peso igual por unidade. Não desconta embalagens, outros custos ou margem de lucro; não representa cotação de mercado nem preço de compra que assegure lucro.</p></div>
       </div>
-      <p class="method-note">Somente preços cadastrados entram nas referências. Sugestões não alimentam outras sugestões. O cálculo mantém a precisão e exibe até cinco casas decimais em $ para distinguir valores pequenos. Esta tabela não aplica as sugestões automaticamente aos custos ou lucros do planejamento.</p>
+      <p class="method-note">Somente preços cadastrados entram nas referências. Sugestões não alimentam outras sugestões. O cálculo mantém a precisão. Por padrão, os valores são exibidos com duas casas decimais; a opção “Mostrar valores completos”, acima da tabela, revela as casas disponíveis sem alterar os cálculos. Esta tabela não aplica as sugestões automaticamente aos custos ou lucros do planejamento.</p>
       <div id="item-notes" class="item-notes"></div>
     </section>
     <footer><span>BOTÂNICA JOHNSONS S/A</span><a href="../">Voltar ao planejamento ↑</a></footer>
