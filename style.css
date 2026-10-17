@@ -46,6 +46,17 @@ header {
   display:flex;
   align-items:center;
   gap:16px}
+.page-link {
+  color:var(--green);
+  font:inherit;
+  font-size:11px;
+  text-decoration:none;
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:7px 10px;
+  white-space:nowrap}
+.page-link:hover {
+  background:#e7dcc4}
 #save-status {
   font-size:10px;
   color:var(--muted)}
@@ -505,6 +516,8 @@ header {
 .text-button {
   font-size:10px;
   padding:6px}
+.header-actions {gap:7px}
+.header-actions .page-link {font-size:10px;padding:6px}
 .toolbar {
   align-items:flex-start}
 h1 {

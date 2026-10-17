@@ -1,0 +1,97 @@
+.economy-page {max-width:1400px;font-size:13px}
+.economy-page main {padding:0 28px}
+.economy-intro {display:flex;align-items:center;justify-content:space-between;gap:24px;padding:32px 0 24px}
+.economy-intro h1 {font-size:32px;margin:0 0 8px;max-width:none}
+.economy-intro p:not(.eyebrow) {color:var(--muted);margin:0;line-height:1.6}
+.catalog-summary {display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.catalog-summary>div {display:flex;align-items:center;gap:12px;padding:17px 20px;background:#e8dfcb;border:1px solid var(--line);border-radius:6px}
+.catalog-summary strong {font:30px var(--serif);color:var(--green)}
+.catalog-summary span {font-size:12px;color:var(--muted)}
+.catalog-panel {background:#fffaf044;border:1px solid var(--line);border-radius:6px;padding:22px}
+.catalog-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}
+.unit-note {color:var(--muted);font-size:11px}
+.catalog-filters {display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+.catalog-filters label {display:grid;gap:7px;font-size:11px;color:var(--muted)}
+.catalog-filters input,.catalog-filters select {font:13px Arial,sans-serif;color:var(--ink);width:100%;min-width:0;border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;padding:10px}
+.catalog-filters select:focus-visible,summary:focus-visible {outline:2px solid var(--green);outline-offset:3px}
+#result-count {font-size:11px;color:var(--muted);margin:18px 0 12px}
+.table-scroll {overflow:auto;max-height:min(65dvh,680px);min-height:180px}
+.catalog-table {width:100%;min-width:690px;border-collapse:collapse;text-align:left;font-size:12px}
+.catalog-table caption {text-align:left;font-size:11px;color:var(--muted);padding:0 0 12px}
+.catalog-table thead {position:sticky;top:0;z-index:1;background:#e8dfcb;font-size:10px;color:var(--muted)}
+.catalog-table th,.catalog-table td {padding:13px 10px;border-bottom:1px solid var(--line);line-height:1.4}
+.catalog-table tbody th {font-weight:600;min-width:160px}
+.catalog-table small {display:block;color:var(--muted);font-size:10px;font-weight:normal;margin-top:3px}
+.catalog-table tbody tr:hover {background:#dfe6d455}
+.catalog-table th:nth-child(n+3):nth-child(-n+5),.price-number {text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price-main {color:var(--green);font-weight:bold}
+.catalog-table .source-warning {color:var(--accent);max-width:220px;min-width:140px;line-height:1.6}
+.economy-nav {display:flex;gap:18px;flex-wrap:wrap;margin:0 0 24px;font-size:12px}
+.economy-nav a {color:var(--green);text-underline-offset:4px}
+.catalog-order {display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 10px}
+.catalog-order label {font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.catalog-order select,.simulation-inputs select,.simulation-inputs input {border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;color:var(--ink);padding:8px;font:12px Arial,sans-serif;min-width:0}
+.catalog-order #result-count {margin:0}
+.economy-study {padding-top:32px;scroll-margin-top:20px}
+.study-hint {color:var(--muted);font-size:12px;line-height:1.8;margin:12px 0 18px}
+.sector-summary {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sector-card {padding:16px;border:1px solid var(--line);border-radius:6px;background:#fffaf044}
+.sector-card h3 {font:18px var(--serif);margin:0;color:var(--green)}
+.sector-card>p {font-size:10px;color:var(--muted);line-height:1.6}
+.sector-card dl {margin:0}
+.sector-card dl div {padding:9px 0;border-top:1px solid var(--line)}
+.sector-card dt {font-size:10px;color:var(--muted);margin-bottom:5px}
+.sector-card dd {font-size:13px;font-weight:bold;margin:0;font-variant-numeric:tabular-nums}
+.simulation-inputs {display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px}
+.simulation-inputs label {display:grid;gap:8px;color:var(--muted);font-size:11px}
+.simulation-inputs select,.simulation-inputs input {width:100%;padding:10px}
+.simulation-result {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:18px}
+.simulation-result>div {padding:14px;background:#e8dfcb;border-radius:4px}
+.simulation-result span {display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-bottom:8px}
+.simulation-result strong {font-size:14px;color:var(--green);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+@media(max-width:1000px) {.sector-summary {grid-template-columns:repeat(2,minmax(0,1fr))}.simulation-inputs {grid-template-columns:repeat(2,minmax(0,1fr))}.simulation-result {grid-template-columns:repeat(3,minmax(0,1fr))}}
+.price-badge {display:inline-block;border:1px solid #b8c6b5;background:#e1e8d8;color:#314b39;padding:4px 7px;border-radius:4px;font-size:10px;white-space:nowrap}
+.price-badge.is-suggested {background:#eee0c9;border-color:#c8a785;color:#743b2d}
+.catalog-table a,.economy-page footer a {color:var(--accent);text-underline-offset:3px}
+.catalog-footnote {font-size:11px;color:var(--muted);line-height:1.7;margin:16px 0 0}
+.methodology {padding:32px 0 18px;scroll-margin-top:20px}
+.method-overview {display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:18px 0}
+.method-overview h3 {font-size:13px;color:var(--green);margin:0 0 8px}
+.method-overview p,.method-note {font-size:12px;line-height:1.8;color:var(--muted);margin:0}
+.method-note {border-left:3px solid var(--green);padding:8px 14px;background:#dfe6d455;margin:0 0 24px}
+.item-notes {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.item-note {border:1px solid var(--line);background:#fffaf044;border-radius:6px;scroll-margin-top:18px}
+.item-note summary {cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px;font-weight:bold;line-height:1.5}
+.item-note summary::before {content:'+';color:var(--accent);font-size:18px;font-weight:normal}
+.item-note[open] summary::before {content:'−'}
+.item-note summary>span:first-of-type {flex:1}
+.item-note summary small {display:block;font-size:10px;font-weight:normal;color:var(--muted);margin-top:3px}
+.suggested-value {text-align:right;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
+.note-body {border-top:1px solid var(--line);padding:0 16px 8px;font-size:12px;line-height:1.8}
+.note-body ol {padding-left:20px}
+.note-body li {margin-bottom:12px}
+.raw-detail {color:var(--muted);font-size:11px}
+.note-result {background:#e8dfcb;padding:10px;border-radius:4px;color:var(--green)}
+.economy-page footer {border-top:1px solid var(--line);padding:18px 0}
+@media(max-width:750px) {
+ .catalog-order {align-items:flex-start;flex-direction:column}
+ .simulation-result {grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sector-card {padding:12px}
+ .economy-page main {padding:0 14px}
+ .economy-intro {align-items:flex-start;flex-direction:column;gap:12px;padding:24px 0 18px}
+ .economy-intro h1 {font-size:27px}
+ .catalog-summary {gap:7px;margin-bottom:18px}
+ .catalog-summary>div {display:block;padding:12px 9px}
+ .catalog-summary strong,.catalog-summary span {display:block}
+ .catalog-summary strong {font-size:26px;margin-bottom:4px}
+ .catalog-summary span {font-size:10px;line-height:1.5}
+ .catalog-panel {padding:14px}
+ .catalog-heading {align-items:flex-start}
+ .unit-note {font-size:10px;text-align:right;max-width:75px}
+ .catalog-filters {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .search-label {grid-column:1/-1}
+ .method-overview,.item-notes {grid-template-columns:1fr}
+ .method-overview {gap:16px}
+ .item-note summary {padding:13px;gap:10px;font-size:12px}
+ .economy-page header .page-link {font-size:10px;padding:6px}
+}

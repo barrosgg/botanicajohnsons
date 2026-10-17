@@ -17,7 +17,7 @@ Fontes externas são opcionais; há fontes locais de fallback.
 ## Validar cálculos
 
 ```sh
-node --test calculator.test.cjs
+node --test *.test.cjs
 ```
 
 ## GitHub Pages
@@ -35,7 +35,7 @@ Após a publicação, o endereço esperado é https://barrosgg.github.io/botanic
 
 ## Custos estimados das encomendas
 
-A lista mostra mínimo, mediano estimado (ponto médio da faixa) e máximo em $, com base nos preços unitários das tabelas da Gazeta Comercial enviadas. Os preços estão em `ingredientPrices` no `app.js`, em centavos. O ponto médio mantém a precisão e apenas os totais exibidos são arredondados para duas casas.
+A lista mostra mínimo, mediano estimado (ponto médio da faixa) e máximo em $, com base nos preços unitários das tabelas da Gazeta Comercial enviadas. Os preços estão em `ingredientPrices` no `data.js`, em centavos. O ponto médio mantém a precisão e apenas os totais exibidos são arredondados para duas casas.
 
 Há preços para perfume, buquê, óleo de girassol, cera de abelha, garrafa de álcool, embalagem de papel, frasco vazio, pilão, caixa de madeira, saca vazia e linha de algodão. Ingredientes sem preço são identificados e excluídos do subtotal, que aparece como **parcial**; eles nunca são considerados gratuitos. A opção de produzir ingredientes compostos recalcula os custos pela lista expandida, sem somar também os intermediários. Marcar um ingrediente como separado não desconta seu custo. A lista copiada inclui a estimativa e os preços pendentes.
 
@@ -54,3 +54,12 @@ O faturamento da produção aparece junto ao lucro bruto em cada produto e no qu
 A tela de desktop reúne produção, encomenda e resultado em três painéis. O seletor Mínimo / Mediano / Máximo muda as colunas de venda unitária, faturamento e lucro por produto; o resultado geral mantém os três cenários para comparação. Ingredientes e totais ficam visíveis sem abrir os detalhes. A memória, os lotes/tempo e as regras de cálculo abrem em janelas acessíveis por teclado (Escape fecha). Em telas estreitas, abas alternam os três painéis.
 
 Layout validado com as oito receitas preenchidas e compostos ativados, sem rolagem da página em 1280×720, 1366×768, 1920×1080 e nas abas em 375×812. Zoom, tamanhos menores e textos maiores podem exigir rolagem; o conteúdo permanece acessível. Não há bloqueio artificial de rolagem.
+
+
+## Economia geral
+
+A página `/economia/` reúne as mercadorias visíveis nas imagens da Gazeta Comercial (páginas 1–18), os insumos do planejamento e as matérias-primas sem cotação. Contém as 323 mercadorias das 13 seções, mais 14 matérias-primas com preço sugerido. As faixas de Minérios são por lote, conforme confirmação do usuário: a tabela usa os valores convertidos por unidade e preserva tamanho e preço originais dos lotes nas notas. `gazette.js` guarda os preços unitários originais em centavos, as seções, nomes truncados e a faixa invertida de Escova Equina sem corrigir a fonte por suposição.
+
+Os preços sugeridos e suas notas são calculados em `price-catalog.js`: para cada receita que usa o ingrediente sem preço, ponto médio de venda × rendimento do lote ÷ quantidade total de ingredientes sem preço; depois, média simples das referências. São estimativas indiretas de faturamento, sem dedução de insumos conhecidos ou margem. Não são cotações de compra que assegurem lucro. A precisão é mantida até a exibição e nenhuma sugestão alimenta outra ou altera os custos do planejamento.
+
+A página permite pesquisar sem acentos, filtrar seções e origem, ordenar, comparar seções, exportar CSV e simular negociações com quantidades e custos informados. Todos os cálculos do simulador são locais e não alteram preços cadastrados.
