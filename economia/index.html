@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Todos os preços da Botânica Johnsons, com sugestões para matérias-primas e metodologia de cálculo por item.">
+  <title>Botânica Johnsons · Economia</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="economia.css">
+</head>
+<body class="economy-page">
+  <header>
+    <a class="brand" href="../">BOTÂNICA <strong>JOHNSONS</strong><span>Gestão e estudo da economia</span></a>
+    <a class="page-link" href="../">← Planejamento</a>
+  </header>
+  <main>
+    <section class="economy-intro">
+      <div><p class="eyebrow">CADERNO DE ECONOMIA</p><h1>Conheça os preços. Estude as possibilidades.</h1><p>Uma ferramenta de gestão geral: consulte mercadorias, compare setores e simule negociações.</p></div>
+      <a class="page-link" href="#metodologia">Como sugerimos os preços ↓</a>
+    </section>
+    <div class="catalog-summary" id="catalog-summary" aria-label="Resumo do catálogo"></div>
+    <nav class="economy-nav" aria-label="Economia"><a href="#catalog-title">Tabela de preços</a><a href="#sector-title">Comparar setores</a><a href="#simulation-title">Simular negociação</a><a href="#metodologia">Notas e metodologia</a></nav>
+    <section class="catalog-panel" aria-labelledby="catalog-title">
+      <div class="catalog-heading"><div><p class="eyebrow">01 / TABELA DE PREÇOS</p><h2 id="catalog-title">Catálogo completo</h2></div><button id="export-csv" type="button">Exportar CSV ↓</button></div>
+      <form class="catalog-filters" role="search" onsubmit="return false">
+        <label class="search-label" for="search">Buscar item<input id="search" type="search" placeholder="Ex.: girassol, perfume, pilão…"></label>
+        <label for="category">Seção<select id="category"><option value="all">Todas as seções</option><option>Fazendas</option><option>Botânicos</option><option>Ateliês</option><option>Estábulos</option><option>Insumos do planejamento</option><option>Matérias-primas da Botânica</option></select></label>
+        <label for="status">Origem do preço<select id="status"><option value="all">Todos os preços</option><option value="listed">Cadastrados</option><option value="suggested">Preços sugeridos</option></select></label>
+      </form>
+      <div class="catalog-order"><p id="result-count" role="status" aria-live="polite"></p><label for="sort">Ordenar por <select id="sort"><option value="name">Nome A–Z</option><option value="low">Menor preço de referência</option><option value="high">Maior preço de referência</option><option value="spread">Maior amplitude da faixa</option></select></label></div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela de preços; role horizontalmente em telas pequenas">
+        <table class="catalog-table"><caption>Preços unitários. Sugestões têm valor único e uma nota explicativa por item.</caption><thead><tr><th scope="col">Item / categoria</th><th scope="col">Origem</th><th scope="col">Mínimo</th><th scope="col">Médio¹ / sugerido</th><th scope="col">Máximo</th><th scope="col">Referência</th></tr></thead><tbody id="price-rows"></tbody></table>
+      </div>
+      <p id="no-results" class="empty" hidden>Nenhum item encontrado. Ajuste a busca ou os filtros.</p>
+      <p class="catalog-footnote">¹ Nos preços cadastrados, “médio” é o ponto médio entre mínimo e máximo, chamado de “mediano” no planejamento. Os preços sugeridos são estimativas únicas; não possuem faixa cadastrada.</p>
+      <p class="catalog-footnote">Fonte: imagens da Gazeta Comercial, edição XLI de 17 de outubro de 1899, páginas 1–18. As 323 mercadorias das 13 seções foram transcritas. Nomes truncados e faixas inconsistentes estão sinalizados nas respectivas linhas. Em Minérios, as faixas originais são por lote de 10, 20 ou 100 unidades, conforme confirmação do usuário; aqui estão convertidas para $ por unidade, com a faixa original na nota de cada linha.</p>
+      <noscript>Ative o JavaScript para consultar a tabela e as notas de cálculo.</noscript>
+    </section>
+    <section class="economy-study" aria-labelledby="sector-title"><p class="eyebrow">02 / VISÃO POR SETOR</p><h2 id="sector-title">Compare a distribuição dos preços.</h2><p class="study-hint">Considera todas as mercadorias cadastradas das imagens, sem os filtros da tabela. A mediana divide os preços de referência do setor em duas metades; não é o ponto médio de uma faixa.</p><div id="sector-summary" class="sector-summary"></div><p class="study-hint">A amplitude é a diferença entre máximo e mínimo cadastrados. Ela não representa lucro: faltam custos e condições reais de compra e venda. A faixa invertida da Escova Equina é excluída desta análise.</p></section>
+    <section class="economy-study simulation" aria-labelledby="simulation-title"><p class="eyebrow">03 / SIMULADOR DE NEGOCIAÇÃO</p><h2 id="simulation-title">Teste uma quantidade e um preço.</h2><p class="study-hint">Compare uma proposta com a referência da tabela. Informe o custo total da operação para estimar o resultado bruto.</p><div class="simulation-inputs"><label for="sim-item">Mercadoria<select id="sim-item"></select></label><label for="sim-quantity">Quantidade<input id="sim-quantity" type="number" min="1" max="1000000" step="1" value="100"></label><label for="sim-price">Preço negociado / un. ($)<input id="sim-price" type="number" min="0" max="1000000" step="0.00001"></label><label for="sim-cost">Custo total ($, opcional)<input id="sim-cost" type="number" min="0" max="1000000000000" step="0.01" placeholder="Informe para calcular"></label></div><div id="simulation-result" class="simulation-result" role="status" aria-live="polite"></div><p id="simulation-note" class="study-hint"></p></section>
+    <section id="metodologia" class="methodology" aria-labelledby="methodology-title">
+      <p class="eyebrow">04 / NOTAS EXPLICATIVAS</p><h2 id="methodology-title">De onde vem cada sugestão?</h2>
+      <div class="method-overview">
+        <div><h3>A referência disponível</h3><p>As faixas cadastradas vêm das tabelas da Gazeta Comercial já usadas no planejamento. Não há preços cadastrados de matérias-primas similares. Por isso, usamos como referências indiretas os produtos que consomem cada ingrediente.</p></div>
+        <div><h3>A conta, passo a passo</h3><p>Para cada receita correlata: ponto médio do preço de venda × unidades produzidas no lote ÷ total de unidades dos ingredientes sem preço no lote. Se um item participa de várias receitas, tiramos a média aritmética simples desses resultados.</p></div>
+        <div><h3>Como interpretar</h3><p>É uma aproximação que distribui o faturamento bruto entre as matérias-primas sem preço, com peso igual por unidade. Não desconta embalagens, outros custos ou margem de lucro; não representa cotação de mercado nem preço de compra que assegure lucro.</p></div>
+      </div>
+      <p class="method-note">Somente preços cadastrados entram nas referências. Sugestões não alimentam outras sugestões. O cálculo mantém a precisão e exibe até cinco casas decimais em $ para distinguir valores pequenos. Esta tabela não aplica as sugestões automaticamente aos custos ou lucros do planejamento.</p>
+      <div id="item-notes" class="item-notes"></div>
+    </section>
+    <footer><span>BOTÂNICA JOHNSONS S/A</span><a href="../">Voltar ao planejamento ↑</a></footer>
+  </main>
+  <script src="../data.js"></script>
+  <script src="../gazette.js"></script>
+  <script src="../price-catalog.js"></script>
+  <script src="economia.js"></script>
+</body>
+</html>
