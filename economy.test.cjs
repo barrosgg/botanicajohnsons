@@ -4,7 +4,7 @@ const {recipes, ingredientPrices, salePrices, ingredientPriceSources} = require(
 const county = require('./county-prices.js');
 const {readFileSync}=require('node:fs');
 const {gazetteItems} = require('./gazette.js');
-const {buildPriceCatalog, summarizeSectors, simulateTrade} = require('./price-catalog.js');
+const {buildPriceCatalog, buildEconomyCatalog, simulateTrade} = require('./price-catalog.js');
 const {estimateCosts} = require('./app.js');
 const catalog = buildPriceCatalog();
 const item = name => catalog.find(row => row.name === name);
@@ -86,15 +86,13 @@ test('all supplied unit and lot prices match the catalog and identical duplicate
   assert.equal(item('Pacote de Semente de Agarita').min,3);
 });
 
-test('anomalies and fixed prices are preserved; sector study excludes inverted ranges', () => {
+test('anomalies and fixed prices are preserved', () => {
   const escova = item('Escova Equina');
   assert.deepEqual([escova.min, escova.max], [6, 5]);
   assert.ok(escova.sourceNote.includes('invertida'));
   assert.equal(item('Ave · Águia').median, 150000);
   assert.deepEqual([item('Peças Importadas').min, item('Peças Importadas').max], [800,800]);
-  const stable = summarizeSectors(catalog).find(sector => sector.section === 'Estábulos');
-  assert.equal(stable.count, 7); assert.equal(stable.analyzed, 6);
-  assert.equal(summarizeSectors(catalog).find(sector => sector.section === 'Salões').median, 17.5);
+
 });
 
 test('mineral lot prices are normalized per unit while source lots remain available', () => {
@@ -119,4 +117,24 @@ test('trade simulation handles profit, loss, missing costs, free sales and inval
   for (const quantity of [-1, 0, 1.5, Infinity, NaN]) assert.throws(() => simulateTrade(item('Perfume'), quantity, 10));
   assert.throws(() => simulateTrade(item('Perfume'), 2, -1));
   assert.throws(() => simulateTrade(item('Perfume'), 2, 1, -1));
+});
+
+test('Economia hides only the two requested farm origins and preserves all other channels', () => {
+  const visible=buildEconomyCatalog();
+  assert.equal(visible.length,401);
+  assert.equal(new Set(visible.map(row=>row.name)).size,401);
+  assert.ok(visible.every(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin)));
+  for(const origin of ['Coleta','Lenhador','Mineração','Fazenda Venda','Gazeta Comercial']) assert.ok(visible.some(row=>row.origin===origin));
+  for(const row of county.rows.filter(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin))) {
+    const name=row.name.replace(/ \(v\)$/, '');
+    const shown=visible.find(item=>item.name===name);
+    assert.equal(shown.origin,row.origin);assert.equal(shown.min,row.min);assert.equal(shown.max,row.max);
+  }
+  assert.equal(visible.find(row=>row.name==='Rosa').min,0.3);
+  assert.equal(visible.find(row=>row.name==='Rosa (coleta)').min,0.15);
+  assert.equal(visible.find(row=>row.name==='Leite').origin,'Gazeta Comercial');
+  assert.equal(visible.find(row=>row.name==='Leite').min,4);
+  assert.equal(visible.some(row=>row.name==='Esterco'),false);
+  assert.deepEqual(ingredientPrices.Esterco,[0.22,0.25]);
+  assert.deepEqual(ingredientPrices.Rosa,[0.3,0.35]);
 });

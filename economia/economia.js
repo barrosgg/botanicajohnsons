@@ -1,9 +1,10 @@
-const catalog = buildPriceCatalog();
-const money = cents => {
+const catalog = buildEconomyCatalog();
+const money = (cents, fullPrecision = document.getElementById('full-precision').checked) => {
+  if (!fullPrecision && cents !== 0 && Math.abs(cents) < 0.5) return cents > 0 ? '< $0,01' : '> -$0,01';
   // Shift the decimal as a string so formatting 0.325 cents yields $0.00325,
   // without introducing a binary division tail in the full precision view.
   const [coefficient, exponent = '0'] = String(cents).split('e');
-  return '$' + new Intl.NumberFormat('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: document.getElementById('full-precision').checked ? 20 : 2}).format(`${coefficient}e${Number(exponent) - 2}`);
+  return '$' + new Intl.NumberFormat('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: fullPrecision ? 20 : 2}).format(`${coefficient}e${Number(exponent) - 2}`);
 };
 const noteId = name => 'nota-' + name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const suggestedItems = catalog.filter(item => item.status === 'suggested');
@@ -11,6 +12,8 @@ document.getElementById('category').innerHTML = '<option value="all">Todas as se
 document.getElementById('origin').innerHTML = '<option value="all">Todas as origens</option>' + [...new Set(catalog.map(item => item.origin))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(origin => `<option>${origin}</option>`).join('');
 const referencePrice = item => item.status === 'suggested' ? item.suggested : item.median;
 let visibleCatalog = catalog;
+let currentPage = 0;
+let pageSize = 10;
 document.getElementById('catalog-summary').innerHTML = [
   [catalog.length, 'itens no catálogo'],
   [catalog.length - suggestedItems.length, 'preços cadastrados'],
@@ -21,11 +24,11 @@ function renderItemNotes() {
   const openNotes = new Set([...document.querySelectorAll('#item-notes details[open]')].map(note => note.id));
   document.getElementById('item-notes').innerHTML = suggestedItems.map(item => `
   <details id="${noteId(item.name)}" class="item-note">
-    <summary><span>${item.name}<small>${item.references.map(ref => ref.name).join(' · ')}</small></span><span class="suggested-value">${money(item.suggested)}<small>Preço sugerido / un.</small></span></summary>
+    <summary><span>${item.name}<small>${item.references.map(ref => ref.name).join(' · ')}</small></span><span class="suggested-value">${money(item.suggested, true)}<small>Preço sugerido / un.</small></span></summary>
     <div class="note-body"><p>${item.methodology}</p>
-    <ol>${item.references.map(ref => `<li><strong>${ref.name}:</strong> (${money(ref.min)} + ${money(ref.max)}) ÷ 2 = <strong>${money(ref.value)} / un.</strong>.<br><span class="raw-detail">${ref.source} · ${ref.origin}</span></li>`).join('')}</ol>
-    <p class="note-result">${item.references.length > 1 ? `Média simples: (${item.references.map(ref => money(ref.value)).join(' + ')}) ÷ ${item.references.length}` : 'Resultado da referência única'} = <strong>${money(item.suggested)} / un.</strong></p>
-    <p class="raw-detail">Estimativa por itens correlatos, sem cotação específica nem garantia de margem. Valores exibidos são arredondados; a média usa os valores completos.</p></div>
+    <ol>${item.references.map(ref => `<li><strong>${ref.name}:</strong> (${money(ref.min, true)} + ${money(ref.max, true)}) ÷ 2 = <strong>${money(ref.value, true)} / un.</strong>.<br><span class="raw-detail">${ref.source} · ${ref.origin}</span></li>`).join('')}</ol>
+    <p class="note-result">${item.references.length > 1 ? `Média simples: (${item.references.map(ref => money(ref.value, true)).join(' + ')}) ÷ ${item.references.length}` : 'Resultado da referência única'} = <strong>${money(item.suggested, true)} / un.</strong></p>
+    <p class="raw-detail">Estimativa por itens correlatos, sem cotação específica nem garantia de margem. As notas mostram os valores completos para tornar a conta legível, mesmo quando a tabela está no modo de duas casas decimais.</p></div>
   </details>`).join('');
   for (const id of openNotes) document.getElementById(id).open = true;
 }
@@ -33,7 +36,11 @@ renderItemNotes();
 
 function openNoteFromHash() {
   const target = document.getElementById(location.hash.slice(1));
-  if (target?.matches('details.item-note')) target.open = true;
+  if (target?.matches('details.item-note')) {
+    showDialog('notes-dialog');
+    target.open = true;
+    target.querySelector('summary').focus();
+  }
 }
 window.addEventListener('hashchange', openNoteFromHash);
 openNoteFromHash();
@@ -50,26 +57,65 @@ function renderCatalog() {
   if (order === 'high') visible.sort((a, b) => referencePrice(b) - referencePrice(a));
   if (order === 'spread') visible.sort((a, b) => (b.status === 'listed' && b.max >= b.min ? b.max - b.min : -1) - (a.status === 'listed' && a.max >= a.min ? a.max - a.min : -1));
   visibleCatalog = visible;
-  document.getElementById('price-rows').innerHTML = visible.map(item => {
+  const pages = Math.max(1, Math.ceil(visible.length / pageSize));
+  currentPage = Math.min(currentPage, pages - 1);
+  const first = currentPage * pageSize;
+  document.getElementById('price-rows').innerHTML = visible.slice(first, first + pageSize).map(item => {
     const suggested = item.status === 'suggested';
-    return `<tr><th scope="row">${item.name}<small>${item.section} · ${item.category} · ${item.origin}</small></th><td><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Preço sugerido' : 'Cadastrado'}</span></td><td class="price-number">${suggested ? '—' : money(item.min)}</td><td class="price-number price-main">${money(suggested ? item.suggested : item.median)}</td><td class="price-number">${suggested ? '—' : money(item.max)}</td><td>${suggested ? `<a href="#${noteId(item.name)}">Ver cálculo ↗</a>` : `${item.source}${item.sourceNote ? `<small class="source-warning">${item.sourceNote}</small>` : ''}`}</td></tr>`;
+    const action = suggested ? `data-note="${noteId(item.name)}"` : `data-source="${catalog.indexOf(item)}"`;
+    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Sugerido' : 'Cadastrado'}</span></td><td class="price-number">${suggested ? '—' : money(item.min)}</td><td class="price-number price-main">${money(suggested ? item.suggested : item.median)}</td><td class="price-number">${suggested ? '—' : money(item.max)}</td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
   }).join('');
-  document.getElementById('result-count').textContent = `${visible.length} de ${catalog.length} itens · ${visible.filter(item => item.status === 'suggested').length} com preço sugerido`;
+  document.getElementById('page-range').textContent = visible.length ? `${first + 1}–${Math.min(first + pageSize, visible.length)} de ${visible.length}` : '0 resultados';
+  document.getElementById('page-count').textContent = `${currentPage + 1} / ${pages}`;
+  document.getElementById('previous-page').disabled = currentPage === 0;
+  document.getElementById('next-page').disabled = currentPage >= pages - 1;
+  document.getElementById('result-count').textContent = `${visible.length} de ${catalog.length} referências`;
   document.getElementById('no-results').hidden = visible.length > 0;
 }
+function showDialog(id) {
+  const dialog = document.getElementById(id);
+  if (!dialog.open) dialog.showModal();
+}
+for (const button of document.querySelectorAll('[data-dialog]')) button.addEventListener('click', () => showDialog(button.dataset.dialog));
+for (const button of document.querySelectorAll('[data-close]')) button.addEventListener('click', () => button.closest('dialog').close());
 document.getElementById('price-rows').addEventListener('click', event => {
-  const link = event.target.closest('a[href^="#nota-"]');
-  if (!link) return;
-  const note = document.getElementById(link.hash.slice(1));
-  note.open = true;
-  note.querySelector('summary').focus();
+  const noteButton = event.target.closest('[data-note]');
+  if (noteButton) {
+    const note = document.getElementById(noteButton.dataset.note);
+    showDialog('notes-dialog'); note.open = true; note.querySelector('summary').focus();
+    return;
+  }
+  const sourceButton = event.target.closest('[data-source]');
+  if (!sourceButton) return;
+  const item = catalog[Number(sourceButton.dataset.source)];
+  document.getElementById('reference-title').textContent = item.name;
+  const body = document.getElementById('reference-body'); body.replaceChildren();
+  for (const line of [`${item.section} · ${item.origin}`, `${item.source}. Mínimo: ${money(item.min, true)} / un. · Referência: ${money(item.median, true)} / un. · Máximo: ${money(item.max, true)} / un.`, item.sourceNote || 'Faixa cadastrada da Gazeta Comercial. Referência = ponto médio entre mínimo e máximo.']) {
+    const paragraph = document.createElement('p'); paragraph.textContent = line; body.append(paragraph);
+  }
+  showDialog('reference-dialog');
 });
-document.getElementById('search').addEventListener('input', renderCatalog);
-document.getElementById('category').addEventListener('change', renderCatalog);
-document.getElementById('status').addEventListener('change', renderCatalog);
-document.getElementById('origin').addEventListener('change', renderCatalog);
-document.getElementById('sort').addEventListener('change', renderCatalog);
+function resetPage() { currentPage = 0; renderCatalog(); }
+document.getElementById('search').addEventListener('input', resetPage);
+for (const id of ['category','status','origin','sort']) document.getElementById(id).addEventListener('change', resetPage);
+document.getElementById('previous-page').addEventListener('click', () => {if(currentPage > 0) {currentPage--; renderCatalog();}});
+document.getElementById('next-page').addEventListener('click', () => {if((currentPage + 1) * pageSize < visibleCatalog.length) {currentPage++; renderCatalog();}});
 renderCatalog();
+function fitPageToViewport() {
+  const viewport = document.getElementById('table-viewport');
+  if (!viewport.clientHeight) return;
+  const headerHeight = document.querySelector('.catalog-table thead').getBoundingClientRect().height;
+  const rowHeight = document.querySelector('#price-rows tr')?.getBoundingClientRect().height || 44;
+  const nextSize = Math.max(1, Math.floor((viewport.clientHeight - headerHeight - 2) / rowHeight));
+  if (nextSize !== pageSize) {
+    currentPage = Math.floor(currentPage * pageSize / nextSize);
+    pageSize = nextSize;
+    renderCatalog();
+  }
+}
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fitPageToViewport).observe(document.getElementById('table-viewport'));
+window.addEventListener('resize', fitPageToViewport);
+fitPageToViewport();
 
 document.getElementById('export-csv').addEventListener('click', () => {
   const decimal = value => value == null ? '' : (value / 100).toFixed(8).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
@@ -80,11 +126,6 @@ document.getElementById('export-csv').addEventListener('click', () => {
   document.body.append(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
-
-function renderSectorSummary() {
-  document.getElementById('sector-summary').innerHTML = summarizeSectors(catalog).map(sector => `<article class="sector-card"><h3>${sector.section}</h3><p>${sector.count} mercadorias · ${sector.analyzed} faixas analisadas</p><dl><div><dt>Mediana das referências</dt><dd>${money(sector.median)}</dd></div><div><dt>Menor mínimo / maior máximo</dt><dd>${money(sector.min)} / ${money(sector.max)}</dd></div><div><dt>Amplitude média das faixas</dt><dd>${money(sector.averageSpread)}</dd></div></dl></article>`).join('');
-}
-renderSectorSummary();
 
 const simulationItem = document.getElementById('sim-item');
 simulationItem.innerHTML = catalog.map((item, index) => `<option value="${index}">${item.name}${item.status === 'suggested' ? ' (sugerido)' : ''}</option>`).join('');
@@ -124,6 +165,5 @@ setSimulationReference();
 document.getElementById('full-precision').addEventListener('change', () => {
   renderCatalog();
   renderItemNotes();
-  renderSectorSummary();
   updateSimulation();
 });

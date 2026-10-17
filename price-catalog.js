@@ -43,15 +43,19 @@ function buildPriceCatalog(data = catalogData) {
   });
 }
 
-function summarizeSectors(catalog) {
-  const sectors = [...new Set(catalog.filter(item => item.status === 'listed').map(item => item.section))];
-  return sectors.map(section => {
-    const listed = catalog.filter(item => item.section === section && item.status === 'listed');
-    const valid = listed.filter(item => item.min <= item.max);
-    const values = valid.map(item => item.median).sort((a, b) => a - b);
-    const center = Math.floor(values.length / 2);
-    return {section, count: listed.length, analyzed: valid.length, median: values.length % 2 ? values[center] : (values[center - 1] + values[center]) / 2, min: Math.min(...valid.map(item => item.min)), max: Math.max(...valid.map(item => item.max)), averageSpread: valid.reduce((sum, item) => sum + item.max - item.min, 0) / valid.length};
-  });
+function buildEconomyCatalog(data = catalogData) {
+  const excluded = new Set(['Fazenda Coleta', 'Fazenda Plantação']);
+  const saleName = name => name.replace(/ \(v\)$/, '');
+  return buildPriceCatalog(data).flatMap(item => {
+    let quote = item;
+    if (excluded.has(item.origin)) {
+      // A collection quote must not hide an independently supplied Gazeta quote.
+      if (!item.previousPrice || excluded.has(item.previousPrice.origin)) return [];
+      quote = {...item.previousPrice, category:item.category, status:'listed', median:rangeMidpoint(item.previousPrice.min,item.previousPrice.max)};
+    }
+    const name = quote.origin === 'Fazenda Venda' ? saleName(quote.name) : quote.name;
+    return [{...quote, name, aliases:[...(quote.aliases || []), ...(name === quote.name ? [] : [quote.name])], references:quote.references?.map(ref => ({...ref, name:saleName(ref.name)}))}];
+  }).sort((a,b) => a.name.localeCompare(b.name,'pt-BR'));
 }
 
 function simulateTrade(item, quantity, price, totalCost = null) {
@@ -63,4 +67,4 @@ function simulateTrade(item, quantity, price, totalCost = null) {
   return {referenceTotal: quantity * reference, minTotal: item.status === 'listed' && item.min <= item.max ? quantity * item.min : null, maxTotal: item.status === 'listed' && item.min <= item.max ? quantity * item.max : null, revenue, deviation, profit: totalCost === null ? null : revenue - totalCost, margin: totalCost === null || revenue === 0 ? null : (revenue - totalCost) / revenue * 100};
 }
 
-if (typeof module !== 'undefined') module.exports = {buildPriceCatalog, summarizeSectors, simulateTrade};
+if (typeof module !== 'undefined') module.exports = {buildPriceCatalog, buildEconomyCatalog, simulateTrade};
