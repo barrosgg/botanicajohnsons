@@ -34,7 +34,7 @@
 <dialog id="shopping-dialog"><div class="dialog-heading"><h2>Calculadora de compras e vendas</h2><button type="button" data-close>Fechar ×</button></div>
 <p>Adicione os itens da negociação. Escolha unidade ou lote, ajuste quantidade e preço e confira o total.</p>
 <form id="shopping-form" class="shopping-form">
-<label for="shopping-item">Item<select id="shopping-item"></select></label>
+<label for="shopping-item-search">Item<div id="shopping-picker" class="shopping-picker"><input id="shopping-item-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="shopping-options" aria-describedby="shopping-search-status" autocomplete="off" placeholder="Digite para buscar um item…" required><ul id="shopping-options" role="listbox" aria-label="Itens encontrados" hidden></ul><span id="shopping-search-status" class="visually-hidden" role="status"></span></div><input id="shopping-item" type="hidden"></label>
 <label for="shopping-basis">Negociar por<select id="shopping-basis"><option value="unit">Unidade</option></select></label>
 <label for="shopping-quantity"><span id="quantity-label">Quantidade de unidades</span><input id="shopping-quantity" type="number" min="1" max="1000000" step="1" value="1" required></label>
 <label for="shopping-price"><span id="price-label">Preço por unidade ($)</span><input id="shopping-price" type="number" min="0" max="1000000" step="0.00001" required></label>
@@ -42,7 +42,8 @@
 </form>
 <p id="shopping-hint" class="study-hint">O preço de referência é preenchido para facilitar; ajuste para o valor combinado.</p>
 <div class="shopping-table-wrap"><table class="shopping-table"><caption class="visually-hidden">Itens da compra ou venda. Edite quantidades e preços para atualizar o total.</caption><thead><tr><th scope="col">Item / base</th><th scope="col">Quantidade</th><th scope="col">Preço ($)</th><th scope="col">Subtotal</th><th scope="col"><span class="visually-hidden">Remover</span></th></tr></thead><tbody id="shopping-rows"></tbody></table><p id="shopping-empty" class="empty">Adicione o primeiro item para começar.</p></div>
-<div class="shopping-total"><button id="clear-shopping" type="button" disabled>Limpar lista</button><p><span>Total da lista</span><strong id="shopping-total" aria-live="polite">$0,00</strong></p></div>
+<div class="shopping-total"><div class="shopping-buttons"><button id="copy-shopping" type="button" disabled>Copiar conta</button><button id="clear-shopping" type="button" disabled>Limpar lista</button></div><p><span>Total da lista</span><strong id="shopping-total" aria-live="polite">$0,00</strong></p></div>
+<p id="shopping-copy-status" class="study-hint" role="status" aria-live="polite"></p><div id="shopping-copy-fallback" hidden><label for="shopping-copy-text">Selecione e copie a conta abaixo:</label><textarea id="shopping-copy-text" readonly rows="7"></textarea></div>
 <p id="shopping-message" class="study-hint" role="status" aria-live="polite"></p>
 </dialog>
 <script src="../county-prices.js"></script><script src="../data.js"></script><script src="../gazette.js"></script><script src="../price-catalog.js"></script><script src="economia.js"></script>

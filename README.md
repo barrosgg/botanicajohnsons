@@ -73,3 +73,6 @@ A tabela compacta exibe valores por unidade na primeira linha e os preços míni
 
 
 A calculadora de compras e vendas substitui o simulador de um único produto. Permite adicionar vários itens, escolher unidade ou lote quando informado, ajustar quantidade e preço em cada linha, remover itens e limpar a lista. O total é a soma dos subtotais, com até cinco casas decimais por preço informado e soma inteira em escala decimal para evitar perda de precisão. A lista permanece ao fechar e reabrir a janela durante a sessão. Valores completos continuam ativados por padrão.
+
+
+Na calculadora, o seletor de itens permite busca sem acentos, navegação com setas e seleção por Enter ou clique. Uma busca ainda não confirmada não adiciona o item anterior por engano. “Copiar conta” inclui todos os itens da lista com unidade/lote, quantidade, preço combinado, subtotal e total, sempre com a precisão completa. Linhas inválidas bloqueiam a cópia; se a área de transferência falhar, o texto fica disponível para cópia manual.

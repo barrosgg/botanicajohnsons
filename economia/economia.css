@@ -142,3 +142,18 @@
 
 .economy-page .brand span {letter-spacing:.2px;line-height:1.3;max-width:480px}
 @media(max-width:700px) {.economy-page .brand span {max-width:220px;font-size:9px}}
+
+.shopping-picker {position:relative}
+#shopping-options {position:absolute;z-index:3;top:100%;left:0;right:0;margin:4px 0 0;padding:4px;list-style:none;border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;box-shadow:0 7px 20px #0002;max-height:230px;overflow:auto}
+#shopping-options[hidden] {display:none}
+#shopping-options [role=option] {padding:7px 8px;cursor:pointer;color:var(--ink);font-size:12px;line-height:1.4}
+#shopping-options [role=option][aria-selected=true],#shopping-options [role=option]:hover {background:#e1e8d8;color:var(--green)}
+#shopping-options small {display:block;font-size:10px;color:var(--muted)}
+.no-item-match {padding:10px;color:var(--muted);font-size:12px}
+.shopping-buttons {display:flex;flex-wrap:wrap;gap:6px}
+#copy-shopping {background:var(--green);border-color:var(--green);color:white}
+#copy-shopping:hover:not(:disabled) {background:#2d4435}
+#shopping-copy-status:empty {display:none}
+#shopping-copy-fallback {margin-top:12px}
+#shopping-copy-fallback label {display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+#shopping-copy-text {width:100%;resize:vertical;border:1px solid var(--line);border-radius:4px;background:#fffcf4;color:var(--ink);padding:10px;font:12px/1.6 Arial,sans-serif}

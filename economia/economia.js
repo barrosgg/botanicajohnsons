@@ -134,9 +134,71 @@ document.getElementById('export-csv').addEventListener('click', () => {
 const shoppingLines = [];
 const shoppingItem = document.getElementById('shopping-item');
 const shoppingBasis = document.getElementById('shopping-basis');
-shoppingItem.innerHTML = catalog.map((item, index) => `<option value="${index}">${item.name}${item.status === 'suggested' ? ' (sugerido)' : ''}</option>`).join('');
+const shoppingSearch = document.getElementById('shopping-item-search');
+const shoppingOptions = document.getElementById('shopping-options');
+const itemLabel = item => item.name + (item.status === 'suggested' ? ' (sugerido)' : '');
+let itemMatches = [];
+let activeItemOption = 0;
+let searchCloseTimer;
+function closeItemOptions() {
+  shoppingOptions.hidden = true;
+  shoppingSearch.setAttribute('aria-expanded','false');
+  shoppingSearch.removeAttribute('aria-activedescendant');
+}
+function highlightItemOption() {
+  shoppingOptions.querySelectorAll('[role="option"]').forEach((option, index) => {
+    option.setAttribute('aria-selected',String(index === activeItemOption));
+  });
+  if (itemMatches.length) shoppingSearch.setAttribute('aria-activedescendant',`shopping-option-${itemMatches[activeItemOption].index}`);
+  else shoppingSearch.removeAttribute('aria-activedescendant');
+  shoppingOptions.querySelector('[aria-selected="true"]')?.scrollIntoView?.({block:'nearest'});
+}
+function showItemOptions(showAll = false) {
+  const query = showAll ? '' : normalizeSearch(shoppingSearch.value.trim());
+  const matches = catalog.map((item,index)=>({item,index})).filter(({item})=>normalizeSearch([itemLabel(item),...(item.aliases || [])].join(' ')).includes(query));
+  itemMatches = matches.slice(0,12);
+  activeItemOption = 0;
+  shoppingOptions.innerHTML = itemMatches.length ? itemMatches.map(({item,index})=>`<li id="shopping-option-${index}" role="option" data-choice="${index}" aria-selected="false">${itemLabel(item)}<small>${item.origin}</small></li>`).join('') : '<li class="no-item-match" role="presentation">Nenhum item encontrado.</li>';
+  shoppingOptions.hidden = false;
+  shoppingSearch.setAttribute('aria-expanded','true');
+  document.getElementById('shopping-search-status').textContent = matches.length > 12 ? `${matches.length} itens encontrados. Mostrando 12; continue digitando para refinar.` : `${matches.length} itens encontrados. Use as setas e Enter para selecionar.`;
+  highlightItemOption();
+}
+function chooseShoppingItem(index) {
+  shoppingItem.value = String(index);
+  shoppingSearch.value = itemLabel(catalog[index]);
+  shoppingSearch.setCustomValidity('');
+  closeItemOptions();
+  setShoppingBasis();
+}
+shoppingSearch.addEventListener('focus',()=>{clearTimeout(searchCloseTimer);shoppingSearch.select();showItemOptions(shoppingItem.value !== '' && shoppingSearch.value === itemLabel(catalog[shoppingItem.value]));});
+shoppingSearch.addEventListener('input',()=>{
+  shoppingItem.value = '';
+  shoppingSearch.setCustomValidity('Selecione um item nos resultados da busca.');
+  setShoppingBasis(); showItemOptions();
+});
+shoppingSearch.addEventListener('keydown',event=>{
+  if (event.key === 'Escape' && !shoppingOptions.hidden) { event.preventDefault(); event.stopPropagation(); closeItemOptions(); return; }
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    if (shoppingOptions.hidden) showItemOptions();
+    else if (itemMatches.length) activeItemOption = (activeItemOption + (event.key === 'ArrowDown' ? 1 : -1) + itemMatches.length) % itemMatches.length;
+    highlightItemOption();
+    return;
+  }
+  if (event.key === 'Enter' && !shoppingOptions.hidden) {
+    event.preventDefault();
+    if (itemMatches.length) chooseShoppingItem(itemMatches[activeItemOption].index);
+  }
+});
+shoppingOptions.addEventListener('mousedown',event=>event.preventDefault());
+shoppingOptions.addEventListener('click',event=>{const option=event.target.closest('[data-choice]');if(option) chooseShoppingItem(Number(option.dataset.choice));});
+shoppingSearch.addEventListener('blur',()=>{searchCloseTimer=setTimeout(closeItemOptions,100);});
+shoppingItem.value = '0';
+shoppingSearch.value = itemLabel(catalog[0]);
 function setShoppingPrice() {
   const item = catalog[shoppingItem.value];
+  if (!item) return;
   const lot = shoppingBasis.value === 'lot';
   const cents = lot ? rangeMidpoint(item.sourceMin, item.sourceMax) : referencePrice(item);
   document.getElementById('shopping-price').value = (cents / 100).toFixed(5);
@@ -146,6 +208,13 @@ function setShoppingPrice() {
 }
 function setShoppingBasis() {
   const item = catalog[shoppingItem.value];
+  document.querySelector('#shopping-form .add-item').disabled = !item;
+  if (!item) {
+    shoppingBasis.innerHTML = '<option value="unit">Unidade</option>';
+    document.getElementById('shopping-price').value = '';
+    document.getElementById('shopping-hint').textContent = 'Selecione um item nos resultados para adicionar à conta.';
+    return;
+  }
   const hasLot = item.lotSize > 1 && Number.isFinite(item.sourceMin) && Number.isFinite(item.sourceMax);
   shoppingBasis.innerHTML = '<option value="unit">Unidade</option>' + (hasLot ? `<option value="lot">Lote de ${item.lotSize} un.</option>` : '');
   setShoppingPrice();
@@ -162,6 +231,10 @@ function renderShoppingTotals() {
       invalid = true; row.querySelector('.line-subtotal').textContent = '—'; row.classList.add('invalid-line');
     }
   }
+  document.getElementById('copy-shopping').disabled = invalid || shoppingLines.length === 0;
+  document.getElementById('shopping-copy-status').textContent = '';
+  document.getElementById('shopping-copy-fallback').hidden = true;
+  document.getElementById('shopping-copy-text').value = '';
   document.getElementById('shopping-total').textContent = invalid ? '—' : money(calculateShoppingList(shoppingLines).totalCents);
   document.getElementById('shopping-message').textContent = invalid ? 'Corrija as linhas destacadas: quantidade inteira de 1 a 1.000.000 e preço de 0 a 1.000.000, com até cinco casas decimais.' : '';
 }
@@ -174,6 +247,7 @@ function renderShoppingList() {
 document.getElementById('shopping-form').addEventListener('submit', event => {
   event.preventDefault();
   const item = catalog[shoppingItem.value];
+  if (!item) { document.getElementById('shopping-message').textContent = 'Selecione um item nos resultados da busca.'; shoppingSearch.focus(); return; }
   const line = {name:item.name, basis:shoppingBasis.value, lotSize:item.lotSize, quantity:document.getElementById('shopping-quantity').value, price:document.getElementById('shopping-price').value};
   try {
     calculateShoppingList([line]);
@@ -181,7 +255,7 @@ document.getElementById('shopping-form').addEventListener('submit', event => {
     document.getElementById('shopping-quantity').value = '1';
   } catch (error) { document.getElementById('shopping-message').textContent = error.message; }
 });
-shoppingItem.addEventListener('change', setShoppingBasis);
+shoppingItem.addEventListener('change', () => {if(catalog[shoppingItem.value]) chooseShoppingItem(Number(shoppingItem.value));});
 shoppingBasis.addEventListener('change', setShoppingPrice);
 document.getElementById('shopping-rows').addEventListener('input', event => {
   const input = event.target.closest('[data-line][data-field]');
@@ -195,6 +269,28 @@ document.getElementById('shopping-rows').addEventListener('click', event => {
   shoppingLines.splice(Number(button.dataset.remove), 1); renderShoppingList();
 });
 document.getElementById('clear-shopping').addEventListener('click', () => { shoppingLines.length = 0; renderShoppingList(); });
+document.getElementById('copy-shopping').addEventListener('click', async () => {
+  if (!shoppingLines.length) return;
+  const status = document.getElementById('shopping-copy-status');
+  let text;
+  try {
+    const result = calculateShoppingList(shoppingLines);
+    const priceText = price => '$' + new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:20}).format(price);
+    text = 'Botânica Johnsons — Conta de compras e vendas\n\n' + shoppingLines.map((line,index)=>{
+      const quantity = Number(line.quantity).toLocaleString('pt-BR');
+      const basis = line.basis === 'lot' ? `lote(s) de ${line.lotSize} un.` : 'un.';
+      return `${index+1}. ${line.name}\n${quantity} ${basis} × ${priceText(line.price)} = ${money(result.items[index].subtotalCents,true)}`;
+    }).join('\n\n') + `\n\nTOTAL: ${money(result.totalCents,true)}`;
+  } catch (error) {status.textContent = error.message;return;}
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = 'Conta completa copiada!';
+  } catch {
+    status.textContent = 'Não foi possível copiar automaticamente.';
+    document.getElementById('shopping-copy-fallback').hidden = false;
+    const field = document.getElementById('shopping-copy-text'); field.value = text; field.focus(); field.select();
+  }
+});
 setShoppingBasis();
 renderShoppingList();
 
