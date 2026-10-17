@@ -1,33 +1,50 @@
 const catalogData = typeof module !== 'undefined' ? require('./data.js') : BotanicaData;
 const catalogGazette = typeof module !== 'undefined' ? require('./gazette.js').gazetteItems : gazetteItems;
+const catalogCounty = typeof module !== 'undefined' ? require('./county-prices.js') : CountyPrices;
+// Current official prices resolve to hundredths of a cent (four decimal dollars).
+// Average in that integer scale to avoid floating point tails such as 0.0032499999.
+const rangeMidpoint = (min, max) => (Math.round(min * 100) + Math.round(max * 100)) / 200;
 
 function buildPriceCatalog(data = catalogData) {
   const {recipes, ingredientPrices, salePrices} = data;
-  const names = new Set([...recipes.map(r => r.name), ...recipes.flatMap(r => Object.keys(r.ingredients)), ...Object.keys(ingredientPrices), ...catalogGazette.map(item => item.name)]);
-  return [...names].sort((a, b) => a.localeCompare(b, 'pt-BR')).map(name => {
+  const registered = new Map(catalogGazette.map(item => [catalogCounty.canonicalName(item.name), {...item, name: catalogCounty.canonicalName(item.name), source: 'Gazeta Comercial', origin: 'Gazeta Comercial'}]));
+  const currency = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 8});
+  for (const row of catalogCounty.rows) {
+    const previous = registered.get(row.name);
+    const section = row.origin === 'Mineração' ? 'Minérios' : row.origin === 'Lenhador' ? 'Lenhador' : row.origin === 'Coleta' ? 'Coleta' : 'Fazendas';
+    const history = previous && (previous.min !== row.min || previous.max !== row.max)
+      ? ` Substitui a faixa anterior da Gazeta: ${currency(previous.min)} a ${currency(previous.max)} por unidade.` : '';
+    registered.set(row.name, {...row, section, aliases: Object.entries(catalogCounty.aliases).filter(([, target]) => target === row.name).map(([alias]) => alias), source: 'Atualização do condado', previousPrice: previous,
+      sourceNote: `${row.origin}.${row.originalName ? ` Nome na fonte: ${row.originalName}; identificado aqui como ${row.name}.` : ''} Lote de ${row.lotSize} un.: ${currency(row.sourceMin)} a ${currency(row.sourceMax)}. A planilha já informa preços unitários; não foram divididos novamente.${history}`});
+  }
+  const names = new Set([...recipes.map(r => r.name), ...recipes.flatMap(r => Object.keys(r.ingredients)), ...Object.keys(ingredientPrices), ...registered.keys()]);
+  const comparableNames = {
+    'Tomilho': ['Orégano (v)', 'Hortelã-brava (v)', 'Sálvia-beija-flor (v)', 'Sálvia-vermelha (v)', 'Milefólio (v)', 'Tanaceto (v)', 'Lavanda (v)'],
+    'Mel': ['Melado de Cana', 'Xarope de Açúcar']
+  };
+  const reasons = {
+    'Tomilho': 'Média dos preços de venda de sete ervas e plantas aromáticas ou medicinais. Usa Fazenda Venda, a mesma base escolhida para a compra dos insumos no planejamento.',
+    'Mel': 'Média dos pontos médios de dois adoçantes líquidos correlatos: melado de cana e xarope de açúcar. São produtos diferentes do mel; esta referência indireta não representa cotação específica.'
+  };
+  return [...names].sort((a,b) => a.localeCompare(b,'pt-BR')).map(name => {
     const product = recipes.find(r => r.name === name);
-    const gazette = catalogGazette.find(item => item.name === name);
-    const price = gazette ? [gazette.min, gazette.max] : ingredientPrices[name] || (product && salePrices[product.id]);
+    const quote = registered.get(name);
+    const price = quote ? [quote.min, quote.max] : ingredientPrices[name] || (product && salePrices[product.id]);
     const usedIn = recipes.filter(r => Object.hasOwn(r.ingredients, name)).map(r => r.name);
-    if (price) return {name, category: product ? 'Produto' : Object.hasOwn(ingredientPrices, name) ? 'Insumo' : 'Mercadoria', section: gazette?.section || 'Insumos do planejamento', sourceNote: gazette?.sourceNote, lotSize: gazette?.lotSize || 1, sourceMin: gazette?.sourceMin, sourceMax: gazette?.sourceMax, status: 'listed', min: price[0], median: (price[0] + price[1]) / 2, max: price[1], usedIn};
-
-    // Only original price ranges feed the estimate. No suggested price is reused.
-    const references = recipes.filter(r => Object.hasOwn(r.ingredients, name)).map(recipe => {
-      const range = salePrices[recipe.id];
-      const raw = Object.entries(recipe.ingredients).filter(([ingredient]) => !ingredientPrices[ingredient]);
-      const quantity = raw.reduce((sum, [, count]) => sum + count, 0);
-      if (!range || !quantity) throw new Error(`Referência insuficiente para ${name}`);
-      const midpoint = (range[0] + range[1]) / 2;
-      return {name: recipe.name, midpoint, yield: recipe.yield, quantity, ingredients: raw.map(([ingredient, count]) => ({name: ingredient, quantity: count})), value: midpoint * recipe.yield / quantity};
+    if (price) return {...quote, name, category: product ? 'Produto' : Object.hasOwn(ingredientPrices, name) || quote?.source === 'Atualização do condado' ? 'Insumo' : 'Mercadoria', section: quote?.section || 'Insumos do planejamento', source: quote?.source || 'Gazeta Comercial', origin: quote?.origin || 'Gazeta Comercial', lotSize: quote?.lotSize || 1, status: 'listed', min:price[0], median:rangeMidpoint(price[0],price[1]), max:price[1], usedIn};
+    if (!comparableNames[name]) throw new Error(`Sem referência para ${name}`);
+    const references = comparableNames[name].map(refName => {
+      const ref = registered.get(refName);
+      if (!ref) throw new Error(`Referência ausente: ${refName}`);
+      return {name:ref.name, min:ref.min, max:ref.max, value:rangeMidpoint(ref.min,ref.max), source:ref.source, origin:ref.origin};
     });
-    if (!references.length) throw new Error(`Sem referência para ${name}`);
-    const suggested = references.reduce((sum, ref) => sum + ref.value, 0) / references.length;
-    return {name, category: 'Matéria-prima', section: 'Matérias-primas da Botânica', status: 'suggested', suggested, references, usedIn};
+    const suggested = references.reduce((sum, ref) => sum + Math.round(ref.min * 100) + Math.round(ref.max * 100), 0) / (references.length * 200);
+    return {name, category:'Matéria-prima', section:'Matérias-primas da Botânica', origin:'Estimado por similares', status:'suggested', suggested, references, methodology:reasons[name], usedIn};
   });
 }
 
 function summarizeSectors(catalog) {
-  const sectors = [...new Set(catalogGazette.map(item => item.section))];
+  const sectors = [...new Set(catalog.filter(item => item.status === 'listed').map(item => item.section))];
   return sectors.map(section => {
     const listed = catalog.filter(item => item.section === section && item.status === 'listed');
     const valid = listed.filter(item => item.min <= item.max);

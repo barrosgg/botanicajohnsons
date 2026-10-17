@@ -1,8 +1,14 @@
 const catalog = buildPriceCatalog();
-const money = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: document.getElementById('full-precision').checked ? 20 : 2});
+const money = cents => {
+  // Shift the decimal as a string so formatting 0.325 cents yields $0.00325,
+  // without introducing a binary division tail in the full precision view.
+  const [coefficient, exponent = '0'] = String(cents).split('e');
+  return '$' + new Intl.NumberFormat('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: document.getElementById('full-precision').checked ? 20 : 2}).format(`${coefficient}e${Number(exponent) - 2}`);
+};
 const noteId = name => 'nota-' + name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const suggestedItems = catalog.filter(item => item.status === 'suggested');
 document.getElementById('category').innerHTML = '<option value="all">Todas as seções</option>' + [...new Set(catalog.map(item => item.section))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(section => `<option>${section}</option>`).join('');
+document.getElementById('origin').innerHTML = '<option value="all">Todas as origens</option>' + [...new Set(catalog.map(item => item.origin))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(origin => `<option>${origin}</option>`).join('');
 const referencePrice = item => item.status === 'suggested' ? item.suggested : item.median;
 let visibleCatalog = catalog;
 document.getElementById('catalog-summary').innerHTML = [
@@ -16,10 +22,10 @@ function renderItemNotes() {
   document.getElementById('item-notes').innerHTML = suggestedItems.map(item => `
   <details id="${noteId(item.name)}" class="item-note">
     <summary><span>${item.name}<small>${item.references.map(ref => ref.name).join(' · ')}</small></span><span class="suggested-value">${money(item.suggested)}<small>Preço sugerido / un.</small></span></summary>
-    <div class="note-body"><p>Referência indireta: ${item.references.length === 1 ? 'o produto que utiliza este ingrediente' : 'os produtos que utilizam este ingrediente'}. O mesmo valor por unidade é atribuído aos ingredientes sem preço de cada receita.</p>
-    <ol>${item.references.map(ref => `<li><strong>${ref.name}:</strong> ponto médio de venda ${money(ref.midpoint)} × ${ref.yield} unidades produzidas ÷ ${ref.quantity} unidades de matérias-primas = <strong>${money(ref.value)} por unidade de matéria-prima</strong>.<br><span class="raw-detail">Divisor: ${ref.ingredients.map(ingredient => `${ingredient.quantity} × ${ingredient.name}`).join(' + ')}. Insumos com preço cadastrado ficam fora do divisor.</span></li>`).join('')}</ol>
+    <div class="note-body"><p>${item.methodology}</p>
+    <ol>${item.references.map(ref => `<li><strong>${ref.name}:</strong> (${money(ref.min)} + ${money(ref.max)}) ÷ 2 = <strong>${money(ref.value)} / un.</strong>.<br><span class="raw-detail">${ref.source} · ${ref.origin}</span></li>`).join('')}</ol>
     <p class="note-result">${item.references.length > 1 ? `Média simples: (${item.references.map(ref => money(ref.value)).join(' + ')}) ÷ ${item.references.length}` : 'Resultado da referência única'} = <strong>${money(item.suggested)} / un.</strong></p>
-    <p class="raw-detail">Estimativa pelo faturamento bruto, sem desconto de custos ou margem. Valores exibidos são arredondados; a média usa os valores completos.</p></div>
+    <p class="raw-detail">Estimativa por itens correlatos, sem cotação específica nem garantia de margem. Valores exibidos são arredondados; a média usa os valores completos.</p></div>
   </details>`).join('');
   for (const id of openNotes) document.getElementById(id).open = true;
 }
@@ -37,7 +43,8 @@ function renderCatalog() {
   const query = normalizeSearch(document.getElementById('search').value.trim());
   const category = document.getElementById('category').value;
   const status = document.getElementById('status').value;
-  const visible = catalog.filter(item => normalizeSearch(item.name).includes(query) && (category === 'all' || category === item.section) && (status === 'all' || status === item.status));
+  const origin = document.getElementById('origin').value;
+  const visible = catalog.filter(item => normalizeSearch([item.name, item.originalName || '', ...(item.aliases || [])].join(' ')).includes(query) && (category === 'all' || category === item.section) && (status === 'all' || status === item.status) && (origin === 'all' || origin === item.origin));
   const order = document.getElementById('sort').value;
   if (order === 'low') visible.sort((a, b) => referencePrice(a) - referencePrice(b));
   if (order === 'high') visible.sort((a, b) => referencePrice(b) - referencePrice(a));
@@ -45,7 +52,7 @@ function renderCatalog() {
   visibleCatalog = visible;
   document.getElementById('price-rows').innerHTML = visible.map(item => {
     const suggested = item.status === 'suggested';
-    return `<tr><th scope="row">${item.name}<small>${item.section} · ${item.category}</small></th><td><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Preço sugerido' : 'Cadastrado'}</span></td><td class="price-number">${suggested ? '—' : money(item.min)}</td><td class="price-number price-main">${money(suggested ? item.suggested : item.median)}</td><td class="price-number">${suggested ? '—' : money(item.max)}</td><td>${suggested ? `<a href="#${noteId(item.name)}">Ver cálculo ↗</a>` : `Gazeta Comercial${item.sourceNote ? `<small class="source-warning">${item.sourceNote}</small>` : ''}`}</td></tr>`;
+    return `<tr><th scope="row">${item.name}<small>${item.section} · ${item.category} · ${item.origin}</small></th><td><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Preço sugerido' : 'Cadastrado'}</span></td><td class="price-number">${suggested ? '—' : money(item.min)}</td><td class="price-number price-main">${money(suggested ? item.suggested : item.median)}</td><td class="price-number">${suggested ? '—' : money(item.max)}</td><td>${suggested ? `<a href="#${noteId(item.name)}">Ver cálculo ↗</a>` : `${item.source}${item.sourceNote ? `<small class="source-warning">${item.sourceNote}</small>` : ''}`}</td></tr>`;
   }).join('');
   document.getElementById('result-count').textContent = `${visible.length} de ${catalog.length} itens · ${visible.filter(item => item.status === 'suggested').length} com preço sugerido`;
   document.getElementById('no-results').hidden = visible.length > 0;
@@ -60,15 +67,16 @@ document.getElementById('price-rows').addEventListener('click', event => {
 document.getElementById('search').addEventListener('input', renderCatalog);
 document.getElementById('category').addEventListener('change', renderCatalog);
 document.getElementById('status').addEventListener('change', renderCatalog);
+document.getElementById('origin').addEventListener('change', renderCatalog);
 document.getElementById('sort').addEventListener('change', renderCatalog);
 renderCatalog();
 
 document.getElementById('export-csv').addEventListener('click', () => {
   const decimal = value => value == null ? '' : (value / 100).toFixed(8).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
   const csvCell = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Item', 'Seção', 'Origem', 'Mínimo ($/un.)', 'Médio ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : 'Cadastrado', decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.sourceNote || (item.references ? item.references.map(ref => `${ref.name}: ${decimal(ref.midpoint)} × ${ref.yield} ÷ ${ref.quantity} = ${decimal(ref.value)}`).join(' | ') + '; média simples das referências, sem dedução de custos ou margem.' : 'Gazeta Comercial')])];
+  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Médio ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
   const url = URL.createObjectURL(new Blob(['\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'}));
-  const link = document.createElement('a'); link.href = url; link.download = 'economia-gazeta.csv';
+  const link = document.createElement('a'); link.href = url; link.download = 'economia-condado.csv';
   document.body.append(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
@@ -102,7 +110,7 @@ function updateSimulation() {
       ['Resultado bruto', result.profit === null ? 'Informe o custo' : money(result.profit)],
       ['Margem bruta sobre a venda', result.margin === null ? '—' : percent(result.margin)]
     ].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join('');
-    note.textContent = `${result.minTotal === null ? 'Sem faixa válida de mínimo e máximo.' : `Faixa de referência para a quantidade: ${money(result.minTotal)} a ${money(result.maxTotal)}.`} ${selected.status === 'suggested' ? 'Referência sugerida, calculada pelas receitas da Botânica.' : 'Referência central: ponto médio da faixa cadastrada.'} Resultado bruto = total negociado − custo total informado. Margem = resultado bruto ÷ total negociado; não se aplica a venda de valor zero. Não inclui despesas que você não informar.${selected.sourceNote ? ' ' + selected.sourceNote : ''}`;
+    note.textContent = `${result.minTotal === null ? 'Sem faixa válida de mínimo e máximo.' : `Faixa de referência para a quantidade: ${money(result.minTotal)} a ${money(result.maxTotal)}.`} ${selected.status === 'suggested' ? 'Referência sugerida pela média dos preços de itens correlatos.' : 'Referência central: ponto médio da faixa cadastrada.'} Resultado bruto = total negociado − custo total informado. Margem = resultado bruto ÷ total negociado; não se aplica a venda de valor zero. Não inclui despesas que você não informar.${selected.sourceNote ? ' ' + selected.sourceNote : ''}`;
   } catch (error) {
     resultElement.textContent = error.message;
     note.textContent = '';

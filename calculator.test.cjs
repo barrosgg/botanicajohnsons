@@ -14,11 +14,12 @@ test('combo prices all purchased intermediates with a precise midpoint',()=>{
 });
 test('expanded combo charges raw ingredients without double counting intermediates',()=>{
  const cost=estimateCosts(calculate({combo:5},true).totals);
- assert.equal(cost.min,0.72);assert.equal(cost.median,0.87);assert.equal(cost.max,1.02);
- assert.deepEqual(cost.missing.sort(),['Rosa','Girassol','Papoula-da-pradaria','Mel'].sort());
+ assert.equal(cost.min,0.855);assert.equal(cost.median,1.01625);assert.equal(cost.max,1.1775);
+ assert.deepEqual(cost.missing,['Mel']);
 });
 test('unknown prices stay missing and a midpoint is not rounded per unit',()=>{
- assert.deepEqual(estimateCosts({'Rosa':10}),{min:0,median:0,max:0,priced:0,missing:['Rosa']});
+ assert.deepEqual(estimateCosts({'Mel':10}),{min:0,median:0,max:0,priced:0,missing:['Mel']});
+ assert.deepEqual(estimateCosts({'Rosa':1000}),{min:3,median:3.25,max:3.5,priced:1,missing:[]});
  assert.equal(estimateCosts({'Frasco Vazio':100}).median,2.5);
  assert.deepEqual(estimateCosts({}),{min:0,median:0,max:0,priced:0,missing:[]});
 });
@@ -35,7 +36,7 @@ test('profit includes full rounded output and permits a loss',()=>{
 test('expanded intermediates generate no extra sales and flag missing costs',()=>{
  const r=estimateProfit(calculate({combo:5},true));
  assert.equal(r.revenue.min,0.9);assert.equal(r.revenue.max,1.15);
- assert.ok(r.missing.includes('Rosa'));
+ assert.deepEqual(r.missing,['Mel']);
  assert.equal(estimateProfit(calculate({})).profit.min,0);
 });
 
@@ -55,4 +56,11 @@ test('incense recipe matches supplied card and rounds full batches',()=>{
  const r=calculate({defumacao:6});
  assert.equal(r.units,10);assert.equal(r.batches,2);
  assert.deepEqual(r.totals,Object.fromEntries(Object.entries(expected).map(([k,v])=>[k,v*2])));
+});
+
+test('fertilizer and incense use new official costs without per-unit rounding',()=>{
+ const fertilizer=estimateCosts(calculate({fertilizante:50}).totals);
+ assert.deepEqual(fertilizer,{min:0.106,median:0.1205,max:0.135,priced:3,missing:[]});
+ const incense=estimateCosts(calculate({defumacao:5}).totals);
+ assert.deepEqual(incense,{min:0.165,median:0.18875,max:0.2125,priced:4,missing:[]});
 });

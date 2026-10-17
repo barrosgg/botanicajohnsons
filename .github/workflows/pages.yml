@@ -27,8 +27,8 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html style.css app.js data.js gazette.js price-catalog.js _site/
-          cp -R economia _site/
+          cp index.html style.css app.js data.js gazette.js county-prices.js price-catalog.js _site/
+          cp -R economia data _site/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

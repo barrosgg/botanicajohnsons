@@ -1,4 +1,5 @@
 const BotanicaData = (() => {
+const county = typeof module !== 'undefined' ? require('./county-prices.js') : CountyPrices;
 const recipes = [
  {id:'perfume',name:'Perfume',yield:5,ingredients:{'Rosa':5,'Garrafa de Álcool':2,'Frasco Vazio':2,'Cera de Abelha':2,'Girassol':5}},
  {id:'oleo',name:'Óleo de Girassol',yield:5,ingredients:{'Mel':5,'Frasco Vazio':5,'Girassol':5}},
@@ -20,7 +21,16 @@ const salePrices = {
  perfume:[12,16], oleo:[10,15], fertilizante:[1,2], combo:[18,23],
  defumacao:[5,7], aromaticas:[6,8], medicinais:[4,6], buque:[10,15]
 };
+// Procurement uses Fazenda Venda when available, as selected by the user.
+// Collection references apply to inputs without a separate sale row.
+const ingredientPriceSources = {};
+for (const name of new Set(recipes.flatMap(recipe => Object.keys(recipe.ingredients)))) {
+ const updated = county.find(name, true);
+ if (!updated) continue;
+ ingredientPrices[name] = [updated.min, updated.max];
+ ingredientPriceSources[name] = {name: updated.name, origin: updated.origin};
+}
 // Both pages read the same recipe and price source; suggestions stay separate.
-return {recipes, ingredientPrices, salePrices};
+return {recipes, ingredientPrices, salePrices, ingredientPriceSources};
 })();
 if (typeof module !== 'undefined') module.exports = BotanicaData;

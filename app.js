@@ -1,4 +1,4 @@
-const {recipes, ingredientPrices, salePrices} = typeof module !== 'undefined' ? require('./data.js') : BotanicaData;
+const {recipes, ingredientPrices, salePrices, ingredientPriceSources} = typeof module !== 'undefined' ? require('./data.js') : BotanicaData;
 function calculate(quantities, expand=false) {
  const totals={}, production=[], pending={};let batches=0,units=0;
  function addIngredients(recipe,count){for(const [name,quantity] of Object.entries(recipe.ingredients))pending[name]=(pending[name]||0)+quantity*count;}
@@ -17,11 +17,11 @@ function estimateCosts(totals) {
   const price=ingredientPrices[name];
   if(!price) { missing.push(name); continue; }
   priced++;
-  min+=price[0]*quantity;
-  max+=price[1]*quantity;
+  min+=Math.round(price[0]*100)*quantity;
+  max+=Math.round(price[1]*100)*quantity;
  }
  // Keep the midpoint precise until formatting the final totals.
- return {min:min/100, median:(min+max)/200, max:max/100, priced, missing};
+ return {min:min/10000, median:(min+max)/20000, max:max/10000, priced, missing};
 }
 function estimateProfit(result) {
  const cost=estimateCosts(result.totals);
@@ -107,7 +107,8 @@ if (typeof document !== 'undefined') {
       const price = ingredientPrices[name];
       if (!price) return {name, lines: [`${fmt(quantity)} un. · Sem preço cadastrado; não incluído no subtotal.`]};
       const values = [price[0]/100, (price[0]+price[1])/200, price[1]/100];
-      return {name, lines: [`${fmt(quantity)} un. · ` + values.map((value, i) => `${['Mín', 'Med', 'Máx'][i]}: ${formatCost(value,3)} × ${fmt(quantity)} = ${formatCost(quantity*value,3)}`).join(' · ')]};
+      const source = ingredientPriceSources[name];
+      return {name, lines: [`${fmt(quantity)} un.${source ? ` · Base: ${source.origin}` : ''} · ` + values.map((value, i) => `${['Mín', 'Med', 'Máx'][i]}: ${formatCost(value,5)} × ${fmt(quantity)} = ${formatCost(quantity*value,5)}`).join(' · ')]};
     });
   }
 
