@@ -22,7 +22,7 @@ const gazetteSections = {
     ["Combo Botânicos", 18, 23], ["Ervas Aromáticas", 6, 8], ["Ervas Medicinais", 4, 6], ["Ervas para Defumação", 5, 7],
     ["Fertilizante", 1, 2], ["Minhocário", 115, 135], ["Perfume", 12, 16], ["Perfume Silvestre", 35, 45],
     ["Perfume de Lavanda", 35, 45], ["Rainha Mansa", 2, 3], ["Rainha Selvagem", 4, 6], ["Ramalhete Silvestre", 1, 2],
-    ["Óleo de Girassol", 10, 15], ["Semente Melhorada…", 40, 60, "Nome truncado na imagem; complemento a confirmar."], ["Semente Selecionada…", 100, 100, "Nome truncado na imagem; complemento a confirmar."]
+    ["Óleo de Girassol", 10, 15], ["Semente Melhorada", 40, 60, "A Gazeta mostra “Semente Melhorada…”, cortado. No livro da Botica todas as variedades (de Milho, de Cana, de Pimenta etc.) têm a mesma receita; esta faixa é usada para todas."], ["Semente Selecionada", 100, 100, "A Gazeta mostra “Semente Selecionada…”, cortado; o nome completo vem do livro da Botica."]
   ],
   "Ateliês": [
     ["Cera de Cabelo", 17, 19], ["Combo Ateliê", 18, 22], ["Figurino Sob Medida", 56, 72], ["Linha de Algodão", 3, 5],
@@ -162,7 +162,7 @@ const previousRanges = {
 const newInEdition = new Set([
   "Carne Bovina", "Carne Ovina", "Carne de Galinha", "Carne de Porco", "Geleia Real", "Mel",
   "Polpa de Morango", "Polpa de Pimenta", "Própolis", "Buquê de Girassóis", "Buquê de Lavanda", "Buquê de Rosas",
-  "Minhocário", "Perfume Silvestre", "Perfume de Lavanda", "Semente Melhorada…", "Semente Selecionada…", "Figurino Sob Medida",
+  "Minhocário", "Perfume Silvestre", "Perfume de Lavanda", "Semente Melhorada", "Semente Selecionada", "Figurino Sob Medida",
   "Treinamento de Cavalo (por treino)", "Antibiótico Potente", "Kit Cirúrgico", "Papel de Imprensa", "Parafusos", "Corda",
   "Pena de Ave Pequena", "Cabo de Escopeta", "Cabo de Pistola", "Cabo de Repetidora", "Cabo de Revólver", "Cabo de Rifle",
   "Cano de Escopeta", "Cano de Pistola", "Cano de Repetidora", "Cano de Revólver", "Cano de Rifle", "Cilindro de Revólver",
@@ -172,7 +172,7 @@ const newInEdition = new Set([
   "Jacaré Braseado", "Diamante", "Esmeralda", "Rubi", "Safira", "Enxofre"
 ]);
 // Searchable names: the XLII spelling, or the XLI name of a renamed entry.
-const gazetteAliases = {"Garrafa de Álcool":["Garrafa de Alcool"], "Saca Vazia":["Saca"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
+const gazetteAliases = {"Semente Melhorada":["Semente Melhorada…", "Semente Melhorada de Milho", "Semente Melhorada de Cana", "Semente Melhorada de Milefólio", "Semente Melhorada de Mirtilo-silvestre", "Semente Melhorada de Pera", "Semente Melhorada de Pimenta", "Semente Melhorada de Repolho", "Semente Melhorada de Tanaceto", "Semente Melhorada de Gaulteria"], "Semente Selecionada":["Semente Selecionada…"], "Garrafa de Álcool":["Garrafa de Alcool"], "Saca Vazia":["Saca"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
 const gazetteMoney = cents => '$' + (cents / 100).toFixed(2).replace('.', ',');
 const gazetteNote = (name, sourceNote) => [sourceNote,
   newInEdition.has(name) && 'Novo na edição XLII.',

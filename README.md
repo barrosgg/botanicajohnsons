@@ -1,6 +1,6 @@
 # Botânica Johnsons
 
-Calculadora web de produção com as oito receitas fornecidas. Sem dependências de instalação.
+Calculadora web de produção com as 16 receitas do livro da Botica. Sem dependências de instalação.
 
 ## Executar
 
@@ -10,7 +10,7 @@ Na raiz do repositório:
 python3 -m http.server 3000 --bind 0.0.0.0
 ```
 
-Abra a aplicação pela porta 3000. Informe unidades desejadas: cada receita é arredondada para lotes completos de 5 unidades (50 para fertilizante). A lista soma ingredientes compartilhados. A opção de produzir ingredientes compostos calcula lotes adicionais de perfume, buquê e óleo e apresenta eventuais excedentes. Pilão é contabilizado conforme a quantidade exibida nas receitas; não é presumido reutilizável. O tempo estimado soma 30 segundos por lote, incluindo ingredientes compostos quando habilitados.
+Abra a aplicação pela porta 3000. Informe unidades desejadas: cada receita é arredondada para lotes completos, conforme o rendimento do livro: 5 unidades nas oito receitas originais, 50 no Fertilizante, 10 no Ramalhete Silvestre, 100 na Semente Melhorada e 1 nos perfumes de Lavanda e Silvestre, nos três buquês novos e no Minhocário. A lista soma ingredientes compartilhados. A opção de produzir ingredientes compostos calcula lotes adicionais de perfume, buquê e óleo e apresenta eventuais excedentes; quando o mesmo produto também é pedido diretamente, os dois usos dividem os mesmos lotes (Perfume 3 + Combo 5 = 1 lote de Perfume), e só o que sobra do consumo do Combo entra como venda. Pilão é contabilizado conforme a quantidade exibida nas receitas; não é presumido reutilizável. O tempo estimado soma o tempo de cada lote (30 segundos; Minhocário, 45 segundos), incluindo ingredientes compostos quando habilitados.
 
 Fontes externas são opcionais; há fontes locais de fallback.
 
@@ -53,7 +53,7 @@ O faturamento da produção aparece junto ao lucro bruto em cada produto e no qu
 
 A tela de desktop reúne produção, encomenda e resultado em três painéis. O seletor Mínimo / Mediano / Máximo muda as colunas de venda unitária, faturamento e lucro por produto; o resultado geral mantém os três cenários para comparação. Ingredientes e totais ficam visíveis sem abrir os detalhes. A memória, os lotes/tempo e as regras de cálculo abrem em janelas acessíveis por teclado (Escape fecha). Em telas estreitas, abas alternam os três painéis.
 
-Layout validado com as oito receitas preenchidas e compostos ativados, sem rolagem da página em 1280×720, 1366×768, 1920×1080 e nas abas em 375×812. Zoom, tamanhos menores e textos maiores podem exigir rolagem; o conteúdo permanece acessível. Não há bloqueio artificial de rolagem.
+Layout validado com as 16 receitas, sem rolagem da página em 1280×720, 1366×768, 1920×1080 e nas abas em 375×812: a lista de produtos rola dentro do próprio painel. Zoom, tamanhos menores e textos maiores podem exigir rolagem; o conteúdo permanece acessível. Não há bloqueio artificial de rolagem.
 
 
 ## Economia geral
@@ -93,3 +93,35 @@ A edição XLII (25 de outubro de 1899) foi transcrita das 29 páginas enviadas 
 **Mel** ($0,04 a $0,05 por unidade, Gazeta) e **Tomilho** ($0,22 a $0,25 o lote de 100, Coleta) passaram a ter cotação. Os custos de Óleo de Girassol e Ervas Aromáticas ficam completos na calculadora principal.
 
 Cada item novo ou alterado traz a origem da mudança nos detalhes, e os novos têm o selo “Novo” na tabela. A edição XLII é a tabela oficial completa, então os itens que não constam nela foram removidos, por orientação do usuário: Polpa de Manga, cinco Pacotes de Semente, Essência de Fertilidade, Tocha e Tomahawk (edição XLI), e Ayuhasca, Peyote, Leite de Fazenda Coleta e Carne de Peixe de Coleta (planilha do condado). Leite e Carne de Peixe continuam no catálogo pela cotação da Gazeta ($0,04–$0,06 e $0,07–$0,11). A planilha original segue íntegra em `data/` e em `spreadsheetRows`.
+
+
+## Receitas do livro da Botica
+
+Além das oito receitas originais, conferidas com o livro, entram oito receitas:
+
+| Receita | Rende / lote | Tempo | Ingredientes |
+|---|---|---|---|
+| Perfume Silvestre | 1 | 30 s | Papoula-da-pradaria 5, Milefólio 5, Garrafa de Álcool 1, Frasco Vazio 1, Cera de Abelha 1 |
+| Perfume de Lavanda | 1 | 30 s | Lavanda 10, Garrafa de Álcool 1, Frasco Vazio 1, Cera de Abelha 1 |
+| Buquê de Rosas | 1 | 30 s | Rosa 30, Linha de Algodão 3 |
+| Buquê de Lavanda | 1 | 30 s | Lavanda 30, Linha de Algodão 3 |
+| Buquê de Girassóis | 1 | 30 s | Girassol 30, Linha de Algodão 3 |
+| Minhocário | 1 | 45 s | Madeira Beneficiada 4, Fibra Vegetal 4, Pregos 3 |
+| Ramalhete Silvestre | 10 | 30 s | Rosa 1, Girassol 1, Fibra Vegetal 1 |
+| Semente Melhorada | 100 | 30 s | Semente Selecionada 100, Embalagem de Papel 2, Húmus 10 |
+
+O livro chama o perfume de “Perfume Floral (Silvestre)”; a calculadora usa o nome da Gazeta, “Perfume Silvestre”, para ligar o preço de venda. As Sementes Melhoradas (de Milho, de Cana, de Pimenta e demais variedades) têm a mesma receita e entram como uma só, “Semente Melhorada”, com a faixa da Gazeta ($0,40–$0,60 por unidade). Com a Semente Selecionada a $1,00 por unidade, cada lote dá prejuízo de cerca de $50 no cenário mediano; o valor segue a Gazeta e não foi ajustado.
+
+Valores negativos aparecem com o sinal antes do símbolo: -$1,20.
+
+## Auditoria (25/10/2026)
+
+Revisão das duas calculadoras, com cada problema reproduzido antes da correção:
+
+1. Compostos pedidos diretamente e consumidos pelo Combo saíam em lotes separados (um lote e 30 s a mais, até +$0,52 de custo). Agora dividem os lotes.
+2. Ao voltar pelo histórico do navegador, o cenário marcado não era o aplicado aos valores. As duas páginas passam a ler o cenário marcado.
+3. Em telas abaixo de 1100 px, Tab no último produto prendia o foco. Agora segue para “Ver lotes e tempo”.
+4. Na calculadora de compras, “Rosa” + Enter escolhia “Buquê de Rosas”. O nome exato vem primeiro, depois os que começam com o termo.
+5. Lucro calculado em ponto flutuante podia mostrar “$0,00” em vermelho para um prejuízo de meio centavo. A subtração passa a ser feita em inteiros e o arredondamento segue o valor decimal.
+6. Remover uma linha ou “usar cenário” perdia o foco do teclado. O foco vai para o controle correspondente.
+7. Um preço digitado no formulário era trocado ao mudar o cenário. Agora é mantido, como as linhas ajustadas.

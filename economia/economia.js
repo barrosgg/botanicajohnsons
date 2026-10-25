@@ -138,7 +138,7 @@ document.getElementById('export-csv').addEventListener('click', () => {
 
 const shoppingLines = [];
 const scenarioNames = {min:'Mínimo', median:'Mediano', max:'Máximo'};
-let shoppingScenario = 'median';
+let shoppingScenario = document.querySelector('input[name="shopping-scenario"]:checked')?.value || 'median';
 // Five decimal dollars hold every unit, lot and midpoint price in the catalog.
 const dollars = cents => (cents / 100).toFixed(5);
 const linePrice = line => dollars(scenarioPrice(catalog[line.index], shoppingScenario, line.basis));
@@ -165,7 +165,12 @@ function highlightItemOption() {
 }
 function showItemOptions(showAll = false) {
   const query = showAll ? '' : normalizeSearch(shoppingSearch.value.trim());
-  const matches = catalog.map((item,index)=>({item,index})).filter(({item})=>normalizeSearch([itemLabel(item),...(item.aliases || [])].join(' ')).includes(query));
+  // Exact names first, then names starting with the query, so "Rosa" + Enter picks Rosa.
+  const rank = item => {
+    const names = [item.name, ...(item.aliases || [])].map(normalizeSearch);
+    return names.includes(query) ? 0 : names.some(name => name.startsWith(query)) ? 1 : 2;
+  };
+  const matches = catalog.map((item,index)=>({item,index})).filter(({item})=>normalizeSearch([itemLabel(item),...(item.aliases || [])].join(' ')).includes(query)).sort((a,b)=>rank(a.item)-rank(b.item));
   itemMatches = matches.slice(0,12);
   activeItemOption = 0;
   shoppingOptions.innerHTML = itemMatches.length ? itemMatches.map(({item,index})=>`<li id="shopping-option-${index}" role="option" data-choice="${index}" aria-selected="false">${itemLabel(item)}<small>${item.origin}</small></li>`).join('') : '<li class="no-item-match" role="presentation">Nenhum item encontrado.</li>';
@@ -206,9 +211,12 @@ shoppingOptions.addEventListener('click',event=>{const option=event.target.close
 shoppingSearch.addEventListener('blur',()=>{searchCloseTimer=setTimeout(closeItemOptions,100);});
 shoppingItem.value = '0';
 shoppingSearch.value = itemLabel(catalog[0]);
+// A price typed in the form is kept when the scenario changes; a new item or basis resets it.
+let formPriceTyped = false;
 function setShoppingPrice() {
   const item = catalog[shoppingItem.value];
   if (!item) return;
+  formPriceTyped = false;
   const lot = shoppingBasis.value === 'lot';
   document.getElementById('shopping-price').value = dollars(scenarioPrice(item, shoppingScenario, shoppingBasis.value));
   document.getElementById('quantity-label').textContent = lot ? 'Quantidade de lotes' : 'Quantidade de unidades';
@@ -290,16 +298,20 @@ document.getElementById('shopping-rows').addEventListener('click', event => {
     renderShoppingTotals();
     return;
   }
+  // Re-rendering replaces the row, so focus moves to the matching control afterwards.
   const reset = event.target.closest('[data-reset]');
   if (reset) {
-    const line = shoppingLines[Number(reset.dataset.reset)];
+    const index = Number(reset.dataset.reset), line = shoppingLines[index];
     line.price = linePrice(line); line.custom = false;
     renderShoppingList();
+    document.querySelector(`[data-line="${index}"][data-field="price"]`).focus();
     return;
   }
   const button = event.target.closest('[data-remove]');
   if (!button) return;
-  shoppingLines.splice(Number(button.dataset.remove), 1); renderShoppingList();
+  const index = Number(button.dataset.remove);
+  shoppingLines.splice(index, 1); renderShoppingList();
+  (document.querySelector(`[data-remove="${Math.min(index, shoppingLines.length - 1)}"]`) || shoppingSearch).focus();
 });
 document.getElementById('clear-shopping').addEventListener('click', () => { shoppingLines.length = 0; renderShoppingList(); });
 document.getElementById('copy-shopping').addEventListener('click', async () => {
@@ -336,10 +348,21 @@ document.getElementById('shopping-plus-100').addEventListener('click', () => {
   shoppingQuantity.value = String(plusHundred(shoppingQuantity.value, shoppingQuantity.dataset.pristine === 'true'));
   delete shoppingQuantity.dataset.pristine;
 });
-for (const input of document.querySelectorAll('input[name="shopping-scenario"]')) input.addEventListener('change', () => {
-  shoppingScenario = input.value;
+document.getElementById('shopping-price').addEventListener('input', () => { formPriceTyped = true; });
+function applyShoppingScenario(value) {
+  shoppingScenario = value;
   for (const line of shoppingLines) if (!line.custom) line.price = linePrice(line);
-  setShoppingPrice(); renderShoppingList();
+  if (formPriceTyped) {
+    const item = catalog[shoppingItem.value];
+    if (item) document.getElementById('shopping-hint').textContent = 'Preço digitado mantido; ele não muda com o cenário.';
+  } else setShoppingPrice();
+  renderShoppingList();
+}
+for (const input of document.querySelectorAll('input[name="shopping-scenario"]')) input.addEventListener('change', () => applyShoppingScenario(input.value));
+// A restored history entry can keep another scenario checked; follow it.
+window.addEventListener('pageshow', () => {
+  const checked = document.querySelector('input[name="shopping-scenario"]:checked')?.value;
+  if (checked && checked !== shoppingScenario) applyShoppingScenario(checked);
 });
 resetShoppingQuantity();
 setShoppingBasis();
