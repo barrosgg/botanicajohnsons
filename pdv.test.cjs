@@ -35,3 +35,10 @@ test('quantities are capped at one million per line',()=>{
  const lines=[];P.addLine(lines,item('Rosa'),999999,'min');P.addLine(lines,item('Rosa'),10,'min');
  assert.equal(lines[0].quantity,1000000);
 });
+test('every sellable item gets a drawn icon',()=>{
+ const I=require('./pdv/icons.js');
+ for(const entry of catalog){const icon=I.iconFor(entry);assert.ok(I.shapes[icon.shape],entry.name);assert.match(icon.tint,/^#/);}
+ assert.equal(I.iconFor(item('Perfume de Lavanda')).shape,'perfume');
+ assert.equal(I.iconFor(item('Semente de Trigo')).shape,'seed');
+ assert.match(I.svg(item('Rosa')),/^<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"/);
+});

@@ -147,7 +147,7 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
 
 `/pdv/` é um ponto de venda para registrar uma venda rápido, como no caixa de mercado. Fica em uma tela; no celular, abas alternam Produtos e Venda.
 
-- **Produtos em blocos** grandes, com ícone e cor por seção. A aba ⭐ Botica traz os 16 produtos da casa; as demais abas trazem cada seção da Gazeta e todos os itens. Cada bloco mostra o preço por unidade e o do lote de 100.
+- **Produtos em blocos** grandes, com ícone e cor por seção. Os ícones são desenhos SVG próprios (`pdv/icons.js`), no mesmo traço e iguais em qualquer aparelho: cada produto da Botica tem o seu (frasco de perfume na cor da essência, buquês com a flor de cada tipo, minhocário, pacote de semente), plantas comuns também, e as demais seções usam o ícone da seção. A aba ⭐ Botica traz os 16 produtos da casa; as demais abas trazem cada seção da Gazeta e todos os itens. Cada bloco mostra o preço por unidade e o do lote de 100.
 - **Um toque adiciona.** “Toque soma” define quanto cada toque acrescenta: +1, +10 ou +100. O mesmo produto acumula na mesma linha.
 - **Busca de caixa:** digite `10*rosa`, `10x rosa` ou `10 rosa` e aperte Enter para lançar 10 Rosas. O nome exato vem primeiro; Esc limpa.
 - **Venda:** − e + por linha, quantidade e preço editáveis (o preço editado fica como “ajustado” e não muda com o cenário), remover e o mesmo seletor Mínimo / Mediano / Máximo.
