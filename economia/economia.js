@@ -8,6 +8,11 @@ const money = (cents, fullPrecision = document.getElementById('full-precision').
 };
 const noteId = name => 'nota-' + name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const suggestedItems = catalog.filter(item => item.status === 'suggested');
+// With every input quoted, the suggestion notes and filter have nothing to show.
+if (!suggestedItems.length) {
+  document.querySelector('[data-dialog="notes-dialog"]').hidden = true;
+  document.querySelector('#status option[value="suggested"]').remove();
+}
 document.getElementById('category').innerHTML = '<option value="all">Todas as seções</option>' + [...new Set(catalog.map(item => item.section))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(section => `<option>${section}</option>`).join('');
 document.getElementById('origin').innerHTML = '<option value="all">Todas as origens</option>' + [...new Set(catalog.map(item => item.origin))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(origin => `<option>${origin}</option>`).join('');
 const referencePrice = item => item.status === 'suggested' ? item.suggested : item.median;
@@ -17,7 +22,7 @@ let pageSize = 10;
 document.getElementById('catalog-summary').innerHTML = [
   [catalog.length, 'itens no catálogo'],
   [catalog.length - suggestedItems.length, 'preços cadastrados'],
-  [suggestedItems.length, 'preços sugeridos']
+  suggestedItems.length ? [suggestedItems.length, 'preços sugeridos'] : [catalog.filter(item => item.isNew).length, 'novos na edição XLII']
 ].map(([count, label]) => `<div><strong>${count}</strong><span>${label}</span></div>`).join('');
 
 function renderItemNotes() {
@@ -67,7 +72,7 @@ function renderCatalog() {
     const lotMaximum = hasLot ? money(item.sourceMax) : '—';
     const lotQuantity = hasLot ? `${item.lotSize.toLocaleString('pt-BR')} un./lote` : 'Sem lote';
     const action = suggested ? `data-note="${noteId(item.name)}"` : `data-source="${catalog.indexOf(item)}"`;
-    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Sugerido' : 'Cadastrado'}</span></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity">${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
+    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested || item.isNew ? 'is-suggested' : ''}" ${item.isNew ? 'title="Item novo na edição XLII da Gazeta Comercial."' : ''}>${suggested ? 'Sugerido' : item.isNew ? 'Novo' : 'Cadastrado'}</span></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity">${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
   }).join('');
   document.getElementById('page-range').textContent = visible.length ? `${first + 1}–${Math.min(first + pageSize, visible.length)} de ${visible.length}` : '0 resultados';
   document.getElementById('page-count').textContent = `${currentPage + 1} / ${pages}`;
@@ -124,7 +129,7 @@ fitPageToViewport();
 document.getElementById('export-csv').addEventListener('click', () => {
   const decimal = value => value == null ? '' : (value / 100).toFixed(8).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
   const csvCell = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Mediano ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
+  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Mediano ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : item.isNew ? 'Novo na edição XLII' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
   const url = URL.createObjectURL(new Blob(['\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'}));
   const link = document.createElement('a'); link.href = url; link.download = 'economia-condado.csv';
   document.body.append(link); link.click(); link.remove();
@@ -132,6 +137,11 @@ document.getElementById('export-csv').addEventListener('click', () => {
 });
 
 const shoppingLines = [];
+const scenarioNames = {min:'Mínimo', median:'Mediano', max:'Máximo'};
+let shoppingScenario = 'median';
+// Five decimal dollars hold every unit, lot and midpoint price in the catalog.
+const dollars = cents => (cents / 100).toFixed(5);
+const linePrice = line => dollars(scenarioPrice(catalog[line.index], shoppingScenario, line.basis));
 const shoppingItem = document.getElementById('shopping-item');
 const shoppingBasis = document.getElementById('shopping-basis');
 const shoppingSearch = document.getElementById('shopping-item-search');
@@ -200,11 +210,10 @@ function setShoppingPrice() {
   const item = catalog[shoppingItem.value];
   if (!item) return;
   const lot = shoppingBasis.value === 'lot';
-  const cents = lot ? rangeMidpoint(item.sourceMin, item.sourceMax) : referencePrice(item);
-  document.getElementById('shopping-price').value = (cents / 100).toFixed(5);
+  document.getElementById('shopping-price').value = dollars(scenarioPrice(item, shoppingScenario, shoppingBasis.value));
   document.getElementById('quantity-label').textContent = lot ? 'Quantidade de lotes' : 'Quantidade de unidades';
   document.getElementById('price-label').textContent = lot ? 'Preço por lote ($)' : 'Preço por unidade ($)';
-  document.getElementById('shopping-hint').textContent = `${lot ? `Cada lote contém ${item.lotSize} unidades.` : 'Quantidade em unidades individuais.'} ${item.status === 'suggested' ? 'Preço sugerido; ajuste para o valor combinado.' : 'Preço de referência preenchido; ajuste para o valor combinado.'}`;
+  document.getElementById('shopping-hint').textContent = `${lot ? `Cada lote contém ${item.lotSize} unidades.` : 'Quantidade em unidades individuais.'} ${item.status === 'suggested' ? 'Preço sugerido, igual nos três cenários; ajuste para o valor combinado.' : `Preço do cenário ${scenarioNames[shoppingScenario].toLowerCase()} preenchido; ajuste para o valor combinado.`}`;
 }
 function setShoppingBasis() {
   const item = catalog[shoppingItem.value];
@@ -238,8 +247,9 @@ function renderShoppingTotals() {
   document.getElementById('shopping-total').textContent = invalid ? '—' : money(calculateShoppingList(shoppingLines).totalCents);
   document.getElementById('shopping-message').textContent = invalid ? 'Corrija as linhas destacadas: quantidade inteira de 1 a 1.000.000 e preço de 0 a 1.000.000, com até cinco casas decimais.' : '';
 }
+const lineSource = (line, index) => `${line.basis === 'lot' ? `Lote de ${line.lotSize} un.` : 'Unidade'} · ${line.custom ? `Preço ajustado <button type="button" class="link-button" data-reset="${index}" aria-label="Usar preço do cenário ${scenarioNames[shoppingScenario].toLowerCase()} em ${line.name}">usar cenário</button>` : catalog[line.index].status === 'suggested' ? 'Sugerido' : scenarioNames[shoppingScenario]}`;
 function renderShoppingList() {
-  document.getElementById('shopping-rows').innerHTML = shoppingLines.map((line, index) => `<tr id="shopping-line-${index}"><th scope="row"><span>${line.name}</span><small>${line.basis === 'lot' ? `Lote de ${line.lotSize} un.` : 'Unidade'}</small></th><td><input type="number" min="1" max="1000000" step="1" value="${line.quantity}" data-line="${index}" data-field="quantity" aria-label="Quantidade de ${line.name}" required></td><td><input type="number" min="0" max="1000000" step="0.00001" value="${line.price}" data-line="${index}" data-field="price" aria-label="Preço de ${line.name}" required></td><td class="line-subtotal"></td><td><button type="button" data-remove="${index}" aria-label="Remover ${line.name}">×</button></td></tr>`).join('');
+  document.getElementById('shopping-rows').innerHTML = shoppingLines.map((line, index) => `<tr id="shopping-line-${index}"><th scope="row"><span>${line.name}</span><small class="line-source">${lineSource(line, index)}</small></th><td><div class="quantity-input"><input type="number" min="1" max="1000000" step="1" value="${line.quantity}" data-line="${index}" data-field="quantity" aria-label="Quantidade de ${line.name}" required><button type="button" class="plus-hundred" data-plus="${index}" aria-label="Somar 100 à quantidade de ${line.name}">+100</button></div></td><td><input type="number" min="0" max="1000000" step="0.00001" value="${line.price}" data-line="${index}" data-field="price" aria-label="Preço de ${line.name}" required></td><td class="line-subtotal"></td><td><button type="button" data-remove="${index}" aria-label="Remover ${line.name}">×</button></td></tr>`).join('');
   document.getElementById('shopping-empty').hidden = shoppingLines.length > 0;
   document.getElementById('clear-shopping').disabled = shoppingLines.length === 0;
   renderShoppingTotals();
@@ -248,11 +258,13 @@ document.getElementById('shopping-form').addEventListener('submit', event => {
   event.preventDefault();
   const item = catalog[shoppingItem.value];
   if (!item) { document.getElementById('shopping-message').textContent = 'Selecione um item nos resultados da busca.'; shoppingSearch.focus(); return; }
-  const line = {name:item.name, basis:shoppingBasis.value, lotSize:item.lotSize, quantity:document.getElementById('shopping-quantity').value, price:document.getElementById('shopping-price').value};
+  const line = {name:item.name, index:Number(shoppingItem.value), basis:shoppingBasis.value, lotSize:item.lotSize, quantity:document.getElementById('shopping-quantity').value, price:document.getElementById('shopping-price').value};
+  // A price typed in the form is a negotiated price: scenario changes keep it.
+  line.custom = Number(line.price) !== Number(linePrice(line));
   try {
     calculateShoppingList([line]);
     shoppingLines.push(line); renderShoppingList();
-    document.getElementById('shopping-quantity').value = '1';
+    resetShoppingQuantity();
   } catch (error) { document.getElementById('shopping-message').textContent = error.message; }
 });
 shoppingItem.addEventListener('change', () => {if(catalog[shoppingItem.value]) chooseShoppingItem(Number(shoppingItem.value));});
@@ -260,10 +272,31 @@ shoppingBasis.addEventListener('change', setShoppingPrice);
 document.getElementById('shopping-rows').addEventListener('input', event => {
   const input = event.target.closest('[data-line][data-field]');
   if (!input) return;
-  shoppingLines[Number(input.dataset.line)][input.dataset.field] = input.value;
+  const line = shoppingLines[Number(input.dataset.line)];
+  line[input.dataset.field] = input.value;
+  if (input.dataset.field === 'price' && !line.custom) {
+    // Only the label changes, so the price field keeps focus while typing.
+    line.custom = true;
+    input.closest('tr').querySelector('.line-source').innerHTML = lineSource(line, Number(input.dataset.line));
+  }
   renderShoppingTotals();
 });
 document.getElementById('shopping-rows').addEventListener('click', event => {
+  const plus = event.target.closest('[data-plus]');
+  if (plus) {
+    const line = shoppingLines[Number(plus.dataset.plus)];
+    line.quantity = String(plusHundred(line.quantity));
+    plus.previousElementSibling.value = line.quantity;
+    renderShoppingTotals();
+    return;
+  }
+  const reset = event.target.closest('[data-reset]');
+  if (reset) {
+    const line = shoppingLines[Number(reset.dataset.reset)];
+    line.price = linePrice(line); line.custom = false;
+    renderShoppingList();
+    return;
+  }
   const button = event.target.closest('[data-remove]');
   if (!button) return;
   shoppingLines.splice(Number(button.dataset.remove), 1); renderShoppingList();
@@ -276,10 +309,10 @@ document.getElementById('copy-shopping').addEventListener('click', async () => {
   try {
     const result = calculateShoppingList(shoppingLines);
     const priceText = price => '$' + new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:20}).format(price);
-    text = 'Botânica Johnsons — Conta de compras e vendas\n\n' + shoppingLines.map((line,index)=>{
+    text = `Botânica Johnsons — Conta de compras e vendas\nCenário: ${scenarioNames[shoppingScenario]}\n\n` + shoppingLines.map((line,index)=>{
       const quantity = Number(line.quantity).toLocaleString('pt-BR');
       const basis = line.basis === 'lot' ? `lote(s) de ${line.lotSize} un.` : 'un.';
-      return `${index+1}. ${line.name}\n${quantity} ${basis} × ${priceText(line.price)} = ${money(result.items[index].subtotalCents,true)}`;
+      return `${index+1}. ${line.name}${line.custom ? ' (preço ajustado)' : ''}\n${quantity} ${basis} × ${priceText(line.price)} = ${money(result.items[index].subtotalCents,true)}`;
     }).join('\n\n') + `\n\nTOTAL: ${money(result.totalCents,true)}`;
   } catch (error) {status.textContent = error.message;return;}
   try {
@@ -291,6 +324,24 @@ document.getElementById('copy-shopping').addEventListener('click', async () => {
     const field = document.getElementById('shopping-copy-text'); field.value = text; field.focus(); field.select();
   }
 });
+// +100 counts from zero while the field still shows the untouched default of 1.
+const shoppingQuantity = document.getElementById('shopping-quantity');
+const plusHundred = (value, fromDefault = false) => {
+  const current = Number(value);
+  return Math.min(1000000, (fromDefault || !Number.isInteger(current) || current < 1 ? 0 : current) + 100);
+};
+function resetShoppingQuantity() { shoppingQuantity.value = '1'; shoppingQuantity.dataset.pristine = 'true'; }
+shoppingQuantity.addEventListener('input', () => { delete shoppingQuantity.dataset.pristine; });
+document.getElementById('shopping-plus-100').addEventListener('click', () => {
+  shoppingQuantity.value = String(plusHundred(shoppingQuantity.value, shoppingQuantity.dataset.pristine === 'true'));
+  delete shoppingQuantity.dataset.pristine;
+});
+for (const input of document.querySelectorAll('input[name="shopping-scenario"]')) input.addEventListener('change', () => {
+  shoppingScenario = input.value;
+  for (const line of shoppingLines) if (!line.custom) line.price = linePrice(line);
+  setShoppingPrice(); renderShoppingList();
+});
+resetShoppingQuantity();
 setShoppingBasis();
 renderShoppingList();
 
