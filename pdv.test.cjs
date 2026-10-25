@@ -42,3 +42,11 @@ test('every sellable item gets a drawn icon',()=>{
  assert.equal(I.iconFor(item('Semente de Trigo')).shape,'seed');
  assert.match(I.svg(item('Rosa')),/^<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"/);
 });
+test('lines say when the quantity makes whole lots',()=>{
+ assert.equal(P.lotLabel(99,100),'');
+ assert.equal(P.lotLabel(100,100),'1 lote de 100');
+ assert.equal(P.lotLabel(230,100),'2 lotes de 100 + 30 un.');
+ assert.equal(P.lotLabel(1000,1000),'1 lote de 1.000');
+ assert.equal(P.lotLabel(25,10),'2 lotes de 10 + 5 un.');
+ assert.equal(P.lotLabel(5,1),'');
+});
