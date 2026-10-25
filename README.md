@@ -76,3 +76,8 @@ A calculadora de compras e vendas substitui o simulador de um único produto. Pe
 
 
 Na calculadora, o seletor de itens permite busca sem acentos, navegação com setas e seleção por Enter ou clique. Uma busca ainda não confirmada não adiciona o item anterior por engano. “Copiar conta” inclui todos os itens da lista com unidade/lote, quantidade, preço combinado, subtotal e total, sempre com a precisão completa. Linhas inválidas bloqueiam a cópia; se a área de transferência falhar, o texto fica disponível para cópia manual.
+
+
+A calculadora tem o seletor de cenário **Mínimo / Mediano / Máximo** (Mediano por padrão). O preço preenchido no formulário e o de cada linha seguem o cenário: por unidade, usa o mínimo, o ponto médio ou o máximo da faixa unitária; por lote, a faixa do lote informada na fonte. Sugestões (Mel e Tomilho) têm um único preço nos três cenários. Trocar o cenário recalcula todas as linhas, exceto as de **preço ajustado**: um preço digitado à mão, no formulário ou na linha, é mantido, e “usar cenário” devolve a linha ao cenário. “Copiar conta” informa o cenário e marca as linhas ajustadas.
+
+O botão **+100** soma 100 à quantidade, no formulário e em cada linha, até o limite de 1.000.000. No formulário, enquanto o campo mostra o 1 inicial sem edição, o primeiro clique leva a 100, não a 101.

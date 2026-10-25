@@ -67,6 +67,15 @@ function simulateTrade(item, quantity, price, totalCost = null) {
   return {referenceTotal: quantity * reference, minTotal: item.status === 'listed' && item.min <= item.max ? quantity * item.min : null, maxTotal: item.status === 'listed' && item.min <= item.max ? quantity * item.max : null, revenue, deviation, profit: totalCost === null ? null : revenue - totalCost, margin: totalCost === null || revenue === 0 ? null : (revenue - totalCost) / revenue * 100};
 }
 
+// Shopping calculator prices per scenario, in cents. Lot prices come straight from
+// the source lot range; suggestions have a single estimate for every scenario.
+function scenarioPrice(item, scenario, basis = 'unit') {
+  if (item.status === 'suggested') return item.suggested;
+  const [min, max] = basis === 'lot' ? [item.sourceMin, item.sourceMax] : [item.min, item.max];
+  if (!['min', 'median', 'max'].includes(scenario) || !Number.isFinite(min) || !Number.isFinite(max)) throw new Error('Cenário ou preço indisponível.');
+  return scenario === 'min' ? min : scenario === 'max' ? max : rangeMidpoint(min, max);
+}
+
 function calculateShoppingList(lines) {
   // Five decimal dollars cover the supplied unit prices and their midpoints.
   // Sum integer amounts so small prices and large quantities stay exact.
@@ -86,4 +95,4 @@ function calculateShoppingList(lines) {
   return {items, totalCents: asCents(total)};
 }
 
-if (typeof module !== 'undefined') module.exports = {buildPriceCatalog, buildEconomyCatalog, simulateTrade, calculateShoppingList};
+if (typeof module !== 'undefined') module.exports = {buildPriceCatalog, buildEconomyCatalog, simulateTrade, scenarioPrice, calculateShoppingList};

@@ -157,3 +157,16 @@
 #shopping-copy-fallback {margin-top:12px}
 #shopping-copy-fallback label {display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
 #shopping-copy-text {width:100%;resize:vertical;border:1px solid var(--line);border-radius:4px;background:#fffcf4;color:var(--ink);padding:10px;font:12px/1.6 Arial,sans-serif}
+
+.shopping-intro {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:10px}
+.shopping-intro p {margin:0}
+.quantity-field {display:grid;gap:5px;color:var(--muted);font-size:10px}
+.quantity-input {display:flex;gap:4px;min-width:0}
+.quantity-input input {flex:1}
+.plus-hundred {flex-shrink:0;padding:4px 7px;font-size:11px;white-space:nowrap}
+.shopping-table .link-button {border:0;background:none;padding:0;color:var(--accent);font-size:10px;text-decoration:underline;cursor:pointer}
+@media(max-width:700px) {
+ .shopping-intro {flex-direction:column;align-items:stretch}
+ .shopping-table .quantity-input {flex-direction:column}
+ .shopping-table .plus-hundred {padding:3px 4px;font-size:9px}
+}
