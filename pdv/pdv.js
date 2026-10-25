@@ -5,10 +5,7 @@ const storageKey = 'botanica-pdv-v1';
 
 // The shop's own products come first; every other item is reachable by section or search.
 const botica = BotanicaData.recipes.map(recipe => byName.get(recipe.name)).filter(Boolean);
-const sectionIcons = {'Fazendas':'🌾', 'Botânicos':'🌿', 'Ateliês':'🧵', 'Estábulos':'🐴', 'Hospital':'🩹', 'Tabacarias':'🚬', 'Tipografias':'📜', 'Fábricas':'⚙️', 'Armazém':'📦', 'Armarias':'🎯', 'Nativos':'🪶', 'Salões':'🍽️', 'Minérios':'⛏️', 'Coleta':'🍂', 'Lenhador':'🪵'};
-const itemIcons = {'Perfume':'🌹', 'Perfume Silvestre':'🌼', 'Perfume de Lavanda':'💜', 'Óleo de Girassol':'🌻', 'Fertilizante':'🪴', 'Combo Botânicos':'🎁', 'Ervas para Defumação':'🔥', 'Ervas Aromáticas':'🌿', 'Ervas Medicinais':'🍃', 'Buquê de Flores':'💐', 'Buquê de Rosas':'🌹', 'Buquê de Lavanda':'💜', 'Buquê de Girassóis':'🌻', 'Minhocário':'🪱', 'Ramalhete Silvestre':'🌼', 'Semente Melhorada':'🌱',
-  'Rosa':'🌹', 'Girassol':'🌻', 'Lavanda':'💜', 'Mel':'🍯', 'Tabaco':'🍂', 'Milho':'🌽', 'Trigo':'🌾', 'Tomate':'🍅', 'Cenoura':'🥕', 'Maçã':'🍎', 'Morango':'🍓', 'Laranja':'🍊', 'Limão':'🍋', 'Ovo':'🥚', 'Leite':'🥛'};
-const icon = item => itemIcons[item.name] || sectionIcons[item.section] || '•';
+const icon = (item, className) => PdvIcons.svg(item, className);
 const sections = [...new Set(catalog.map(item => item.section))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 const tabs = [['botica', 'Botica'], ['all', 'Todos'], ...sections.map(section => [section, section])];
 
@@ -33,7 +30,7 @@ function visibleItems() {
 }
 
 function renderTabs() {
-  document.getElementById('sections').innerHTML = tabs.map(([key, label]) => `<button type="button" role="tab" data-tab="${key}" aria-selected="${key === tab}">${key === 'botica' ? '⭐ ' : key === 'all' ? '' : (sectionIcons[key] || '') + ' '}${label}</button>`).join('');
+  document.getElementById('sections').innerHTML = tabs.map(([key, label]) => `<button type="button" role="tab" data-tab="${key}" aria-selected="${key === tab}">${key === 'botica' ? icon({name: 'Buquê de Flores'}, 'tab-icon') : key === 'all' ? '' : icon({name: '', section: key}, 'tab-icon')}${label}</button>`).join('');
 }
 
 function renderTiles() {
@@ -43,7 +40,7 @@ function renderTiles() {
   tilesBox.innerHTML = items.slice(0, 120).map((item, index) => {
     const price = unitPrice(item, scenario);
     return `<button type="button" class="tile${index === 0 && term ? ' first' : ''}" data-name="${item.name}" style="--hue:${hue(item.section)}" aria-label="Adicionar ${adds} × ${item.name}, ${formatPrice(price)} cada">
-      <span class="tile-icon" aria-hidden="true">${icon(item)}</span><span class="tile-name">${item.name}</span>
+      <span class="tile-badge">${icon(item, 'tile-icon')}</span><span class="tile-name">${item.name}</span>
       <span class="tile-price">${formatPrice(price)}<small>${item.lotSize} un. ${formatAmount(BigInt(price.replace('.', '')) * BigInt(item.lotSize))}</small></span>
       <span class="tile-add" aria-hidden="true">+${adds}</span></button>`;
   }).join('');
@@ -59,7 +56,7 @@ function renderSale() {
     const item = byName.get(line.name);
     const subtotal = BigInt(line.price.replace('.', '')) * BigInt(line.quantity);
     return `<li class="line${line.name === lastAdded ? ' flash' : ''}" style="--hue:${hue(item.section)}">
-      <span class="line-icon" aria-hidden="true">${icon(item)}</span>
+      ${icon(item, 'line-icon')}
       <span class="line-name">${line.name}<small>${line.custom ? 'Preço ajustado' : 'Preço ' + {min:'mínimo', median:'mediano', max:'máximo'}[scenario]} · <label>$ <input class="line-price" data-index="${index}" inputmode="decimal" value="${line.price.replace(/0{1,3}$/, '').replace('.', ',')}" aria-label="Preço por unidade de ${line.name}"></label></small></span>
       <span class="qty"><button type="button" data-minus="${index}" aria-label="Menos 1 ${line.name}">−</button><input class="line-qty" data-index="${index}" inputmode="numeric" value="${line.quantity}" aria-label="Quantidade de ${line.name}"><button type="button" data-plus="${index}" aria-label="Mais 1 ${line.name}">+</button></span>
       <strong class="line-total">${formatAmount(subtotal, 5)}</strong>
