@@ -64,6 +64,7 @@ if (typeof document !== 'undefined') {
   const expand = document.getElementById('expand');
   const fmt = n => n.toLocaleString('pt-BR');
   const storageKey = 'botanica-production-v1';
+  const onlyFilled = document.getElementById('only-filled');
   const normalize = value => Math.min(1000000, Math.max(0, Math.floor(Number(value) || 0)));
   let gathered = {};
   let result;
@@ -90,6 +91,7 @@ if (typeof document !== 'undefined') {
     if (saved && typeof saved === 'object') {
       for (const r of recipes) document.getElementById(r.id).value = normalize(saved.quantities?.[r.id]);
       expand.checked = saved.expand === true;
+      onlyFilled.checked = saved.onlyFilled === true;
       if (saved.gathered && typeof saved.gathered === 'object') gathered = saved.gathered;
     }
   } catch { /* Storage may be unavailable; calculations still work. */ }
@@ -100,7 +102,7 @@ if (typeof document !== 'undefined') {
 
   function save() {
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ quantities: quantities(), expand: expand.checked, gathered }));
+      localStorage.setItem(storageKey, JSON.stringify({ quantities: quantities(), expand: expand.checked, onlyFilled: onlyFilled.checked, gathered }));
       document.getElementById('save-status').textContent = 'Preenchimento salvo neste navegador.';
     } catch {
       document.getElementById('save-status').textContent = 'Preenchimento disponível nesta sessão.';
@@ -152,10 +154,6 @@ if (typeof document !== 'undefined') {
       rows.append(row);
     }
     document.getElementById('cost-memory-total').textContent = costSummary();
-    document.getElementById('cost-heading').textContent = cost.missing.length ? 'Custos da encomenda · parcial' : 'Custos estimados da encomenda';
-    for (const key of ['min', 'median', 'max']) {
-      document.getElementById(`cost-${key}`).textContent = !hasItems || !cost.priced ? '—' : formatCost(cost[key]);
-    }
     document.getElementById('cost-status').textContent = !hasItems
       ? 'Selecione uma produção para estimar os custos.'
       : cost.missing.length
@@ -168,6 +166,14 @@ if (typeof document !== 'undefined') {
     const cost=estimateCosts(result.totals);
     const active=result.units>0;
     const partial=cost.missing.length ? ' *' : '';
+    // The summary repeats the highlighted cell of the selected scenario, with its paired cost.
+    const pairedCost={min:'max', median:'median', max:'min'}[scenario];
+    document.getElementById('cost-heading').textContent=`Resumo do cenário ${{min:'mínimo', median:'mediano', max:'máximo'}[scenario]}${partial ? ' · parcial' : ''}`;
+    document.getElementById('summary-cost').textContent=active && cost.priced ? formatCost(cost[pairedCost]) + partial : '—';
+    document.getElementById('summary-revenue').textContent=active ? formatCost(estimate.revenue[scenario]) : '—';
+    const summaryProfit=document.getElementById('summary-profit');
+    summaryProfit.textContent=active ? formatCost(estimate.profit[scenario]) + partial : '—';
+    summaryProfit.classList.toggle('negative', active && estimate.profit[scenario]<0);
     for (const key of ['min','median','max']) {
       document.getElementById(`cost-head-${key}`).textContent=active && cost.priced ? formatCost(cost[key]) + partial : '—';
       document.getElementById(`revenue-${key}`).textContent=active ? formatCost(estimate.revenue[key]) : '—';
@@ -208,6 +214,9 @@ if (typeof document !== 'undefined') {
     }
     document.getElementById('units').textContent = fmt(result.units);
     document.getElementById('batches').textContent = fmt(result.batches);
+    document.getElementById('duration').textContent = result.seconds >= 60 ? `${fmt(Math.floor(result.seconds / 60))} min${result.seconds % 60 ? ` ${result.seconds % 60} s` : ''}` : `${result.seconds} s`;
+    products.classList.toggle('only-filled', onlyFilled.checked);
+    document.getElementById('filled-empty').hidden = !onlyFilled.checked || recipes.some(r => amounts[r.id] > 0);
     const entries = Object.entries(result.totals).sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'));
     // A changed required quantity must be checked again; unchanged items stay marked.
     gathered = Object.fromEntries(entries.filter(([name, n]) => gathered[name] === n));
@@ -241,10 +250,12 @@ if (typeof document !== 'undefined') {
   products.addEventListener('keydown', e => {
     if (!e.target.matches('input') || !['Tab', 'Enter'].includes(e.key) || e.altKey || e.ctrlKey || e.metaKey) return;
     const index = recipes.findIndex(r => r.id === e.target.id);
-    const next = index + (e.shiftKey ? -1 : 1);
-    e.preventDefault();
-    // On narrow screens the ingredients panel is hidden, so Tab moves on to the plan button.
+    // On narrow screens the ingredients panel is hidden, so Tab moves on to the plan button;
+    // with "Só preenchidos", hidden products are skipped.
     const visible = element => element.getClientRects().length > 0;
+    let next = index + (e.shiftKey ? -1 : 1);
+    while (next >= 0 && next < recipes.length && !visible(document.getElementById(recipes[next].id))) next += e.shiftKey ? -1 : 1;
+    e.preventDefault();
     (next < 0 ? document.getElementById('clear') : next >= recipes.length ? (visible(expand) ? expand : document.querySelector('[data-dialog="plan-dialog"]')) : document.getElementById(recipes[next].id)).focus();
   });
   products.addEventListener('click', e => {
@@ -265,6 +276,7 @@ if (typeof document !== 'undefined') {
     save();
   });
   expand.addEventListener('change', update);
+  onlyFilled.addEventListener('change', update);
   document.getElementById('clear').addEventListener('click', () => {
     recipes.forEach(r => document.getElementById(r.id).value = 0);
     gathered = {};
