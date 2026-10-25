@@ -28,8 +28,8 @@ test('gazette XLII entries match the supplied pages and XLI-only entries are rem
   assert.deepEqual([gazette('Minhocário').min, gazette('Minhocário').max], [115, 135]);
   assert.ok(gazette('Semente Melhorada').aliases.includes('Semente Melhorada de Milho'));
   assert.deepEqual([gazette('Semente Melhorada').min, gazette('Semente Melhorada').max, gazette('Semente Melhorada').lotSize], [0.4, 0.6, 100]);
-  // $1,00 is the price of a lot of 100, as confirmed by the user.
-  assert.deepEqual([gazette('Semente Selecionada').min, gazette('Semente Selecionada').lotSize, gazette('Semente Selecionada').sourceMin], [1, 100, 100]);
+  // $1,00 is the price of a lot of 1,000, as confirmed by the user.
+  assert.deepEqual([gazette('Semente Selecionada').min, gazette('Semente Selecionada').lotSize, gazette('Semente Selecionada').sourceMin], [0.1, 1000, 100]);
   assert.equal(gazette('Rainha Mansa').section, 'Botânicos');
   assert.deepEqual(gazette('Saca Vazia').aliases, ['Saca']);
   assert.ok(gazette('Cerveja').sourceNote.includes('duas vezes'));
