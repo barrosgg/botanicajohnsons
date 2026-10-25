@@ -38,3 +38,15 @@ test('every scenario price fits the five decimal calculator without rounding',()
   calculateShoppingList([{quantity:1,price}]);
  }
 });
+test('every listed item has a lot: 100 units unless the source prints another size',()=>{
+ const catalog=buildEconomyCatalog();
+ assert.ok(catalog.every(item=>item.lotSize>1));
+ const perfume=catalog.find(item=>item.name==='Perfume');
+ assert.deepEqual([perfume.lotSize,perfume.sourceMin,perfume.sourceMax,perfume.lotDerived],[100,1200,1600,true]);
+ assert.ok(perfume.sourceNote.includes('100 × preço unitário'));
+ assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(perfume,scenario,'lot')),[1200,1400,1600]);
+ const ouro=catalog.find(item=>item.name==='Ouro'), girassol=catalog.find(item=>item.name==='Girassol');
+ assert.deepEqual([ouro.lotSize,ouro.sourceMin,ouro.lotDerived],[10,20,undefined]);
+ assert.deepEqual([girassol.lotSize,girassol.sourceMin,girassol.lotDerived],[100,30,undefined]);
+ assert.equal(catalog.filter(item=>item.lotDerived).length,365);
+});
