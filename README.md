@@ -152,6 +152,11 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
 - **Busca de caixa:** digite `10*rosa`, `10x rosa` ou `10 rosa` e aperte Enter para lançar 10 Rosas. O nome exato vem primeiro; Esc limpa.
 - **Venda:** − e + por linha, quantidade e preço editáveis (o preço editado fica como “ajustado” e não muda com o cenário), remover e o mesmo seletor Mínimo / Mediano / Máximo.
 - **Total e troco:** o total exato é somado em inteiros e cobrado arredondado ao centavo (meio centavo para cima; o valor exato aparece abaixo quando difere). “Recebido” calcula o troco ou quanto falta.
-- **Fechamento:** “Copiar comprovante” gera o texto da venda. “Nova venda” limpa a venda e oferece “Desfazer”. A venda em andamento fica salva no navegador.
+- **Fechamento:** “Copiar comprovante” gera o texto da venda. “Concluir venda” limpa a venda e oferece “Desfazer”. A venda em andamento fica salva no navegador.
+
+- **Sem rolagem:** a grade de produtos é paginada (‹ › e Page Up/Down) e o número de blocos por página se ajusta à tela. As abas de seção ficam visíveis quando cabem em até duas linhas; senão, Botica e Todos continuam como abas e as demais seções vão para um seletor. Só a lista da venda rola quando tem muitas linhas.
+- **Tamanho grande:** blocos largos com ícone de 38 px, nomes em 15 px, preços em 17 px, botões de toque de 40–44 px e total em 46 px.
+- **Lotes:** quando a quantidade forma lote, a linha mostra o selo (“1 lote de 100”, “2 lotes de 100 + 30 un.”, “1 lote de 1.000”), e o mesmo texto vai para a mensagem e para o comprovante.
+- **Concluir venda** registra o valor cobrado na mensagem, libera o caixa e permite desfazer.
 
 A lógica testável está em `pdv/pdv-core.js` (`pdv.test.cjs`). O workflow do GitHub Pages publica a pasta `pdv/`.

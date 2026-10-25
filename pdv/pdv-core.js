@@ -54,6 +54,13 @@ function formatAmount(amount, maximumFractionDigits = 2) {
 }
 const formatPrice = price => formatAmount(BigInt(String(price).replace('.', '').replace(/^0+(?=\d)/, '')), 5);
 
+// "1 lote de 100", "2 lotes de 100 + 30 un." or '' below one lot.
+function lotLabel(quantity, lotSize) {
+  if (!(lotSize > 1) || quantity < lotSize) return '';
+  const lots = Math.floor(quantity / lotSize), rest = quantity % lotSize;
+  return `${lots.toLocaleString('pt-BR')} ${lots === 1 ? 'lote' : 'lotes'} de ${lotSize.toLocaleString('pt-BR')}${rest ? ` + ${rest.toLocaleString('pt-BR')} un.` : ''}`;
+}
+
 function addLine(lines, item, quantity, scenario) {
   const existing = lines.find(line => line.name === item.name);
   if (existing) existing.quantity = Math.min(maxQuantity, existing.quantity + quantity);
@@ -61,6 +68,6 @@ function addLine(lines, item, quantity, scenario) {
   return existing || lines[lines.length - 1];
 }
 
-return {normalize, parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, addLine, maxQuantity};
+return {normalize, parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, maxQuantity};
 })();
 if (typeof module !== 'undefined') module.exports = PdvCore;

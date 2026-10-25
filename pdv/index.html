@@ -22,10 +22,11 @@
         <input id="entry" type="search" placeholder="Buscar… ou digite 10*rosa e Enter" aria-describedby="entry-hint">
         <div class="step" role="group" aria-label="Quantidade por toque"><span aria-hidden="true">Toque soma</span><button type="button" data-step="1" aria-pressed="true">+1</button><button type="button" data-step="10" aria-pressed="false">+10</button><button type="button" data-step="100" aria-pressed="false">+100</button></div>
       </form>
-      <p id="entry-hint" class="entry-hint">Enter adiciona o primeiro produto da lista. Esc limpa a busca.</p>
-      <div id="sections" class="sections" role="tablist" aria-label="Seções"></div>
+      <p id="entry-hint" class="entry-hint">Enter adiciona o primeiro produto da lista. Esc limpa a busca. Page Up/Down troca a página.</p>
+      <div class="section-bar"><div id="sections" class="sections" role="tablist" aria-label="Seções"></div><label class="section-select"><span class="visually-hidden">Seção</span><select id="section-select"></select></label></div>
       <div id="tiles" class="tiles" aria-label="Produtos para adicionar"></div>
       <p id="no-match" class="no-match" hidden>Nenhum produto encontrado.</p>
+      <nav class="pager" aria-label="Páginas de produtos"><button type="button" id="tiles-prev" aria-label="Página anterior de produtos">‹</button><span id="tiles-page" aria-live="polite">1 / 1</span><button type="button" id="tiles-next" aria-label="Próxima página de produtos">›</button></nav>
     </section>
     <section class="pdv-sale" aria-label="Venda atual">
       <div class="sale-heading"><h2>Venda atual</h2><span id="sale-count">0 itens</span></div>
@@ -37,7 +38,7 @@
           <label for="received">Recebido ($)<input id="received" inputmode="decimal" placeholder="0,00"></label>
           <div class="change"><span>Troco</span><strong id="change">—</strong></div>
         </div>
-        <div class="sale-actions"><button type="button" id="copy-receipt" disabled>Copiar comprovante</button><button type="button" id="new-sale" class="primary" disabled>Nova venda</button></div>
+        <div class="sale-actions"><button type="button" id="copy-receipt" disabled>Copiar comprovante</button><button type="button" id="new-sale" class="primary" disabled>Concluir venda</button></div>
         <p id="sale-status" class="sale-status" role="status" aria-live="polite"></p>
       </div>
     </section>
