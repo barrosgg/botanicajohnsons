@@ -29,10 +29,11 @@ const ingredientPrices = {
  'Mel':[4,5], 'Madeira Beneficiada':[14,16], 'Pregos':[3,5], 'Semente Selecionada':[1,1]
 };
 // Selling prices per finished unit, in cents (Gazeta Comercial, Botânicos).
+// Semente Melhorada is quoted per lot of 100, so one seed sells for 0.4–0.6 cent.
 const salePrices = {
  perfume:[12,16], oleo:[10,15], fertilizante:[1,2], combo:[18,23],
  defumacao:[5,7], aromaticas:[6,8], medicinais:[4,6], buque:[10,15],
- perfumeSilvestre:[35,45], perfumeLavanda:[35,45], buqueRosas:[30,40], buqueLavanda:[30,40], buqueGirassois:[30,40], minhocario:[115,135], ramalhete:[1,2], sementeMelhorada:[40,60]
+ perfumeSilvestre:[35,45], perfumeLavanda:[35,45], buqueRosas:[30,40], buqueLavanda:[30,40], buqueGirassois:[30,40], minhocario:[115,135], ramalhete:[1,2], sementeMelhorada:[0.4,0.6]
 };
 // Procurement uses Fazenda Venda when available, as selected by the user.
 // Collection references apply to inputs without a separate sale row.

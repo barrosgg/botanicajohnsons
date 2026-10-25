@@ -98,9 +98,10 @@ test('improved seeds share one recipe yielding one hundred per batch',()=>{
  assert.deepEqual([r.units,r.batches,r.seconds],[200,2,60]);
  assert.deepEqual(r.totals,{'Semente Selecionada':200,'Embalagem de Papel':4,'Húmus':20});
  const p=estimateProfit(calculate({sementeMelhorada:100}));
- // Sale 100 × $0.40–$0.60; cost 100 × $0.01 (lot of 100 at $1.00) + 2 × $0.06–$0.08 + 10 × $0.0022–$0.0025.
- assert.deepEqual([p.revenue.min,p.revenue.max],[40,60]);
- assert.deepEqual([p.profit.min,p.profit.max],[40-1.185,60-1.142]);
+ // Both seeds are quoted per lot of 100: sale 100 × $0.004–$0.006;
+ // cost 100 × $0.01 + 2 × $0.06–$0.08 + 10 × $0.0022–$0.0025.
+ assert.deepEqual([p.revenue.min,p.revenue.median,p.revenue.max],[0.4,0.5,0.6]);
+ assert.deepEqual([p.profit.min,p.profit.median,p.profit.max],[-0.785,-0.6635,-0.542]);
  assert.deepEqual(p.missing,[]);
 });
 test('negative amounts put the sign before the currency symbol',()=>{
