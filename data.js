@@ -10,11 +10,12 @@ const recipes = [
  {id:'medicinais',name:'Ervas Medicinais',yield:5,ingredients:{'Milefólio':5,'Ginseng do Alasca':5,'Tanaceto':5,'Pilão':1,'Embalagem de Papel':1}},
  {id:'buque',name:'Buquê de Flores',yield:5,ingredients:{'Rosa':10,'Papoula-da-pradaria':10,'Girassol':10,'Linha de Algodão':5}}
 ];
-// Unit prices in cents, transcribed from the supplied Gazeta Comercial tables.
+// Unit prices in cents, transcribed from the supplied Gazeta Comercial tables (edition XLII).
 const ingredientPrices = {
  'Perfume':[12,16], 'Buquê de Flores':[10,15], 'Óleo de Girassol':[10,15],
  'Cera de Abelha':[12,15], 'Garrafa de Álcool':[4,6], 'Embalagem de Papel':[6,8],
- 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6], 'Linha de Algodão':[3,5]
+ 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6], 'Linha de Algodão':[3,5],
+ 'Mel':[4,5]
 };
 // Selling prices per finished unit, in cents (Gazeta Comercial, Botânicos).
 const salePrices = {

@@ -19,12 +19,10 @@ function buildPriceCatalog(data = catalogData) {
   }
   const names = new Set([...recipes.map(r => r.name), ...recipes.flatMap(r => Object.keys(r.ingredients)), ...Object.keys(ingredientPrices), ...registered.keys()]);
   const comparableNames = {
-    'Tomilho': ['Orégano (v)', 'Hortelã-brava (v)', 'Sálvia-beija-flor (v)', 'Sálvia-vermelha (v)', 'Milefólio (v)', 'Tanaceto (v)', 'Lavanda (v)'],
-    'Mel': ['Melado de Cana', 'Xarope de Açúcar']
+    'Tomilho': ['Orégano (v)', 'Hortelã-brava (v)', 'Sálvia-beija-flor (v)', 'Sálvia-vermelha (v)', 'Milefólio (v)', 'Tanaceto (v)', 'Lavanda (v)']
   };
   const reasons = {
-    'Tomilho': 'Média dos preços de venda de sete ervas e plantas aromáticas ou medicinais. Usa Fazenda Venda, a mesma base escolhida para a compra dos insumos no planejamento.',
-    'Mel': 'Média dos pontos médios de dois adoçantes líquidos correlatos: melado de cana e xarope de açúcar. São produtos diferentes do mel; esta referência indireta não representa cotação específica.'
+    'Tomilho': 'Média dos preços de venda de sete ervas e plantas aromáticas ou medicinais. Usa Fazenda Venda, a mesma base escolhida para a compra dos insumos no planejamento.'
   };
   return [...names].sort((a,b) => a.localeCompare(b,'pt-BR')).map(name => {
     const product = recipes.find(r => r.name === name);
