@@ -129,3 +129,16 @@ Revisão das duas calculadoras, com cada problema reproduzido antes da correçã
 ## Custo, faturamento e lucro bruto
 
 O quadro de resultado cruza os três cenários de venda (linhas, com o faturamento) com os três cenários de custo de produção (colunas, com o custo no cabeçalho). Cada célula é faturamento − custo daquela combinação, calculada em inteiros. As três células em destaque são os cenários usados no resto da página: venda mínima com custo máximo (pior caso), medianos e venda máxima com custo mínimo (melhor caso). A linha do cenário selecionado fica sombreada.
+
+## Interface compacta
+
+- **Planejamento:**
+  - O seletor de cenário fica no cabeçalho.
+  - A lista de produtos tem linhas mais baixas e o filtro “Só preenchidos”, salvo no navegador, que mostra só o que tem quantidade. O Tab e o Enter pulam os produtos ocultos.
+  - O rodapé da produção mostra unidades, lotes e o tempo de bancada.
+  - O resultado abre com o resumo do cenário selecionado (custo de produção, faturamento e lucro bruto) e segue com a grade venda × custo. Os custos não aparecem mais duplicados.
+- **Economia:**
+  - A coluna “Situação” saiu. Os selos “Novo” e “Sugerido” aparecem ao lado da origem.
+  - O filtro “Novidades” mostra só os 74 itens novos da edição XLII.
+  - As linhas são mais baixas: 10 itens por página em 1366×768.
+- Validado sem rolagem da página em 1280×720, 1366×768, 1920×1080, 800×900 e 375×812.

@@ -634,12 +634,113 @@ footer {
 /* With sixteen recipes the product list scrolls inside its panel, keeping the page on one screen. */
 #products {
   overflow-y:auto;
-  max-height:max(220px,calc(100dvh - 404px))}
+  max-height:max(220px,calc(100dvh - 332px))}
 @media(min-width:1100px) and (max-height:800px) {
 #products {
-  max-height:max(220px,calc(100dvh - 344px))}
+  max-height:max(220px,calc(100dvh - 291px))}
 }
 @media(max-width:1099px) {
 #products {
-  max-height:max(220px,calc(100dvh - 360px))}
+  max-height:max(220px,calc(100dvh - 350px))}
+}
+@media(max-width:600px) {
+#products {
+  max-height:max(220px,calc(100dvh - 327px))}
+}
+
+/* Compact layout: the scenario selector lives in the header, rows are shorter,
+   and the result panel leads with the selected scenario's summary. */
+.visually-hidden {
+  position:absolute!important;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+  border:0}
+header {
+  gap:16px}
+header .scenario {
+  margin-left:auto;
+  align-items:center}
+header .scenario legend {
+  float:left;
+  padding:0 8px 0 0;
+  font-size:10px}
+main {
+  padding-top:12px}
+.list-tools {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:0 0 8px}
+.list-tools .hint {
+  margin:0}
+.filled-filter {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:10px;
+  color:var(--muted);
+  cursor:pointer;
+  white-space:nowrap}
+.only-filled .product:not(.selected) {
+  display:none}
+.filled-empty {
+  font-size:11px;
+  color:var(--muted);
+  text-align:center;
+  padding:24px 8px;
+  margin:0}
+.product,
+.product {
+  min-height:42px;
+  padding:4px 0}
+.product h3 {
+  margin-bottom:2px}
+.stepper {
+  height:28px}
+.panel-note {
+  margin:8px 0}
+.production-footer strong {
+  font-variant-numeric:tabular-nums}
+.cost-grid>div {
+  padding:8px 3px}
+.cost-grid .summary-profit {
+  background:#dfe6d4}
+.cost-grid .summary-profit strong {
+  color:var(--green)}
+#cost-status {
+  margin:8px 0 10px}
+@media(min-width:1100px) and (max-height:800px) {
+.product {
+  min-height:38px;
+  padding:3px 0}
+}
+@media(max-width:1099px) {
+header {
+  height:auto;
+  min-height:56px;
+  flex-wrap:wrap;
+  padding-top:8px;
+  padding-bottom:8px}
+main {
+  padding-top:10px}
+}
+@media(max-width:600px) {
+header {
+  gap:8px 10px}
+header .scenario {
+  order:3;
+  width:100%;
+  margin-left:0}
+header .scenario label {
+  flex:1}
+header .scenario span {
+  text-align:center}
+.product {
+  min-height:44px}
 }

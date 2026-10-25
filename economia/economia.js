@@ -21,8 +21,8 @@ let currentPage = 0;
 let pageSize = 10;
 document.getElementById('catalog-summary').innerHTML = [
   [catalog.length, 'itens no catálogo'],
-  [catalog.length - suggestedItems.length, 'preços cadastrados'],
-  suggestedItems.length ? [suggestedItems.length, 'preços sugeridos'] : [catalog.filter(item => item.isNew).length, 'novos na edição XLII']
+  [catalog.filter(item => item.isNew).length, 'novos na edição XLII'],
+  ...(suggestedItems.length ? [[suggestedItems.length, 'preços sugeridos']] : [])
 ].map(([count, label]) => `<div><strong>${count}</strong><span>${label}</span></div>`).join('');
 
 function renderItemNotes() {
@@ -56,7 +56,7 @@ function renderCatalog() {
   const category = document.getElementById('category').value;
   const status = document.getElementById('status').value;
   const origin = document.getElementById('origin').value;
-  const visible = catalog.filter(item => normalizeSearch([item.name, item.originalName || '', ...(item.aliases || [])].join(' ')).includes(query) && (category === 'all' || category === item.section) && (status === 'all' || status === item.status) && (origin === 'all' || origin === item.origin));
+  const visible = catalog.filter(item => normalizeSearch([item.name, item.originalName || '', ...(item.aliases || [])].join(' ')).includes(query) && (category === 'all' || category === item.section) && (status === 'all' || (status === 'new' ? item.isNew : status === item.status)) && (origin === 'all' || origin === item.origin));
   const order = document.getElementById('sort').value;
   if (order === 'low') visible.sort((a, b) => referencePrice(a) - referencePrice(b));
   if (order === 'high') visible.sort((a, b) => referencePrice(b) - referencePrice(a));
@@ -72,7 +72,7 @@ function renderCatalog() {
     const lotMaximum = hasLot ? money(item.sourceMax) : '—';
     const lotQuantity = hasLot ? `${item.lotSize.toLocaleString('pt-BR')} un./lote` : 'Sem lote';
     const action = suggested ? `data-note="${noteId(item.name)}"` : `data-source="${catalog.indexOf(item)}"`;
-    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested || item.isNew ? 'is-suggested' : ''}" ${item.isNew ? 'title="Item novo na edição XLII da Gazeta Comercial."' : ''}>${suggested ? 'Sugerido' : item.isNew ? 'Novo' : 'Cadastrado'}</span></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity"${item.lotDerived ? ' title="Lote calculado: 100 × preço unitário"' : ''}>${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
+    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${suggested || item.isNew ? `<span class="price-badge ${suggested ? 'is-suggested' : ''}" ${item.isNew ? 'title="Item novo na edição XLII da Gazeta Comercial."' : ''}>${suggested ? 'Sugerido' : 'Novo'}</span> ` : ''}${item.section} · ${item.origin}</small></th><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity"${item.lotDerived ? ' title="Lote calculado: 100 × preço unitário"' : ''}>${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
   }).join('');
   document.getElementById('page-range').textContent = visible.length ? `${first + 1}–${Math.min(first + pageSize, visible.length)} de ${visible.length}` : '0 resultados';
   document.getElementById('page-count').textContent = `${currentPage + 1} / ${pages}`;
