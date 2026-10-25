@@ -1,13 +1,13 @@
 const {recipes, ingredientPrices, salePrices, ingredientPriceSources} = typeof module !== 'undefined' ? require('./data.js') : BotanicaData;
 function calculate(quantities, expand=false) {
- const totals={}, production=[], pending={};let batches=0,units=0;
+ const totals={}, production=[], pending={};let batches=0,units=0,seconds=0;
  function addIngredients(recipe,count){for(const [name,quantity] of Object.entries(recipe.ingredients))pending[name]=(pending[name]||0)+quantity*count;}
- for(const r of recipes){const wanted=quantities[r.id]||0;if(!wanted)continue;const count=Math.ceil(wanted/r.yield);batches+=count;units+=count*r.yield;production.push({name:r.name,wanted,produced:count*r.yield,batches:count});addIngredients(r,count);}
+ for(const r of recipes){const wanted=quantities[r.id]||0;if(!wanted)continue;const count=Math.ceil(wanted/r.yield);batches+=count;seconds+=count*r.time;units+=count*r.yield;production.push({name:r.name,wanted,produced:count*r.yield,batches:count});addIngredients(r,count);}
  // Resolve in dependency order so shared intermediate requirements use combined batches.
  if(expand)for(const name of ['Combo Botânicos','Perfume','Buquê de Flores','Óleo de Girassol']){
-  if(!pending[name])continue;const recipe=recipes.find(r=>r.name===name);const count=Math.ceil(pending[name]/recipe.yield);production.push({name,wanted:pending[name],produced:count*recipe.yield,batches:count,intermediate:true});batches+=count;delete pending[name];addIngredients(recipe,count);
+  if(!pending[name])continue;const recipe=recipes.find(r=>r.name===name);const count=Math.ceil(pending[name]/recipe.yield);production.push({name,wanted:pending[name],produced:count*recipe.yield,batches:count,intermediate:true});batches+=count;seconds+=count*recipe.time;delete pending[name];addIngredients(recipe,count);
  }
- Object.assign(totals,pending);return {totals,production,batches,units};
+ Object.assign(totals,pending);return {totals,production,batches,units,seconds};
 }
 function estimateCosts(totals) {
  let min=0, max=0, priced=0;
@@ -37,9 +37,11 @@ function estimateProfit(result) {
  return {revenue, profit:{min:revenue.min-cost.max,median:revenue.median-cost.median,max:revenue.max-cost.min}, missing:cost.missing};
 }
 function formatCost(value, maximumFractionDigits=2) {
- return '$' + value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits});
+ // The sign goes before the currency symbol (-$1,20), and a loss that rounds to zero shows no sign.
+ const text = Math.abs(value).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits});
+ return (value < 0 && /[1-9]/.test(text) ? '-' : '') + '$' + text;
 }
-if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts,salePrices,estimateProfit};
+if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts,salePrices,estimateProfit,formatCost};
 if (typeof document !== 'undefined') {
   const products = document.getElementById('products');
   const ingredients = document.getElementById('ingredients');
@@ -180,7 +182,7 @@ if (typeof document !== 'undefined') {
       profitBox.setAttribute('aria-label',profitBox.textContent + '. ' + profitBox.title);
       document.getElementById(`${r.id}-feedback`).textContent = batches
         ? `${fmt(batches)} ${batches === 1 ? 'lote' : 'lotes'} · ${fmt(batches * r.yield)} un.${surplus ? ` · +${fmt(surplus)} ${surplus === 1 ? 'excedente' : 'excedentes'}` : ''}`
-        : `${r.yield} unidades / lote · 30s`;
+        : `${r.yield} ${r.yield === 1 ? 'unidade' : 'unidades'} / lote · ${r.time}s`;
     }
     document.getElementById('units').textContent = fmt(result.units);
     document.getElementById('batches').textContent = fmt(result.batches);
@@ -197,7 +199,7 @@ if (typeof document !== 'undefined') {
     showProfit();
     document.getElementById('details').innerHTML = result.batches ? `
       <section class="details" aria-label="Plano de produção">
-        <h3>Plano de produção · ${fmt(Math.floor(result.batches * 30 / 60))} min ${result.batches * 30 % 60}s</h3>
+        <h3>Plano de produção · ${fmt(Math.floor(result.seconds / 60))} min ${result.seconds % 60}s</h3>
         <div class="production-list">${result.production.map(p => `<span>${p.intermediate ? '↳ ' : ''}${p.name}: ${fmt(p.produced)} un.${p.produced > p.wanted ? ` (${fmt(p.produced - p.wanted)} ${p.produced - p.wanted === 1 ? 'excedente' : 'excedentes'})` : ''}</span>`).join('')}</div>
       </section>` : '';
     document.getElementById('copy').disabled = !entries.length;

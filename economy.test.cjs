@@ -26,6 +26,8 @@ test('gazette XLII entries match the supplied pages and XLI-only entries are rem
   assert.deepEqual([gazette('Mel').min, gazette('Mel').max], [4, 5]);
   assert.deepEqual([gazette('Carne Bovina').min, gazette('Carne Bovina').max], [22, 34]);
   assert.deepEqual([gazette('Minhocário').min, gazette('Minhocário').max], [115, 135]);
+  assert.ok(gazette('Semente Melhorada').aliases.includes('Semente Melhorada de Milho'));
+  assert.equal(gazette('Semente Selecionada').min, 100);
   assert.equal(gazette('Rainha Mansa').section, 'Botânicos');
   assert.deepEqual(gazette('Saca Vazia').aliases, ['Saca']);
   assert.ok(gazette('Cerveja').sourceNote.includes('duas vezes'));

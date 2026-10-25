@@ -609,3 +609,16 @@ footer {
   width:12px;
   height:12px}
 }
+
+/* With sixteen recipes the product list scrolls inside its panel, keeping the page on one screen. */
+#products {
+  overflow-y:auto;
+  max-height:max(220px,calc(100dvh - 404px))}
+@media(min-width:1100px) and (max-height:800px) {
+#products {
+  max-height:max(220px,calc(100dvh - 344px))}
+}
+@media(max-width:1099px) {
+#products {
+  max-height:max(220px,calc(100dvh - 360px))}
+}

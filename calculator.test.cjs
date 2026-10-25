@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const {calculate,recipes}=require('./app.js');
-test('eight unique recipes and empty selection',()=>{assert.equal(recipes.length,8);assert.equal(new Set(recipes.map(r=>r.id)).size,8);assert.deepEqual(calculate({}).totals,{});});
+test('sixteen unique recipes and empty selection',()=>{assert.equal(recipes.length,16);assert.equal(new Set(recipes.map(r=>r.id)).size,16);assert.deepEqual(calculate({}).totals,{});});
 test('rounds perfume to full batches',()=>{const r=calculate({perfume:6});assert.equal(r.units,10);assert.equal(r.totals.Rosa,10);assert.equal(r.totals['Frasco Vazio'],4);});
 test('fertilizer yields fifty units',()=>{const r=calculate({fertilizante:51});assert.equal(r.units,100);assert.equal(r.totals['Húmus'],30);assert.equal(r.totals['Saca Vazia'],2);});
 test('shared ingredients aggregate',()=>{const r=calculate({perfume:5,buque:5,oleo:5});assert.equal(r.totals.Rosa,15);assert.equal(r.totals.Girassol,20);assert.equal(r.totals['Frasco Vazio'],7);});
@@ -66,4 +66,46 @@ test('fertilizer and incense use new official costs without per-unit rounding',(
  assert.deepEqual(fertilizer,{min:0.106,median:0.1205,max:0.135,priced:3,missing:[]});
  const incense=estimateCosts(calculate({defumacao:5}).totals);
  assert.deepEqual(incense,{min:0.165,median:0.18875,max:0.2125,priced:4,missing:[]});
+});
+
+test('Botica recipes yield one unit per batch with their book ingredients and time',()=>{
+ const r=calculate({perfumeLavanda:2,buqueRosas:1,buqueLavanda:1,buqueGirassois:1,minhocario:3});
+ assert.deepEqual(r.totals,{'Lavanda':50,'Garrafa de Álcool':2,'Frasco Vazio':2,'Cera de Abelha':2,'Rosa':30,'Linha de Algodão':9,'Girassol':30,'Madeira Beneficiada':12,'Fibra Vegetal':12,'Pregos':9});
+ assert.equal(r.units,8);assert.equal(r.batches,8);
+ // Five 30-second batches plus three 45-second Minhocário batches.
+ assert.equal(r.seconds,5*30+3*45);
+ assert.equal(calculate({perfume:5,fertilizante:1}).seconds,60);
+});
+test('Botica recipes are fully priced from the Gazeta and origin tables',()=>{
+ const cost=estimateCosts(calculate({minhocario:1}).totals);
+ // 4 × Madeira Beneficiada (14–16) + 4 × Fibra Vegetal (0.22–0.25) + 3 × Pregos (3–5), in cents.
+ assert.deepEqual([cost.min,cost.max,cost.missing],[0.6588,0.8,[]]);
+ const profit=estimateProfit(calculate({buqueLavanda:1}));
+ // Sale 30–40; cost 30 × Lavanda (Fazenda Venda 0.30–0.35) + 3 × Linha de Algodão (3–5).
+ assert.deepEqual([profit.revenue.min,profit.revenue.max],[0.3,0.4]);
+ assert.ok(Math.abs(profit.profit.min-(0.3-0.255))<1e-10);
+ assert.deepEqual(profit.missing,[]);
+});
+test('Perfume Silvestre and Ramalhete Silvestre follow the book',()=>{
+ assert.deepEqual(calculate({perfumeSilvestre:2}).totals,{'Papoula-da-pradaria':10,'Milefólio':10,'Garrafa de Álcool':2,'Frasco Vazio':2,'Cera de Abelha':2});
+ const r=calculate({ramalhete:11});
+ assert.deepEqual([r.units,r.batches,r.seconds],[20,2,60]);
+ assert.deepEqual(r.totals,{'Rosa':2,'Girassol':2,'Fibra Vegetal':2});
+ assert.deepEqual(estimateProfit(calculate({perfumeSilvestre:1})).missing,[]);
+});
+test('improved seeds share one recipe yielding one hundred per batch',()=>{
+ const r=calculate({sementeMelhorada:150});
+ assert.deepEqual([r.units,r.batches,r.seconds],[200,2,60]);
+ assert.deepEqual(r.totals,{'Semente Selecionada':200,'Embalagem de Papel':4,'Húmus':20});
+ const p=estimateProfit(calculate({sementeMelhorada:100}));
+ // Sale 100 × $0.40–$0.60; cost 100 × $1.00 + 2 × $0.06–$0.08 + 10 × $0.0022–$0.0025.
+ assert.deepEqual([p.revenue.min,p.revenue.max],[40,60]);
+ assert.ok(Math.abs(p.profit.max-(60-100.142))<1e-9);
+ assert.deepEqual(p.missing,[]);
+});
+test('negative amounts put the sign before the currency symbol',()=>{
+ const {formatCost}=require('./app.js');
+ assert.equal(formatCost(-119.17),'-$119,17');
+ assert.equal(formatCost(0.32),'$0,32');
+ assert.equal(formatCost(-0.001),'$0,00');
 });
