@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Ponto de venda experimental da Botânica Johnsons: toque nos produtos, ajuste quantidades e veja o total e o troco.">
+  <title>Botânica Johnsons · PDV</title>
+  <link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="pdv.css">
+</head>
+<body class="pdv-page">
+<header>
+  <a class="brand" href="../">BOTÂNICA <strong>JOHNSONS</strong><span>Ponto de venda · experimental</span></a>
+  <fieldset class="scenario"><legend>Preço</legend><label><input type="radio" name="scenario" value="min"><span>Mínimo</span></label><label><input type="radio" name="scenario" value="median" checked><span>Mediano</span></label><label><input type="radio" name="scenario" value="max"><span>Máximo</span></label></fieldset>
+  <div class="header-actions"><a class="page-link" href="../">← Planejamento</a><a class="page-link" href="../economia/">Economia ↗</a></div>
+</header>
+<main>
+  <h1 class="visually-hidden">Ponto de venda</h1>
+  <nav class="mobile-nav" aria-label="Painéis"><button type="button" data-panel="catalog" aria-pressed="true">Produtos</button><button type="button" data-panel="sale" aria-pressed="false">Venda · <span id="tab-total">$0,00</span></button></nav>
+  <div class="pdv-workspace" data-panel="catalog">
+    <section class="pdv-catalog" aria-label="Produtos">
+      <form id="entry-form" class="entry" role="search" autocomplete="off">
+        <label for="entry" class="visually-hidden">Buscar produto ou digitar quantidade e nome</label>
+        <input id="entry" type="search" placeholder="Buscar… ou digite 10*rosa e Enter" aria-describedby="entry-hint">
+        <div class="step" role="group" aria-label="Quantidade por toque"><span aria-hidden="true">Toque soma</span><button type="button" data-step="1" aria-pressed="true">+1</button><button type="button" data-step="10" aria-pressed="false">+10</button><button type="button" data-step="100" aria-pressed="false">+100</button></div>
+      </form>
+      <p id="entry-hint" class="entry-hint">Enter adiciona o primeiro produto da lista. Esc limpa a busca.</p>
+      <div id="sections" class="sections" role="tablist" aria-label="Seções"></div>
+      <div id="tiles" class="tiles" aria-label="Produtos para adicionar"></div>
+      <p id="no-match" class="no-match" hidden>Nenhum produto encontrado.</p>
+    </section>
+    <section class="pdv-sale" aria-label="Venda atual">
+      <div class="sale-heading"><h2>Venda atual</h2><span id="sale-count">0 itens</span></div>
+      <ol id="lines" class="lines"></ol>
+      <p id="empty-sale" class="empty-sale">Toque em um produto para começar.</p>
+      <div class="checkout">
+        <div class="total"><span>Total a cobrar</span><strong id="total" aria-live="polite">$0,00</strong><small id="exact-total"></small></div>
+        <div class="payment">
+          <label for="received">Recebido ($)<input id="received" inputmode="decimal" placeholder="0,00"></label>
+          <div class="change"><span>Troco</span><strong id="change">—</strong></div>
+        </div>
+        <div class="sale-actions"><button type="button" id="copy-receipt" disabled>Copiar comprovante</button><button type="button" id="new-sale" class="primary" disabled>Nova venda</button></div>
+        <p id="sale-status" class="sale-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="../county-prices.js"></script><script src="../data.js"></script><script src="../gazette.js"></script><script src="../price-catalog.js"></script><script src="pdv-core.js"></script><script src="pdv.js"></script>
+</body>
+</html>
