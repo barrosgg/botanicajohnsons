@@ -40,13 +40,12 @@ function estimateProfit(result) {
   if (item.intermediate) continue;
   const recipe=recipes.find(r=>r.name===item.name);
   const price=salePrices[recipe.id];
-  min+=item.produced*price[0];
-  max+=item.produced*price[1];
+  // Same 1/10000-dollar scale as costs: sale prices can be fractions of a cent.
+  min+=item.produced*Math.round(price[0]*100);
+  max+=item.produced*Math.round(price[1]*100);
  }
- const revenue={min:min/100,median:(min+max)/200,max:max/100};
- // Sale prices are whole cents: ×100 puts revenue on the cost scale before subtracting.
- const [rMin,rMax]=[min*100,max*100];
- return {revenue, profit:{min:(rMin-cost.max)/10000,median:(rMin+rMax-cost.min-cost.max)/20000,max:(rMax-cost.min)/10000}, missing:cost.missing};
+ const revenue={min:min/10000,median:(min+max)/20000,max:max/10000};
+ return {revenue, profit:{min:(min-cost.max)/10000,median:(min+max-cost.min-cost.max)/20000,max:(max-cost.min)/10000}, missing:cost.missing};
 }
 function formatCost(value, maximumFractionDigits=2) {
  // The sign goes before the currency symbol (-$1,20), and a loss that rounds to zero shows no sign.

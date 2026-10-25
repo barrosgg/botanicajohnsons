@@ -27,6 +27,7 @@ test('gazette XLII entries match the supplied pages and XLI-only entries are rem
   assert.deepEqual([gazette('Carne Bovina').min, gazette('Carne Bovina').max], [22, 34]);
   assert.deepEqual([gazette('Minhocário').min, gazette('Minhocário').max], [115, 135]);
   assert.ok(gazette('Semente Melhorada').aliases.includes('Semente Melhorada de Milho'));
+  assert.deepEqual([gazette('Semente Melhorada').min, gazette('Semente Melhorada').max, gazette('Semente Melhorada').lotSize], [0.4, 0.6, 100]);
   // $1,00 is the price of a lot of 100, as confirmed by the user.
   assert.deepEqual([gazette('Semente Selecionada').min, gazette('Semente Selecionada').lotSize, gazette('Semente Selecionada').sourceMin], [1, 100, 100]);
   assert.equal(gazette('Rainha Mansa').section, 'Botânicos');
