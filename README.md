@@ -10,7 +10,7 @@ Na raiz do repositório:
 python3 -m http.server 3000 --bind 0.0.0.0
 ```
 
-Abra a aplicação pela porta 3000. Informe unidades desejadas: cada receita é arredondada para lotes completos, conforme o rendimento do livro: 5 unidades nas oito receitas originais, 50 no Fertilizante, 10 no Ramalhete Silvestre, 100 na Semente Melhorada e 1 nos perfumes de Lavanda e Silvestre, nos três buquês novos e no Minhocário. A lista soma ingredientes compartilhados. A opção de produzir ingredientes compostos calcula lotes adicionais de perfume, buquê e óleo e apresenta eventuais excedentes. Pilão é contabilizado conforme a quantidade exibida nas receitas; não é presumido reutilizável. O tempo estimado soma o tempo de cada lote (30 segundos; Minhocário, 45 segundos), incluindo ingredientes compostos quando habilitados.
+Abra a aplicação pela porta 3000. Informe unidades desejadas: cada receita é arredondada para lotes completos, conforme o rendimento do livro: 5 unidades nas oito receitas originais, 50 no Fertilizante, 10 no Ramalhete Silvestre, 100 na Semente Melhorada e 1 nos perfumes de Lavanda e Silvestre, nos três buquês novos e no Minhocário. A lista soma ingredientes compartilhados. A opção de produzir ingredientes compostos calcula lotes adicionais de perfume, buquê e óleo e apresenta eventuais excedentes; quando o mesmo produto também é pedido diretamente, os dois usos dividem os mesmos lotes (Perfume 3 + Combo 5 = 1 lote de Perfume), e só o que sobra do consumo do Combo entra como venda. Pilão é contabilizado conforme a quantidade exibida nas receitas; não é presumido reutilizável. O tempo estimado soma o tempo de cada lote (30 segundos; Minhocário, 45 segundos), incluindo ingredientes compostos quando habilitados.
 
 Fontes externas são opcionais; há fontes locais de fallback.
 
@@ -113,3 +113,15 @@ Além das oito receitas originais, conferidas com o livro, entram oito receitas:
 O livro chama o perfume de “Perfume Floral (Silvestre)”; a calculadora usa o nome da Gazeta, “Perfume Silvestre”, para ligar o preço de venda. As Sementes Melhoradas (de Milho, de Cana, de Pimenta e demais variedades) têm a mesma receita e entram como uma só, “Semente Melhorada”, com a faixa da Gazeta ($0,40–$0,60 por unidade). Com a Semente Selecionada a $1,00 por unidade, cada lote dá prejuízo de cerca de $50 no cenário mediano; o valor segue a Gazeta e não foi ajustado.
 
 Valores negativos aparecem com o sinal antes do símbolo: -$1,20.
+
+## Auditoria (25/10/2026)
+
+Revisão das duas calculadoras, com cada problema reproduzido antes da correção:
+
+1. Compostos pedidos diretamente e consumidos pelo Combo saíam em lotes separados (um lote e 30 s a mais, até +$0,52 de custo). Agora dividem os lotes.
+2. Ao voltar pelo histórico do navegador, o cenário marcado não era o aplicado aos valores. As duas páginas passam a ler o cenário marcado.
+3. Em telas abaixo de 1100 px, Tab no último produto prendia o foco. Agora segue para “Ver lotes e tempo”.
+4. Na calculadora de compras, “Rosa” + Enter escolhia “Buquê de Rosas”. O nome exato vem primeiro, depois os que começam com o termo.
+5. Lucro calculado em ponto flutuante podia mostrar “$0,00” em vermelho para um prejuízo de meio centavo. A subtração passa a ser feita em inteiros e o arredondamento segue o valor decimal.
+6. Remover uma linha ou “usar cenário” perdia o foco do teclado. O foco vai para o controle correspondente.
+7. Um preço digitado no formulário era trocado ao mudar o cenário. Agora é mantido, como as linhas ajustadas.

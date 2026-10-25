@@ -2,14 +2,20 @@ const {recipes, ingredientPrices, salePrices, ingredientPriceSources} = typeof m
 function calculate(quantities, expand=false) {
  const totals={}, production=[], pending={};let batches=0,units=0,seconds=0;
  function addIngredients(recipe,count){for(const [name,quantity] of Object.entries(recipe.ingredients))pending[name]=(pending[name]||0)+quantity*count;}
- for(const r of recipes){const wanted=quantities[r.id]||0;if(!wanted)continue;const count=Math.ceil(wanted/r.yield);batches+=count;seconds+=count*r.time;units+=count*r.yield;production.push({name:r.name,wanted,produced:count*r.yield,batches:count});addIngredients(r,count);}
- // Resolve in dependency order so shared intermediate requirements use combined batches.
- if(expand)for(const name of ['Combo Botânicos','Perfume','Buquê de Flores','Óleo de Girassol']){
-  if(!pending[name])continue;const recipe=recipes.find(r=>r.name===name);const count=Math.ceil(pending[name]/recipe.yield);production.push({name,wanted:pending[name],produced:count*recipe.yield,batches:count,intermediate:true});batches+=count;seconds+=count*recipe.time;delete pending[name];addIngredients(recipe,count);
+ // With expansion, intermediates ordered directly share batches with what the combo consumes.
+ const intermediates=expand?['Perfume','Buquê de Flores','Óleo de Girassol']:[], direct={};
+ for(const r of recipes){const wanted=quantities[r.id]||0;if(!wanted)continue;if(intermediates.includes(r.name)){direct[r.name]=wanted;continue;}const count=Math.ceil(wanted/r.yield);batches+=count;seconds+=count*r.time;units+=count*r.yield;production.push({name:r.name,wanted,produced:count*r.yield,batches:count});addIngredients(r,count);}
+ for(const name of intermediates){
+  const need=pending[name]||0, own=direct[name]||0;if(!need&&!own)continue;
+  const recipe=recipes.find(r=>r.name===name);const count=Math.ceil((need+own)/recipe.yield);batches+=count;seconds+=count*recipe.time;delete pending[name];addIngredients(recipe,count);
+  // Units left after the combo's share are sold, surplus included; intermediates alone are never sold.
+  if(own){units+=count*recipe.yield-need;production.push({name,wanted:own,produced:count*recipe.yield-need,batches:count});}
+  if(need)production.push({name,wanted:need,produced:own?need:count*recipe.yield,batches:own?0:count,intermediate:true});
  }
  Object.assign(totals,pending);return {totals,production,batches,units,seconds};
 }
-function estimateCosts(totals) {
+// Costs in 1/10000 dollar (hundredths of a cent), so profits subtract exact integers.
+function costUnits(totals) {
  let min=0, max=0, priced=0;
  const missing=[];
  for(const [name,quantity] of Object.entries(totals)) {
@@ -20,11 +26,15 @@ function estimateCosts(totals) {
   min+=Math.round(price[0]*100)*quantity;
   max+=Math.round(price[1]*100)*quantity;
  }
+ return {min, max, priced, missing};
+}
+function estimateCosts(totals) {
+ const {min, max, priced, missing}=costUnits(totals);
  // Keep the midpoint precise until formatting the final totals.
  return {min:min/10000, median:(min+max)/20000, max:max/10000, priced, missing};
 }
 function estimateProfit(result) {
- const cost=estimateCosts(result.totals);
+ const cost=costUnits(result.totals);
  let min=0, max=0;
  for (const item of result.production) {
   if (item.intermediate) continue;
@@ -34,11 +44,14 @@ function estimateProfit(result) {
   max+=item.produced*price[1];
  }
  const revenue={min:min/100,median:(min+max)/200,max:max/100};
- return {revenue, profit:{min:revenue.min-cost.max,median:revenue.median-cost.median,max:revenue.max-cost.min}, missing:cost.missing};
+ // Sale prices are whole cents: ×100 puts revenue on the cost scale before subtracting.
+ const [rMin,rMax]=[min*100,max*100];
+ return {revenue, profit:{min:(rMin-cost.max)/10000,median:(rMin+rMax-cost.min-cost.max)/20000,max:(rMax-cost.min)/10000}, missing:cost.missing};
 }
 function formatCost(value, maximumFractionDigits=2) {
  // The sign goes before the currency symbol (-$1,20), and a loss that rounds to zero shows no sign.
- const text = Math.abs(value).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits});
+ // Formatting the shortest decimal string rounds 1.665 up, as written, not its binary 1.66499….
+ const text = new Intl.NumberFormat('pt-BR', {minimumFractionDigits:2, maximumFractionDigits}).format(String(Math.abs(value)));
  return (value < 0 && /[1-9]/.test(text) ? '-' : '') + '$' + text;
 }
 if(typeof module!=='undefined')module.exports={recipes,calculate,ingredientPrices,estimateCosts,salePrices,estimateProfit,formatCost};
@@ -52,7 +65,8 @@ if (typeof document !== 'undefined') {
   let gathered = {};
   let result;
 
-  let scenario = 'median';
+  // A restored history entry can keep another scenario checked; read it instead of assuming.
+  let scenario = document.querySelector('input[name="scenario"]:checked')?.value || 'median';
   products.innerHTML = recipes.map(r => `
     <article class="product">
       <div class="product-info"><h3><label for="${r.id}">${r.name}</label></h3><small id="${r.id}-feedback"></small></div>
@@ -221,7 +235,9 @@ if (typeof document !== 'undefined') {
     const index = recipes.findIndex(r => r.id === e.target.id);
     const next = index + (e.shiftKey ? -1 : 1);
     e.preventDefault();
-    (next < 0 ? document.getElementById('clear') : next >= recipes.length ? expand : document.getElementById(recipes[next].id)).focus();
+    // On narrow screens the ingredients panel is hidden, so Tab moves on to the plan button.
+    const visible = element => element.getClientRects().length > 0;
+    (next < 0 ? document.getElementById('clear') : next >= recipes.length ? (visible(expand) ? expand : document.querySelector('[data-dialog="plan-dialog"]')) : document.getElementById(recipes[next].id)).focus();
   });
   products.addEventListener('click', e => {
     if (e.target.matches('input')) { e.target.select(); return; }
@@ -259,6 +275,10 @@ if (typeof document !== 'undefined') {
     } catch {
       document.getElementById('copy-status').textContent = 'Não foi possível copiar automaticamente. Selecione a lista para copiar.';
     }
+  });
+  window.addEventListener('pageshow', () => {
+    const checked = document.querySelector('input[name="scenario"]:checked')?.value;
+    if (checked && checked !== scenario) { scenario = checked; update(); }
   });
   update();
 }

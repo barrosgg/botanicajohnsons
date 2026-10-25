@@ -109,3 +109,18 @@ test('negative amounts put the sign before the currency symbol',()=>{
  assert.equal(formatCost(0.32),'$0,32');
  assert.equal(formatCost(-0.001),'$0,00');
 });
+test('expanded intermediates share batches with the same product ordered directly',()=>{
+ const r=calculate({perfume:3,combo:5},true);
+ // 3 Perfumes ordered + 2 inside the combo fit in one batch of 5.
+ assert.equal(r.production.filter(p=>p.name==='Perfume').reduce((n,p)=>n+p.batches,0),1);
+ assert.deepEqual([r.batches,r.seconds,r.units],[4,120,8]);
+ const p=estimateProfit(r);
+ // Revenue sells the 5 combos and the 3 remaining perfumes; the combo's 2 are consumed.
+ assert.deepEqual([p.revenue.min,p.revenue.max],[1.26,1.63]);
+});
+test('profits subtract exact amounts and half cents round up when formatted',()=>{
+ const {formatCost}=require('./app.js');
+ assert.equal(formatCost(-0.005),'-$0,01');
+ assert.equal(formatCost(1.665),'$1,67');
+ assert.equal(estimateProfit(calculate({buqueLavanda:37})).profit.min,1.665);
+});
