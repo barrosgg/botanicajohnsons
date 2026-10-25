@@ -19,7 +19,7 @@ test('expanded combo charges raw ingredients without double counting intermediat
  assert.deepEqual(cost.missing,[]);
 });
 test('unknown prices stay missing and a midpoint is not rounded per unit',()=>{
- assert.deepEqual(estimateCosts({'Tomilho':10}),{min:0,median:0,max:0,priced:0,missing:['Tomilho']});
+ assert.deepEqual(estimateCosts({'Item sem cotação':10}),{min:0,median:0,max:0,priced:0,missing:['Item sem cotação']});
  assert.deepEqual(estimateCosts({'Rosa':1000}),{min:3,median:3.25,max:3.5,priced:1,missing:[]});
  assert.equal(estimateCosts({'Frasco Vazio':100}).median,2.5);
  assert.deepEqual(estimateCosts({}),{min:0,median:0,max:0,priced:0,missing:[]});
@@ -38,7 +38,8 @@ test('expanded intermediates generate no extra sales and flag missing costs',()=
  const r=estimateProfit(calculate({combo:5},true));
  assert.equal(r.revenue.min,0.9);assert.equal(r.revenue.max,1.15);
  assert.deepEqual(r.missing,[]);
- assert.deepEqual(estimateProfit(calculate({aromaticas:5})).missing,['Tomilho']);
+ // Tomilho is quoted in Coleta since Gazeta XLII, so aromatic herbs are fully priced.
+ assert.deepEqual(estimateProfit(calculate({aromaticas:5})).missing,[]);
  assert.equal(estimateProfit(calculate({})).profit.min,0);
 });
 

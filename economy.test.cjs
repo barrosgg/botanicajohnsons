@@ -13,13 +13,13 @@ const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-1
 test('gazette XLII entries match the supplied pages and XLI-only entries stay flagged', () => {
   const sections = rows => rows.reduce((totals, row) => (totals[row.section] = (totals[row.section] || 0) + 1, totals), {});
   const current = gazetteItems.filter(row => row.edition === 'XLII'), previous = gazetteItems.filter(row => row.edition === 'XLI');
-  assert.equal(gazetteItems.length, 378);
-  assert.equal(new Set(gazetteItems.map(row => row.name)).size, 378);
-  assert.deepEqual(sections(current), {'Fazendas':49,'Botânicos':19,'Ateliês':5,'Estábulos':8,'Hospital':6,'Tabacarias':8,'Tipografias':17,'Fábricas':24,'Armazém':28,'Armarias':45,'Nativos':47,'Salões':75});
-  assert.deepEqual(sections(previous), {'Fazendas':1,'Botânicos':5,'Nativos':3,'Salões':30,'Minérios':8});
-  for (const row of previous) assert.ok(row.sourceNote.includes('mantém a faixa da edição XLI'));
-  assert.equal(current.filter(row => row.sourceNote?.includes('Novo na edição XLII')).length, 55);
-  assert.equal(current.filter(row => row.sourceNote?.includes('Na edição XLI:')).length, 76);
+  assert.equal(gazetteItems.length, 383);
+  assert.equal(new Set(gazetteItems.map(row => row.name)).size, 383);
+  assert.deepEqual(sections(current), {'Fazendas':49,'Botânicos':19,'Ateliês':5,'Estábulos':8,'Hospital':6,'Tabacarias':8,'Tipografias':17,'Fábricas':24,'Armazém':28,'Armarias':45,'Nativos':47,'Salões':105,'Minérios':13});
+  assert.deepEqual(sections(previous), {'Fazendas':1,'Botânicos':5,'Nativos':3});
+  for (const row of previous) assert.ok(row.outdated && row.sourceNote.includes('mantém a faixa da edição XLI'));
+  assert.equal(current.filter(row => row.sourceNote?.includes('Novo na edição XLII')).length, 60);
+  assert.equal(current.filter(row => row.sourceNote?.includes('Na edição XLI:')).length, 106);
   assert.ok(current.filter(row => row.section === 'Salões').every(row => row.min === 30 && row.max === 35));
   const gazette = name => gazetteItems.find(row => row.name === name);
   assert.deepEqual([gazette('Mel').min, gazette('Mel').max], [4, 5]);
@@ -28,13 +28,34 @@ test('gazette XLII entries match the supplied pages and XLI-only entries stay fl
   assert.equal(gazette('Rainha Mansa').section, 'Botânicos');
   assert.deepEqual(gazette('Saca Vazia').aliases, ['Saca']);
   assert.ok(gazette('Cerveja').sourceNote.includes('duas vezes'));
+  assert.deepEqual([gazette('Enxofre').min, gazette('Enxofre').lotSize], [0.4, 100]);
+  assert.deepEqual([gazette('Diamante').min, gazette('Diamante').max], [250, 350]);
+});
+
+test('XLII origin tables update, add and flag the county spreadsheet rows', () => {
+  assert.equal(county.spreadsheetRows.length, 148);
+  assert.equal(county.rows.length, 169);
+  const row = name => county.rows.find(entry => entry.name === name);
+  assert.deepEqual([row('Tronco de Madeira').sourceMin, row('Tronco de Madeira').sourceMax, row('Tronco de Madeira').min], [70, 82, 0.7]);
+  assert.deepEqual([row('Tora Ruim').min, row('Tora Boa').max], [0.18, 0.5]);
+  assert.deepEqual([row('Tomilho').origin, row('Tomilho').min, row('Tomilho').max], ['Coleta', 0.22, 0.25]);
+  assert.deepEqual([row('Minhoca Viva').min, row('Minhoca Viva').sourceMax], [1.5, 200]);
+  assert.equal(county.rows.filter(entry => entry.name.startsWith('Semente de')).length, 13);
+  assert.equal(row('Ameixa-do-riacho (v)').min, 0.3);
+  assert.deepEqual(county.rows.filter(entry => entry.outdated).map(entry => entry.name).sort(), ['Ayuhasca', 'Carne de Peixe', 'Leite', 'Peyote']);
+  assert.ok(county.rows.filter(entry => !entry.outdated).every(entry => entry.note));
+  // An outdated origin row never hides the current Gazeta quote.
+  assert.deepEqual([item('Leite').origin, item('Leite').min], ['Gazeta Comercial', 4]);
+  assert.deepEqual([item('Carne de Peixe').origin, item('Carne de Peixe').min], ['Gazeta Comercial', 7]);
+  assert.equal(item('Ayuhasca').outdated, true);
+  assert.equal(ingredientPriceSources.Tomilho.origin, 'Coleta');
 });
 
 test('catalog covers every gazette entry, product and ingredient exactly once', () => {
   const expected = new Set([...gazetteItems.map(row => county.canonicalName(row.name)), ...county.rows.map(row => row.name), ...recipes.map(r => r.name), ...recipes.flatMap(r => Object.keys(r.ingredients))]);
-  assert.equal(catalog.length, 517);
+  assert.equal(catalog.length, 537);
   assert.deepEqual(new Set(catalog.map(row => row.name)), expected);
-  assert.equal(catalog.filter(row => row.status === 'suggested').length, 1);
+  assert.equal(catalog.filter(row => row.status === 'suggested').length, 0);
   for (const row of catalog) assert.ok((row.suggested ?? row.median) > 0);
 });
 
@@ -47,16 +68,10 @@ test('original calculator price ranges and precise midpoints stay intact', () =>
   for (const recipe of recipes) assert.deepEqual([item(recipe.name).min, item(recipe.name).max], salePrices[recipe.id]);
 });
 
-test('the remaining suggestion averages official comparable prices without rounding first', () => {
-  assert.equal(item('Mel').status, 'listed');
-  assert.deepEqual([item('Mel').min, item('Mel').max], [4, 5]);
-  assert.equal(item('Tomilho').suggested, 0.325);
-  assert.equal(item('Tomilho').references.length,7);
-  for (const row of catalog.filter(row => row.status === 'suggested')) for (const ref of row.references) {
-    assert.equal(item(ref.name).status,'listed');
-    close(ref.value,(ref.min+ref.max)/2);
-  }
-  assert.deepEqual(estimateCosts({'Mel':10,'Tomilho':10}).missing,['Tomilho']);
+test('Mel and Tomilho are quoted since Gazeta XLII, so no suggestion remains', () => {
+  assert.deepEqual([item('Mel').status, item('Mel').min, item('Mel').max], ['listed', 4, 5]);
+  assert.deepEqual([item('Tomilho').status, item('Tomilho').min, item('Tomilho').max], ['listed', 0.22, 0.25]);
+  assert.deepEqual(estimateCosts({'Mel':10,'Tomilho':10}).missing,[]);
 });
 
 test('official update replaces twelve prior suggestions and preserves separate plant origins', () => {
@@ -70,14 +85,13 @@ test('official update replaces twelve prior suggestions and preserves separate p
   assert.deepEqual(ingredientPrices.Rosa,[0.3,0.35]);
   assert.equal(ingredientPriceSources.Rosa.origin,'Fazenda Venda');
   assert.equal(ingredientPriceSources['Húmus'].origin,'Coleta');
-  assert.equal(item('Leite').min,0.3);
-  assert.equal(item('Leite').previousPrice.min,4);
-  assert.equal(item('Carne de Peixe').min,0.2);
-  assert.equal(item('Carne de Peixe').previousPrice.min,7);
+  assert.equal(item('Rosa (coleta)').previousPrice,undefined);
 });
 
 test('all supplied unit and lot prices match the catalog and identical duplicates occur once', () => {
   let sourceRows=0;
+  // The spreadsheets are the original county source; XLII changes are checked separately.
+  const sheet=name=>county.spreadsheetRows.find(row=>row.name===name);
   for(const file of ['data/atualizacao-condado.tsv','data/atualizacao-coleta.tsv']) {
     const lines=readFileSync(file,'utf8').trim().split(/\r?\n/).slice(1);
     const currency=text=>Number(text.replace('$','').replace(',','.'))*100;
@@ -85,7 +99,7 @@ test('all supplied unit and lot prices match the catalog and identical duplicate
       sourceRows++;
       const [original,,origin,min,max,lotMin,lotMax,lot]=line.split('\t');
       const name=original==='Humus'?'Húmus':original==='Rosa'&&origin==='Coleta'?'Rosa (coleta)':original;
-      const quote=item(name);
+      const quote=sheet(name);
       assert.equal(quote.origin,origin);
       close(quote.min,currency(min));close(quote.max,currency(max));
       close(quote.sourceMin,currency(lotMin));close(quote.sourceMax,currency(lotMax));
@@ -94,7 +108,7 @@ test('all supplied unit and lot prices match the catalog and identical duplicate
     }
   }
   assert.equal(sourceRows,150);
-  assert.equal(county.rows.length,148);
+  assert.equal(county.spreadsheetRows.length,148);
   assert.equal(catalog.filter(row=>row.name==='Papoula-da-pradaria').length,1);
   assert.equal(catalog.filter(row=>row.name==='Papoula-da-pradaria (v)').length,1);
   assert.equal(item('Semente de Agarita').min,0.22);
@@ -124,8 +138,9 @@ test('trade simulation handles profit, loss, missing costs, free sales and inval
   assert.equal(trade.revenue, 1500); assert.equal(trade.profit, 500);
   close(trade.margin, 100/3); close(trade.deviation, (15/14-1)*100);
   assert.equal(trade.minTotal, 1200); assert.equal(trade.maxTotal, 1600);
-  assert.equal(simulateTrade(item('Tomilho'), 10, 5).profit, null);
-  assert.equal(simulateTrade(item('Tomilho'), 10, 5).minTotal, null);
+  const suggestion = {status:'suggested', suggested:0.325};
+  assert.equal(simulateTrade(suggestion, 10, 5).profit, null);
+  assert.equal(simulateTrade(suggestion, 10, 5).minTotal, null);
   assert.equal(simulateTrade(item('Perfume'), 2, 0, 10).margin, null);
   assert.equal(simulateTrade(item('Perfume'), 2, 0, 10).profit, -10);
   assert.equal(simulateTrade({status:'listed', min:6, max:5, median:5.5}, 2, 5).minTotal, null);
@@ -136,11 +151,12 @@ test('trade simulation handles profit, loss, missing costs, free sales and inval
 
 test('Economia hides only the two requested farm origins and preserves all other channels', () => {
   const visible=buildEconomyCatalog();
-  assert.equal(visible.length,455);
-  assert.equal(new Set(visible.map(row=>row.name)).size,455);
+  assert.equal(visible.length,473);
+  assert.equal(new Set(visible.map(row=>row.name)).size,473);
   assert.ok(visible.every(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin)));
   for(const origin of ['Coleta','Lenhador','Mineração','Fazenda Venda','Gazeta Comercial']) assert.ok(visible.some(row=>row.origin===origin));
-  for(const row of county.rows.filter(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin))) {
+  const replacedByGazette=row=>row.outdated&&gazetteItems.some(entry=>entry.name===row.name&&entry.edition==='XLII');
+  for(const row of county.rows.filter(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin)&&!replacedByGazette(row))) {
     const name=row.name.replace(/ \(v\)$/, '');
     const shown=visible.find(item=>item.name===name);
     assert.equal(shown.origin,row.origin);assert.equal(shown.min,row.min);assert.equal(shown.max,row.max);

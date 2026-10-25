@@ -8,6 +8,11 @@ const money = (cents, fullPrecision = document.getElementById('full-precision').
 };
 const noteId = name => 'nota-' + name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const suggestedItems = catalog.filter(item => item.status === 'suggested');
+// With every input quoted, the suggestion notes and filter have nothing to show.
+if (!suggestedItems.length) {
+  document.querySelector('[data-dialog="notes-dialog"]').hidden = true;
+  document.querySelector('#status option[value="suggested"]').remove();
+}
 document.getElementById('category').innerHTML = '<option value="all">Todas as seções</option>' + [...new Set(catalog.map(item => item.section))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(section => `<option>${section}</option>`).join('');
 document.getElementById('origin').innerHTML = '<option value="all">Todas as origens</option>' + [...new Set(catalog.map(item => item.origin))].sort((a,b) => a.localeCompare(b,'pt-BR')).map(origin => `<option>${origin}</option>`).join('');
 const referencePrice = item => item.status === 'suggested' ? item.suggested : item.median;
@@ -17,7 +22,7 @@ let pageSize = 10;
 document.getElementById('catalog-summary').innerHTML = [
   [catalog.length, 'itens no catálogo'],
   [catalog.length - suggestedItems.length, 'preços cadastrados'],
-  [suggestedItems.length, 'preços sugeridos']
+  suggestedItems.length ? [suggestedItems.length, 'preços sugeridos'] : [catalog.filter(item => item.outdated).length, 'fora da edição XLII']
 ].map(([count, label]) => `<div><strong>${count}</strong><span>${label}</span></div>`).join('');
 
 function renderItemNotes() {
@@ -67,7 +72,7 @@ function renderCatalog() {
     const lotMaximum = hasLot ? money(item.sourceMax) : '—';
     const lotQuantity = hasLot ? `${item.lotSize.toLocaleString('pt-BR')} un./lote` : 'Sem lote';
     const action = suggested ? `data-note="${noteId(item.name)}"` : `data-source="${catalog.indexOf(item)}"`;
-    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested ? 'is-suggested' : ''}">${suggested ? 'Sugerido' : 'Cadastrado'}</span></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity">${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
+    return `<tr><th scope="row"><span class="item-name desktop-name" title="${item.name}">${item.name}</span><button type="button" class="item-name mobile-detail" ${action} title="${item.name} · Ver detalhes">${item.name} ↗</button><small title="${item.section} · ${item.origin}">${item.section} · ${item.origin}</small></th><td class="status-column"><span class="price-badge ${suggested || item.outdated ? 'is-suggested' : ''}" ${item.outdated ? 'title="Não consta na edição XLII; mantém a faixa anterior."' : ''}>${suggested ? 'Sugerido' : item.outdated ? 'Anterior' : 'Cadastrado'}</span></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.min)}</span><small class="lot-price" aria-label="Mínimo por lote">Lote: ${lotMinimum}</small></td><td class="price-number price-main"><span class="unit-price">${money(suggested ? item.suggested : item.median)}</span><small class="lot-quantity">${lotQuantity}</small></td><td class="price-number"><span class="unit-price">${suggested ? '—' : money(item.max)}</span><small class="lot-price" aria-label="Máximo por lote">Lote: ${lotMaximum}</small></td><td class="detail-column"><button type="button" class="row-detail" ${action}>${suggested ? 'Cálculo ↗' : 'Fonte ↗'}</button></td></tr>`;
   }).join('');
   document.getElementById('page-range').textContent = visible.length ? `${first + 1}–${Math.min(first + pageSize, visible.length)} de ${visible.length}` : '0 resultados';
   document.getElementById('page-count').textContent = `${currentPage + 1} / ${pages}`;
@@ -124,7 +129,7 @@ fitPageToViewport();
 document.getElementById('export-csv').addEventListener('click', () => {
   const decimal = value => value == null ? '' : (value / 100).toFixed(8).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
   const csvCell = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Mediano ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
+  const rows = [['Item', 'Seção', 'Situação', 'Fonte', 'Obtenção', 'Mínimo ($/un.)', 'Mediano ($/un.)', 'Máximo ($/un.)', 'Sugerido ($/un.)', 'Unidades por lote', 'Mínimo do lote ($)', 'Máximo do lote ($)', 'Nota / metodologia'], ...visibleCatalog.map(item => [item.name, item.section, item.status === 'suggested' ? 'Preço sugerido' : item.outdated ? 'Edição anterior' : 'Cadastrado', item.source || 'Estimativa', item.origin, decimal(item.min), decimal(item.median), decimal(item.max), decimal(item.suggested), item.lotSize || '', decimal(item.sourceMin), decimal(item.sourceMax), item.sourceNote || (item.references ? item.methodology + ' ' + item.references.map(ref => `${ref.name}: (${decimal(ref.min)} + ${decimal(ref.max)}) ÷ 2 = ${decimal(ref.value)}`).join(' | ') + '; média simples dos pontos médios.' : item.source)])];
   const url = URL.createObjectURL(new Blob(['\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n')], {type: 'text/csv;charset=utf-8'}));
   const link = document.createElement('a'); link.href = url; link.download = 'economia-condado.csv';
   document.body.append(link); link.click(); link.remove();

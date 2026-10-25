@@ -11,25 +11,28 @@ function buildPriceCatalog(data = catalogData) {
   const currency = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 8});
   for (const row of catalogCounty.rows) {
     const previous = registered.get(row.name);
+    // An origin row absent from edition XLII must not hide the current Gazeta quote.
+    if (row.outdated && previous?.edition === 'XLII') {
+      registered.set(row.name, {...previous, sourceNote: [previous.sourceNote, `A cotação de ${row.origin} da planilha do condado (${currency(row.min)} a ${currency(row.max)} por unidade) não consta na edição XLII.`].filter(Boolean).join(' ')});
+      continue;
+    }
     const section = row.origin === 'Mineração' ? 'Minérios' : row.origin === 'Lenhador' ? 'Lenhador' : row.origin === 'Coleta' ? 'Coleta' : 'Fazendas';
     const history = previous && (previous.min !== row.min || previous.max !== row.max)
       ? ` Substitui a faixa anterior da Gazeta: ${currency(previous.min)} a ${currency(previous.max)} por unidade.` : '';
-    registered.set(row.name, {...row, section, aliases: Object.entries(catalogCounty.aliases).filter(([, target]) => target === row.name).map(([alias]) => alias), source: 'Atualização do condado', previousPrice: previous,
-      sourceNote: `${row.origin}.${row.originalName ? ` Nome na fonte: ${row.originalName}; identificado aqui como ${row.name}.` : ''} Lote de ${row.lotSize} un.: ${currency(row.sourceMin)} a ${currency(row.sourceMax)}. A planilha já informa preços unitários; não foram divididos novamente.${history}`});
+    registered.set(row.name, {...row, section, aliases: Object.entries(catalogCounty.aliases).filter(([, target]) => target === row.name).map(([alias]) => alias), source: row.source || 'Atualização do condado', previousPrice: previous,
+      sourceNote: `${row.origin}.${row.originalName ? ` Nome na fonte: ${row.originalName}; identificado aqui como ${row.name}.` : ''} ${row.lotSize > 1 ? `Lote de ${row.lotSize} un.: ${currency(row.sourceMin)} a ${currency(row.sourceMax)}; preço por unidade = lote ÷ ${row.lotSize}.` : 'Preço por unidade, sem lote.'} ${row.note}${history}`});
   }
   const names = new Set([...recipes.map(r => r.name), ...recipes.flatMap(r => Object.keys(r.ingredients)), ...Object.keys(ingredientPrices), ...registered.keys()]);
-  const comparableNames = {
-    'Tomilho': ['Orégano (v)', 'Hortelã-brava (v)', 'Sálvia-beija-flor (v)', 'Sálvia-vermelha (v)', 'Milefólio (v)', 'Tanaceto (v)', 'Lavanda (v)']
-  };
-  const reasons = {
-    'Tomilho': 'Média dos preços de venda de sete ervas e plantas aromáticas ou medicinais. Usa Fazenda Venda, a mesma base escolhida para a compra dos insumos no planejamento.'
-  };
+  // Recipe inputs without an official quote get a suggestion from comparable items here.
+  // Since Gazeta XLII every input is quoted (Mel and Tomilho included), so none is needed.
+  const comparableNames = {};
+  const reasons = {};
   return [...names].sort((a,b) => a.localeCompare(b,'pt-BR')).map(name => {
     const product = recipes.find(r => r.name === name);
     const quote = registered.get(name);
     const price = quote ? [quote.min, quote.max] : ingredientPrices[name] || (product && salePrices[product.id]);
     const usedIn = recipes.filter(r => Object.hasOwn(r.ingredients, name)).map(r => r.name);
-    if (price) return {...quote, name, category: product ? 'Produto' : Object.hasOwn(ingredientPrices, name) || quote?.source === 'Atualização do condado' ? 'Insumo' : 'Mercadoria', section: quote?.section || 'Insumos do planejamento', source: quote?.source || 'Gazeta Comercial', origin: quote?.origin || 'Gazeta Comercial', lotSize: quote?.lotSize || 1, status: 'listed', min:price[0], median:rangeMidpoint(price[0],price[1]), max:price[1], usedIn};
+    if (price) return {...quote, name, category: product ? 'Produto' : Object.hasOwn(ingredientPrices, name) || (quote && quote.origin !== 'Gazeta Comercial') ? 'Insumo' : 'Mercadoria', section: quote?.section || 'Insumos do planejamento', source: quote?.source || 'Gazeta Comercial', origin: quote?.origin || 'Gazeta Comercial', lotSize: quote?.lotSize || 1, status: 'listed', min:price[0], median:rangeMidpoint(price[0],price[1]), max:price[1], usedIn};
     if (!comparableNames[name]) throw new Error(`Sem referência para ${name}`);
     const references = comparableNames[name].map(refName => {
       const ref = registered.get(refName);

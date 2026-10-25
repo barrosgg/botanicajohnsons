@@ -1,7 +1,7 @@
 // Latest county input supplied by the user. Monetary values are in cents.
 // The original TSV is retained under data/; two identical duplicate rows are consolidated.
 const CountyPrices = (() => {
-const rows = [
+const spreadsheetRows = [
   {"name":"Esterco","origin":"Fazenda Coleta","min":0.22,"max":0.25,"lotSize":100,"sourceMin":22.0,"sourceMax":25.0},
   {"name":"Lã","origin":"Fazenda Coleta","min":0.9,"max":1.2,"lotSize":100,"sourceMin":90.0,"sourceMax":120.0},
   {"name":"Leite","origin":"Fazenda Coleta","min":0.3,"max":0.35,"lotSize":100,"sourceMin":30.0,"sourceMax":35.0},
@@ -151,12 +151,37 @@ const rows = [
   {"name":"Semente de Mirtilo-Silvestre","origin":"Coleta","min":0.22,"max":0.25,"lotSize":100,"sourceMin":22.0,"sourceMax":25.0},
   {"name":"Semente de Orégano","origin":"Coleta","min":0.22,"max":0.25,"lotSize":100,"sourceMin":22.0,"sourceMax":25.0}
 ];
+// Gazeta Comercial XLII (25/10/1899) republishes these origin tables on pages 20–29.
+// Prices are per lot in cents, as printed; unit prices are derived like the spreadsheet rows.
+const gazetteXLIIChanges = {'Tronco de Madeira': [70, 82]};
+const seeds = ['Trigo', 'Milho', 'Cana', 'Algodão', 'Batata', 'Tomate', 'Girassol', 'Rosa'];
+const gazetteXLIIAdditions = [
+  ['Tora Ruim', 'Lenhador', 100, 18, 26], ['Tora Boa', 'Lenhador', 100, 35, 50],
+  ['Enxofre', 'Mineração', 100, 40, 60],
+  ...['Diamante', 'Esmeralda', 'Rubi', 'Safira'].map(name => [name, 'Mineração', 1, 250, 350]),
+  ['Tomilho', 'Coleta', 100, 22, 25], ['Minhoca Viva', 'Coleta', 100, 150, 200],
+  ...seeds.map(seed => [`Semente de ${seed}`, 'Coleta', 100, 22, 25]),
+  ...['Café (grão)', 'Ameixa-do-riacho'].flatMap(name => [[name, 'Fazenda Plantação', 100, 22, 25], [`${name} (v)`, 'Fazenda Venda', 100, 30, 35]])
+];
+// Spreadsheet rows missing from the XLII origin tables keep their range, flagged as outdated.
+const absentFromXLII = new Set(['Leite', 'Ayuhasca', 'Carne de Peixe', 'Peyote']);
+const lotMoney = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+const rows = [
+  ...spreadsheetRows.map(row => {
+    const change = gazetteXLIIChanges[row.name];
+    if (change) return {...row, min: change[0] / row.lotSize, max: change[1] / row.lotSize, sourceMin: change[0], sourceMax: change[1], source: 'Gazeta Comercial XLII',
+      note: `Na planilha do condado: lote de ${lotMoney(row.sourceMin)} a ${lotMoney(row.sourceMax)}.`};
+    if (absentFromXLII.has(row.name)) return {...row, outdated: true, note: 'Não consta nas tabelas de origem da Gazeta XLII; mantém a faixa da planilha do condado.'};
+    return {...row, note: 'Faixa confirmada na Gazeta Comercial XLII.'};
+  }),
+  ...gazetteXLIIAdditions.map(([name, origin, lotSize, sourceMin, sourceMax]) => ({name, origin, min: sourceMin / lotSize, max: sourceMax / lotSize, lotSize, sourceMin, sourceMax, source: 'Gazeta Comercial XLII', note: 'Novo na Gazeta Comercial XLII.'}))
+];
 const aliases = {'Carvão':'Carvão Bruto', 'Cobre bruto':'Cobre', 'Ferro bruto':'Ferro', 'Ouro bruto':'Ouro', 'Prata bruta':'Prata'};
 const canonicalName = name => aliases[name] || name;
 function find(name, preferSale = false) {
   const canonical = canonicalName(name);
   return (preferSale && rows.find(row => row.name === canonical + ' (v)' && row.origin === 'Fazenda Venda')) || rows.find(row => row.name === canonical);
 }
-return {rows, aliases, canonicalName, find};
+return {rows, spreadsheetRows, aliases, canonicalName, find};
 })();
 if (typeof module !== 'undefined') module.exports = CountyPrices;

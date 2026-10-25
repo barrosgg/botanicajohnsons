@@ -25,8 +25,8 @@ test('scenarios price units and lots from the source ranges',()=>{
  const girassol=catalog.find(item=>item.name==='Girassol');
  assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(girassol,scenario)),[0.3,0.325,0.35]);
  assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(girassol,scenario,'lot')),[30,32.5,35]);
- const tomilho=catalog.find(item=>item.name==='Tomilho');
- assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(tomilho,scenario)),[tomilho.suggested,tomilho.suggested,tomilho.suggested]);
+ const suggestion={status:'suggested',suggested:0.325};
+ assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(suggestion,scenario)),[0.325,0.325,0.325]);
  assert.throws(()=>scenarioPrice(girassol,'average'));
  assert.throws(()=>scenarioPrice({status:'listed',min:1,max:2},'min','lot'));
 });

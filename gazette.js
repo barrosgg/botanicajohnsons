@@ -1,5 +1,5 @@
 // Cents per unit, transcribed from the Gazeta Comercial screenshots supplied
-// in this conversation (edition XLII, 25 October 1899, pages 1–18).
+// in this conversation (edition XLII, 25 October 1899, pages 1–21; pages 21–29 are in county-prices.js).
 // Truncated labels stay explicit; recipe names are kept where the edition spells them differently.
 const gazetteSections = {
   "Fazendas": [
@@ -111,11 +111,25 @@ const gazetteSections = {
     ["Peru Recheado", 30, 35], ["Picolé de Limão", 30, 35], ["Pudim de Leite", 30, 35], ["Pão de Mel", 30, 35],
     ["Quesadilla", 30, 35], ["Quibebe", 30, 35], ["Quiche Lorraine", 30, 35], ["Rabanada", 30, 35],
     ["Rocambole de Carne", 30, 35], ["Rosbife com Batatas", 30, 35], ["Rum", 30, 35], ["Salmão com Manteiga de Sálvia", 30, 35],
-    ["Skause", 30, 35], ["Sopa de Legumes", 30, 35], ["Sorvete de Amora", 30, 35]
+    ["Skause", 30, 35], ["Sopa de Legumes", 30, 35], ["Sorvete de Amora", 30, 35], ["Sorvete de Framboesa", 30, 35],
+    ["Sorvete de Uva", 30, 35], ["Suco de Amora", 30, 35], ["Suco de Framboesa", 30, 35], ["Suco de Frutas Vermelhas", 30, 35],
+    ["Suco de Groselha", 30, 35], ["Suco de Laranja", 30, 35], ["Suco de Limão", 30, 35], ["Suco de Maçã", 30, 35],
+    ["Suco de Morango", 30, 35], ["Suco de Pera", 30, 35], ["Suco de Pêssego", 30, 35], ["Sundae de Morango", 30, 35],
+    ["Taco com Machaca", 30, 35], ["Tacos de Frango", 30, 35], ["Tequila", 30, 35], ["Torta de Frango", 30, 35],
+    ["Torta de Maçã", 30, 35], ["Torta de Morango", 30, 35], ["Tábua de Frios", 30, 35], ["Vaca Atolada", 30, 35],
+    ["Veado Assado", 30, 35], ["Veado Braseado", 30, 35], ["Vinho", 30, 35], ["Vitamina de Banana", 30, 35],
+    ["Vitamina de Frutas", 30, 35], ["Vodka", 30, 35], ["Whiskey", 30, 35], ["Água Fresca de Limão", 30, 35],
+    ["Água Fresca de Morango", 30, 35]
+  ],
+  "Minérios": [
+    ["Diamante", 250, 350], ["Esmeralda", 250, 350], ["Rubi", 250, 350], ["Safira", 250, 350],
+    ["Carvão", 13, 15, undefined, 100], ["Cobre bruto", 22, 25, undefined, 100], ["Ferro bruto", 29, 34, undefined, 100], ["Ouro bruto", 20, 30, undefined, 10],
+    ["Pedra", 9, 12, undefined, 100], ["Prata bruta", 16, 20, undefined, 20], ["Quartzo", 30, 50, undefined, 100], ["Salitre", 45, 65, undefined, 100],
+    ["Enxofre", 40, 60, undefined, 100]
   ]
 };
-// Edition XLI (17 October 1899) entries absent from the XLII pages supplied. Pages after 18
-// were not sent, so they keep the XLI range and are flagged instead of being dropped or guessed.
+// Edition XLI (17 October 1899) entries absent from edition XLII. They keep the XLI range
+// and are flagged as outdated instead of being dropped or guessed.
 const previousEditionSections = {
   "Fazendas": [
     ["Polpa de Manga", 5, 7]
@@ -126,20 +140,6 @@ const previousEditionSections = {
   ],
   "Nativos": [
     ["Essência de Fertilidade", 1000, 1500], ["Tocha", 19, 24], ["Tomahawk", 12, 15]
-  ],
-  "Salões": [
-    ["Sorvete de Framboesa", 15, 20], ["Sorvete de Uva", 15, 20], ["Suco de Amora", 15, 20], ["Suco de Framboesa", 15, 20],
-    ["Suco de Frutas Vermelhas", 15, 20], ["Suco de Groselha", 15, 20], ["Suco de Laranja", 15, 20], ["Suco de Limão", 15, 20],
-    ["Suco de Maçã", 15, 20], ["Suco de Morango", 15, 20], ["Suco de Pera", 15, 20], ["Suco de Pêssego", 15, 20],
-    ["Sundae de Morango", 15, 20], ["Taco com Machaca", 20, 25], ["Tacos de Frango", 20, 25], ["Tequila", 20, 25],
-    ["Torta de Frango", 20, 25], ["Torta de Maçã", 15, 20], ["Torta de Morango", 15, 20], ["Tábua de Frios", 20, 25],
-    ["Vaca Atolada", 20, 25], ["Veado Assado", 20, 25], ["Veado Braseado", 20, 25], ["Vinho", 20, 25],
-    ["Vitamina de Banana", 15, 20], ["Vitamina de Frutas", 15, 20], ["Vodka", 20, 25], ["Whiskey", 20, 25],
-    ["Água Fresca de Limão", 15, 20], ["Água Fresca de Morango", 15, 20]
-  ],
-  "Minérios": [
-    ["Carvão", 13, 15, undefined, 100], ["Cobre bruto", 22, 25, undefined, 100], ["Ferro bruto", 29, 34, undefined, 100], ["Ouro bruto", 20, 30, undefined, 10],
-    ["Pedra", 9, 12, undefined, 100], ["Prata bruta", 16, 20, undefined, 20], ["Quartzo", 30, 50, undefined, 100], ["Salitre", 45, 65, undefined, 100]
   ]
 };
 // XLI ranges of entries whose XLII range differs, shown in each item note.
@@ -162,7 +162,15 @@ const previousRanges = {
   "Peixe Empanado":[20, 25], "Peru Recheado":[20, 25], "Picolé de Limão":[15, 20], "Pudim de Leite":[15, 20],
   "Pão de Mel":[15, 20], "Quesadilla":[20, 25], "Quibebe":[20, 25], "Quiche Lorraine":[20, 25],
   "Rabanada":[15, 20], "Rocambole de Carne":[20, 25], "Rosbife com Batatas":[20, 25], "Rum":[20, 25],
-  "Salmão com Manteiga de Sálvia":[20, 25], "Skause":[20, 25], "Sopa de Legumes":[20, 25], "Sorvete de Amora":[15, 20]
+  "Salmão com Manteiga de Sálvia":[20, 25], "Skause":[20, 25], "Sopa de Legumes":[20, 25], "Sorvete de Amora":[15, 20],
+  "Sorvete de Framboesa":[15, 20], "Sorvete de Uva":[15, 20], "Suco de Amora":[15, 20], "Suco de Framboesa":[15, 20],
+  "Suco de Frutas Vermelhas":[15, 20], "Suco de Groselha":[15, 20], "Suco de Laranja":[15, 20], "Suco de Limão":[15, 20],
+  "Suco de Maçã":[15, 20], "Suco de Morango":[15, 20], "Suco de Pera":[15, 20], "Suco de Pêssego":[15, 20],
+  "Sundae de Morango":[15, 20], "Taco com Machaca":[20, 25], "Tacos de Frango":[20, 25], "Tequila":[20, 25],
+  "Torta de Frango":[20, 25], "Torta de Maçã":[15, 20], "Torta de Morango":[15, 20], "Tábua de Frios":[20, 25],
+  "Vaca Atolada":[20, 25], "Veado Assado":[20, 25], "Veado Braseado":[20, 25], "Vinho":[20, 25],
+  "Vitamina de Banana":[15, 20], "Vitamina de Frutas":[15, 20], "Vodka":[20, 25], "Whiskey":[20, 25],
+  "Água Fresca de Limão":[15, 20], "Água Fresca de Morango":[15, 20]
 };
 const newInEdition = new Set([
   "Carne Bovina", "Carne Ovina", "Carne de Galinha", "Carne de Porco", "Geleia Real", "Mel",
@@ -174,10 +182,10 @@ const newInEdition = new Set([
   "Corpo de Escopeta", "Corpo de Pistola", "Corpo de Repetidora", "Corpo de Revólver", "Corpo de Rifle", "Tambor de Repetidora",
   "Arco Melhorado", "Flecha (Fogo)", "Flecha (P)", "Flecha (Veneno)", "Flecha Farpada", "Flecha de Exaustão",
   "Flecha de Fumaça Sagrada", "Flecha de Ocre", "Flecha de Rastreio", "Flecha de Sílex", "Flecha de Trovão", "Aquavit",
-  "Jacaré Braseado"
+  "Jacaré Braseado", "Diamante", "Esmeralda", "Rubi", "Safira", "Enxofre"
 ]);
 // Searchable names: the XLII spelling, or the XLI name of a renamed entry.
-const gazetteAliases = {"Garrafa de Álcool":["Garrafa de Alcool"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Saca Vazia":["Saca"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
+const gazetteAliases = {"Garrafa de Álcool":["Garrafa de Alcool"], "Saca Vazia":["Saca"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
 const gazetteMoney = cents => '$' + (cents / 100).toFixed(2).replace('.', ',');
 const gazetteNote = (name, sourceNote) => [sourceNote,
   newInEdition.has(name) && 'Novo na edição XLII.',
@@ -185,8 +193,9 @@ const gazetteNote = (name, sourceNote) => [sourceNote,
 ].filter(Boolean).join(' ') || undefined;
 // The user confirmed mineral prices apply to the displayed lot, not each unit.
 const gazetteItems = [
-  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote]) => ({name, min: sourceMin, max: sourceMax, section, lotSize: 1, sourceMin, sourceMax, edition: 'XLII', aliases: gazetteAliases[name] || [], sourceNote: gazetteNote(name, sourceNote)}))),
-  ...Object.entries(previousEditionSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: 'XLI', aliases: [],
-    sourceNote: [sourceNote, 'Não aparece nas páginas 1–18 da edição XLII enviadas; mantém a faixa da edição XLI (17/10/1899).', lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' ')})))
+  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: 'XLII', aliases: gazetteAliases[name] || [],
+    sourceNote: gazetteNote(name, [sourceNote, lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' '))}))),
+  ...Object.entries(previousEditionSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote]) => ({name, min: sourceMin, max: sourceMax, section, lotSize: 1, sourceMin, sourceMax, edition: 'XLI', outdated: true, aliases: [],
+    sourceNote: [sourceNote, 'Não consta na edição XLII (páginas 1–29); mantém a faixa da edição XLI (17/10/1899).'].filter(Boolean).join(' ')})))
 ];
 if (typeof module !== 'undefined') module.exports = {gazetteItems};
