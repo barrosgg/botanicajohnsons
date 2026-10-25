@@ -39,6 +39,16 @@ function buildPriceCatalog(data = catalogData) {
   });
 }
 
+// A lot is 100 units unless the source prints another size (Ouro: 10, Prata: 20).
+const standardLotSize = 100;
+function withStandardLot(item) {
+  if (item.status !== 'listed' || item.lotSize > 1) return item;
+  // Unit prices are whole or hundredths of a cent, so 100 × unit stays exact.
+  const lot = cents => Math.round(cents * standardLotSize * 100) / 100;
+  return {...item, lotSize: standardLotSize, sourceMin: lot(item.min), sourceMax: lot(item.max), lotDerived: true,
+    sourceNote: [item.sourceNote, `Lote de ${standardLotSize} un. calculado: ${standardLotSize} × preço unitário; a fonte informa só o preço por unidade.`].filter(Boolean).join(' ')};
+}
+
 function buildEconomyCatalog(data = catalogData) {
   const excluded = new Set(['Fazenda Coleta', 'Fazenda Plantação']);
   const saleName = name => name.replace(/ \(v\)$/, '');
@@ -50,7 +60,7 @@ function buildEconomyCatalog(data = catalogData) {
       quote = {...item.previousPrice, category:item.category, status:'listed', median:rangeMidpoint(item.previousPrice.min,item.previousPrice.max)};
     }
     const name = quote.origin === 'Fazenda Venda' ? saleName(quote.name) : quote.name;
-    return [{...quote, name, aliases:[...(quote.aliases || []), ...(name === quote.name ? [] : [quote.name])], references:quote.references?.map(ref => ({...ref, name:saleName(ref.name)}))}];
+    return [withStandardLot({...quote, name, aliases:[...(quote.aliases || []), ...(name === quote.name ? [] : [quote.name])], references:quote.references?.map(ref => ({...ref, name:saleName(ref.name)}))})];
   }).sort((a,b) => a.name.localeCompare(b.name,'pt-BR'));
 }
 
