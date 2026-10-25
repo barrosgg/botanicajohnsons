@@ -1,0 +1,91 @@
+/* Single-screen point of sale: product tiles on the left, the current sale on the right. */
+.pdv-page {max-width:1800px;height:calc(100dvh - 32px);min-height:540px;display:flex;flex-direction:column}
+.pdv-page header {flex-shrink:0}
+.pdv-page main {flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 18px}
+.pdv-workspace {flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px}
+.pdv-catalog,.pdv-sale {min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;background:#fffaf044;padding:12px}
+.mobile-nav {display:none}
+
+.entry {display:flex;gap:10px;align-items:center}
+.entry input {flex:1;min-width:0;font:16px Arial,sans-serif;padding:11px 12px;border:2px solid var(--green);border-radius:6px;background:#fffcf4;color:var(--ink)}
+.entry input:focus-visible {outline:3px solid #3d594755;outline-offset:1px}
+.step {display:flex;align-items:center;gap:3px;font-size:10px;color:var(--muted);white-space:nowrap}
+.step span {margin-right:4px}
+.step button {padding:8px 10px;font-weight:bold}
+.step button[aria-pressed=true] {background:var(--green);border-color:var(--green);color:white}
+.entry-hint {font-size:10px;color:var(--muted);margin:6px 0 8px}
+.sections {display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px;scrollbar-width:thin}
+.sections button {white-space:nowrap;font-size:11px;padding:6px 10px;border-radius:999px;color:var(--ink)}
+.sections button[aria-selected=true] {background:var(--green);border-color:var(--green);color:white}
+
+.tiles {flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px;align-content:start;padding:2px}
+.tile {position:relative;display:grid;grid-template-rows:auto 1fr auto;gap:4px;text-align:left;min-height:108px;padding:10px;border:1px solid var(--line);border-left:5px solid hsl(var(--hue) 38% 42%);border-radius:8px;background:hsl(var(--hue) 45% 96%);color:var(--ink);transition:transform .08s ease}
+.tile:hover {background:hsl(var(--hue) 45% 92%)}
+.tile:active {transform:scale(.97)}
+.tile.first {box-shadow:0 0 0 2px var(--green)}
+.tile-icon {font-size:24px;line-height:1}
+.tile-name {font-weight:bold;font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+.tile-price {font-size:13px;font-weight:bold;color:var(--green);font-variant-numeric:tabular-nums}
+.tile-price small {display:block;font-size:9px;font-weight:normal;color:var(--muted)}
+.tile-add {position:absolute;top:8px;right:8px;font-size:10px;font-weight:bold;color:white;background:var(--green);border-radius:999px;padding:2px 7px}
+.no-match {text-align:center;color:var(--muted);padding:30px 0}
+
+.sale-heading {display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sale-heading h2 {font-size:18px}
+.sale-heading span {font-size:11px;color:var(--muted)}
+.lines {flex:1;min-height:0;overflow-y:auto;list-style:none;margin:0;padding:0}
+.line {display:grid;grid-template-columns:28px minmax(0,1fr) auto minmax(64px,auto) 26px;gap:6px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line);border-left:4px solid hsl(var(--hue) 38% 42%)}
+.line.flash {animation:flash 1.2s ease-out}
+@keyframes flash {from {background:#cfe0c3} to {background:transparent}}
+@media(prefers-reduced-motion:reduce) {.line.flash {animation:none;background:#e1e8d8} .tile {transition:none}}
+.line-icon {font-size:20px;text-align:center}
+.line-name {font-weight:bold;font-size:12px;min-width:0;overflow-wrap:anywhere}
+.line-name small {display:block;font-weight:normal;font-size:9px;color:var(--muted);margin-top:2px}
+.line-price {width:70px;font:10px Arial,sans-serif;padding:2px 4px;border:1px solid var(--line);border-radius:3px;background:#fffcf4}
+.qty {display:flex;align-items:stretch;height:30px;border:1px solid #c2b79e;border-radius:4px;overflow:hidden;background:#fffcf4}
+.qty button {border:0;border-radius:0;padding:0 9px;font-size:16px}
+.line-qty {width:52px;border:0;text-align:center;font:bold 13px Arial,sans-serif;background:transparent;color:var(--ink)}
+.line-total {text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+.remove {padding:2px 6px;font-size:15px}
+[aria-invalid=true] {outline:2px solid #9a342a}
+.empty-sale {text-align:center;color:var(--muted);padding:30px 8px;margin:0}
+.empty-sale[hidden] {display:none}
+
+.checkout {border-top:2px solid var(--green);padding-top:10px;margin-top:6px}
+.total {display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 10px}
+.total span {font-size:12px;color:var(--muted)}
+.total strong {font:36px var(--serif);color:var(--green);font-variant-numeric:tabular-nums}
+.total small {flex-basis:100%;text-align:right;font-size:10px;color:var(--muted)}
+.payment {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.payment label {display:grid;gap:3px;font-size:10px;color:var(--muted)}
+.payment input {font:16px Arial,sans-serif;padding:8px;border:1px solid #c2b79e;border-radius:4px;background:#fffcf4;color:var(--ink);min-width:0}
+.change {display:grid;gap:3px;font-size:10px;color:var(--muted);text-align:right}
+.change strong {font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.sale-actions {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sale-actions button {padding:11px;font-size:13px}
+.sale-actions .primary {background:var(--green);border-color:var(--green);color:white}
+.sale-status {font-size:11px;min-height:1.5em;margin:6px 0 0;color:var(--green)}
+.sale-status button {font-size:11px;padding:2px 8px;margin-left:6px}
+
+@media(max-width:1099px) {
+ .pdv-page {height:auto;min-height:100dvh}
+ .pdv-page main {padding:10px 12px}
+ .mobile-nav {display:flex;gap:6px;margin:0 0 10px}
+ .mobile-nav button {flex:1}
+ .mobile-nav [aria-pressed=true] {background:var(--green);color:white;border-color:var(--green)}
+ .pdv-workspace {display:block}
+ .pdv-workspace>section {height:calc(100dvh - 190px);min-height:420px}
+ .pdv-workspace[data-panel=catalog] .pdv-sale,.pdv-workspace[data-panel=sale] .pdv-catalog {display:none}
+}
+@media(max-width:600px) {
+ .pdv-page {height:100dvh;min-height:0}
+ .pdv-page main {min-height:0}
+ .pdv-workspace>section {height:calc(100dvh - 205px);min-height:0}
+ .entry {flex-wrap:wrap}
+ .step {width:100%;justify-content:flex-end}
+ .tiles {grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+ .tile {min-height:96px;padding:8px}
+ .line {grid-template-columns:22px minmax(0,1fr) auto 24px;grid-template-areas:"icon name name remove" "icon qty total total"}
+ .line-icon {grid-area:icon} .line-name {grid-area:name} .qty {grid-area:qty} .line-total {grid-area:total} .remove {grid-area:remove}
+ .total strong {font-size:28px}
+}
