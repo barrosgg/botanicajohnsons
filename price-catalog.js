@@ -11,11 +11,6 @@ function buildPriceCatalog(data = catalogData) {
   const currency = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 8});
   for (const row of catalogCounty.rows) {
     const previous = registered.get(row.name);
-    // An origin row absent from edition XLII must not hide the current Gazeta quote.
-    if (row.outdated && previous?.edition === 'XLII') {
-      registered.set(row.name, {...previous, sourceNote: [previous.sourceNote, `A cotação de ${row.origin} da planilha do condado (${currency(row.min)} a ${currency(row.max)} por unidade) não consta na edição XLII.`].filter(Boolean).join(' ')});
-      continue;
-    }
     const section = row.origin === 'Mineração' ? 'Minérios' : row.origin === 'Lenhador' ? 'Lenhador' : row.origin === 'Coleta' ? 'Coleta' : 'Fazendas';
     const history = previous && (previous.min !== row.min || previous.max !== row.max)
       ? ` Substitui a faixa anterior da Gazeta: ${currency(previous.min)} a ${currency(previous.max)} por unidade.` : '';

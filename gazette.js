@@ -128,20 +128,7 @@ const gazetteSections = {
     ["Enxofre", 40, 60, undefined, 100]
   ]
 };
-// Edition XLI (17 October 1899) entries absent from edition XLII. They keep the XLI range
-// and are flagged as outdated instead of being dropped or guessed.
-const previousEditionSections = {
-  "Fazendas": [
-    ["Polpa de Manga", 5, 7]
-  ],
-  "Botânicos": [
-    ["Pacote de Semente de Agarita", 3, 4], ["Pacote de Semente de Gaulteria", 3, 4], ["Pacote de Semente de Groselha…", 3, 4, "Nome truncado na imagem; complemento a confirmar."], ["Pacote de Semente de Mirtilo-…", 3, 4, "Nome truncado na imagem; complemento a confirmar."],
-    ["Pacote de Semente de Orégano", 3, 4]
-  ],
-  "Nativos": [
-    ["Essência de Fertilidade", 1000, 1500], ["Tocha", 19, 24], ["Tomahawk", 12, 15]
-  ]
-};
+// Edition XLII is the complete official table: XLI entries absent from it were removed.
 // XLI ranges of entries whose XLII range differs, shown in each item note.
 const previousRanges = {
   "Carne de Peixe":[4, 5], "Combo Estábulo":[10, 22], "Escova Equina":[6, 5], "Absinto":[20, 25],
@@ -193,9 +180,7 @@ const gazetteNote = (name, sourceNote) => [sourceNote,
 ].filter(Boolean).join(' ') || undefined;
 // The user confirmed mineral prices apply to the displayed lot, not each unit.
 const gazetteItems = [
-  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: 'XLII', aliases: gazetteAliases[name] || [],
-    sourceNote: gazetteNote(name, [sourceNote, lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' '))}))),
-  ...Object.entries(previousEditionSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote]) => ({name, min: sourceMin, max: sourceMax, section, lotSize: 1, sourceMin, sourceMax, edition: 'XLI', outdated: true, aliases: [],
-    sourceNote: [sourceNote, 'Não consta na edição XLII (páginas 1–29); mantém a faixa da edição XLI (17/10/1899).'].filter(Boolean).join(' ')})))
+  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: 'XLII', isNew: newInEdition.has(name), aliases: gazetteAliases[name] || [],
+    sourceNote: gazetteNote(name, [sourceNote, lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' '))})))
 ];
 if (typeof module !== 'undefined') module.exports = {gazetteItems};

@@ -10,15 +10,16 @@ const catalog = buildPriceCatalog();
 const item = name => catalog.find(row => row.name === name);
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-10, `${actual} != ${expected}`);
 
-test('gazette XLII entries match the supplied pages and XLI-only entries stay flagged', () => {
+test('gazette XLII entries match the supplied pages and XLI-only entries are removed', () => {
   const sections = rows => rows.reduce((totals, row) => (totals[row.section] = (totals[row.section] || 0) + 1, totals), {});
-  const current = gazetteItems.filter(row => row.edition === 'XLII'), previous = gazetteItems.filter(row => row.edition === 'XLI');
-  assert.equal(gazetteItems.length, 383);
-  assert.equal(new Set(gazetteItems.map(row => row.name)).size, 383);
+  const current = gazetteItems;
+  assert.equal(gazetteItems.length, 374);
+  assert.equal(new Set(gazetteItems.map(row => row.name)).size, 374);
+  assert.ok(gazetteItems.every(row => row.edition === 'XLII'));
   assert.deepEqual(sections(current), {'Fazendas':49,'Botânicos':19,'Ateliês':5,'Estábulos':8,'Hospital':6,'Tabacarias':8,'Tipografias':17,'Fábricas':24,'Armazém':28,'Armarias':45,'Nativos':47,'Salões':105,'Minérios':13});
-  assert.deepEqual(sections(previous), {'Fazendas':1,'Botânicos':5,'Nativos':3});
-  for (const row of previous) assert.ok(row.outdated && row.sourceNote.includes('mantém a faixa da edição XLI'));
-  assert.equal(current.filter(row => row.sourceNote?.includes('Novo na edição XLII')).length, 60);
+  for (const name of ['Polpa de Manga','Pacote de Semente de Agarita','Essência de Fertilidade','Tocha','Tomahawk']) assert.equal(gazetteItems.some(row => row.name === name), false);
+  assert.equal(current.filter(row => row.isNew).length, 60);
+  assert.ok(current.filter(row => row.isNew).every(row => row.sourceNote.includes('Novo na edição XLII')));
   assert.equal(current.filter(row => row.sourceNote?.includes('Na edição XLI:')).length, 106);
   assert.ok(current.filter(row => row.section === 'Salões').every(row => row.min === 30 && row.max === 35));
   const gazette = name => gazetteItems.find(row => row.name === name);
@@ -32,9 +33,9 @@ test('gazette XLII entries match the supplied pages and XLI-only entries stay fl
   assert.deepEqual([gazette('Diamante').min, gazette('Diamante').max], [250, 350]);
 });
 
-test('XLII origin tables update, add and flag the county spreadsheet rows', () => {
+test('XLII origin tables update, add and remove the county spreadsheet rows', () => {
   assert.equal(county.spreadsheetRows.length, 148);
-  assert.equal(county.rows.length, 169);
+  assert.equal(county.rows.length, 165);
   const row = name => county.rows.find(entry => entry.name === name);
   assert.deepEqual([row('Tronco de Madeira').sourceMin, row('Tronco de Madeira').sourceMax, row('Tronco de Madeira').min], [70, 82, 0.7]);
   assert.deepEqual([row('Tora Ruim').min, row('Tora Boa').max], [0.18, 0.5]);
@@ -42,18 +43,20 @@ test('XLII origin tables update, add and flag the county spreadsheet rows', () =
   assert.deepEqual([row('Minhoca Viva').min, row('Minhoca Viva').sourceMax], [1.5, 200]);
   assert.equal(county.rows.filter(entry => entry.name.startsWith('Semente de')).length, 13);
   assert.equal(row('Ameixa-do-riacho (v)').min, 0.3);
-  assert.deepEqual(county.rows.filter(entry => entry.outdated).map(entry => entry.name).sort(), ['Ayuhasca', 'Carne de Peixe', 'Leite', 'Peyote']);
-  assert.ok(county.rows.filter(entry => !entry.outdated).every(entry => entry.note));
-  // An outdated origin row never hides the current Gazeta quote.
+  for (const name of county.absentFromXLII) assert.equal(county.rows.some(entry => entry.name === name), false);
+  assert.ok(county.rows.every(entry => entry.note));
+  assert.equal(county.rows.filter(entry => entry.isNew).length, 21);
+  // Leite and Carne de Peixe left the origin tables but remain quoted by the Gazeta.
   assert.deepEqual([item('Leite').origin, item('Leite').min], ['Gazeta Comercial', 4]);
   assert.deepEqual([item('Carne de Peixe').origin, item('Carne de Peixe').min], ['Gazeta Comercial', 7]);
-  assert.equal(item('Ayuhasca').outdated, true);
+  assert.equal(item('Ayuhasca'), undefined);
+  assert.equal(item('Peyote'), undefined);
   assert.equal(ingredientPriceSources.Tomilho.origin, 'Coleta');
 });
 
 test('catalog covers every gazette entry, product and ingredient exactly once', () => {
   const expected = new Set([...gazetteItems.map(row => county.canonicalName(row.name)), ...county.rows.map(row => row.name), ...recipes.map(r => r.name), ...recipes.flatMap(r => Object.keys(r.ingredients))]);
-  assert.equal(catalog.length, 537);
+  assert.equal(catalog.length, 526);
   assert.deepEqual(new Set(catalog.map(row => row.name)), expected);
   assert.equal(catalog.filter(row => row.status === 'suggested').length, 0);
   for (const row of catalog) assert.ok((row.suggested ?? row.median) > 0);
@@ -112,7 +115,6 @@ test('all supplied unit and lot prices match the catalog and identical duplicate
   assert.equal(catalog.filter(row=>row.name==='Papoula-da-pradaria').length,1);
   assert.equal(catalog.filter(row=>row.name==='Papoula-da-pradaria (v)').length,1);
   assert.equal(item('Semente de Agarita').min,0.22);
-  assert.equal(item('Pacote de Semente de Agarita').min,3);
 });
 
 test('anomalies and fixed prices are preserved', () => {
@@ -151,12 +153,11 @@ test('trade simulation handles profit, loss, missing costs, free sales and inval
 
 test('Economia hides only the two requested farm origins and preserves all other channels', () => {
   const visible=buildEconomyCatalog();
-  assert.equal(visible.length,473);
-  assert.equal(new Set(visible.map(row=>row.name)).size,473);
+  assert.equal(visible.length,462);
+  assert.equal(new Set(visible.map(row=>row.name)).size,462);
   assert.ok(visible.every(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin)));
   for(const origin of ['Coleta','Lenhador','Mineração','Fazenda Venda','Gazeta Comercial']) assert.ok(visible.some(row=>row.origin===origin));
-  const replacedByGazette=row=>row.outdated&&gazetteItems.some(entry=>entry.name===row.name&&entry.edition==='XLII');
-  for(const row of county.rows.filter(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin)&&!replacedByGazette(row))) {
+  for(const row of county.rows.filter(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin))) {
     const name=row.name.replace(/ \(v\)$/, '');
     const shown=visible.find(item=>item.name===name);
     assert.equal(shown.origin,row.origin);assert.equal(shown.min,row.min);assert.equal(shown.max,row.max);

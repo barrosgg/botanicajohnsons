@@ -163,18 +163,17 @@ const gazetteXLIIAdditions = [
   ...seeds.map(seed => [`Semente de ${seed}`, 'Coleta', 100, 22, 25]),
   ...['Café (grão)', 'Ameixa-do-riacho'].flatMap(name => [[name, 'Fazenda Plantação', 100, 22, 25], [`${name} (v)`, 'Fazenda Venda', 100, 30, 35]])
 ];
-// Spreadsheet rows missing from the XLII origin tables keep their range, flagged as outdated.
+// XLII is the complete official table, so spreadsheet rows missing from it are removed.
 const absentFromXLII = new Set(['Leite', 'Ayuhasca', 'Carne de Peixe', 'Peyote']);
 const lotMoney = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2});
 const rows = [
-  ...spreadsheetRows.map(row => {
+  ...spreadsheetRows.filter(row => !absentFromXLII.has(row.name)).map(row => {
     const change = gazetteXLIIChanges[row.name];
     if (change) return {...row, min: change[0] / row.lotSize, max: change[1] / row.lotSize, sourceMin: change[0], sourceMax: change[1], source: 'Gazeta Comercial XLII',
       note: `Na planilha do condado: lote de ${lotMoney(row.sourceMin)} a ${lotMoney(row.sourceMax)}.`};
-    if (absentFromXLII.has(row.name)) return {...row, outdated: true, note: 'Não consta nas tabelas de origem da Gazeta XLII; mantém a faixa da planilha do condado.'};
     return {...row, note: 'Faixa confirmada na Gazeta Comercial XLII.'};
   }),
-  ...gazetteXLIIAdditions.map(([name, origin, lotSize, sourceMin, sourceMax]) => ({name, origin, min: sourceMin / lotSize, max: sourceMax / lotSize, lotSize, sourceMin, sourceMax, source: 'Gazeta Comercial XLII', note: 'Novo na Gazeta Comercial XLII.'}))
+  ...gazetteXLIIAdditions.map(([name, origin, lotSize, sourceMin, sourceMax]) => ({name, origin, min: sourceMin / lotSize, max: sourceMax / lotSize, lotSize, sourceMin, sourceMax, source: 'Gazeta Comercial XLII', isNew: true, note: 'Novo na Gazeta Comercial XLII.'}))
 ];
 const aliases = {'Carvão':'Carvão Bruto', 'Cobre bruto':'Cobre', 'Ferro bruto':'Ferro', 'Ouro bruto':'Ouro', 'Prata bruta':'Prata'};
 const canonicalName = name => aliases[name] || name;
@@ -182,6 +181,6 @@ function find(name, preferSale = false) {
   const canonical = canonicalName(name);
   return (preferSale && rows.find(row => row.name === canonical + ' (v)' && row.origin === 'Fazenda Venda')) || rows.find(row => row.name === canonical);
 }
-return {rows, spreadsheetRows, aliases, canonicalName, find};
+return {rows, spreadsheetRows, absentFromXLII, aliases, canonicalName, find};
 })();
 if (typeof module !== 'undefined') module.exports = CountyPrices;
