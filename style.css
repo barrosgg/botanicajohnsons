@@ -355,9 +355,30 @@ input[type=checkbox] {
 .profit thead th {
   font-size:9px;
   color:var(--muted)}
-.profit td:last-child {
+.profit td[id^="profit-"] {
   font-weight:bold;
   color:var(--green)}
+.profit thead th {
+  font-weight:normal}
+.profit thead tr+tr th:first-child {
+  text-align:right}
+.profit thead th span {
+  display:block;
+  margin-top:2px;
+  color:var(--ink);
+  font-size:10px;
+  font-weight:bold}
+.profit th[colspan] {
+  text-align:center;
+  border-bottom:1px solid var(--line)}
+.profit td.paired {
+  box-shadow:inset 0 0 0 1px var(--green);
+  border-radius:3px}
+.profit-legend {
+  font-size:10px;
+  line-height:1.5;
+  color:var(--muted);
+  margin:6px 0 0}
 .median-row {
   background:#dfe6d455}
 #profit-status {

@@ -125,3 +125,7 @@ Revisão das duas calculadoras, com cada problema reproduzido antes da correçã
 5. Lucro calculado em ponto flutuante podia mostrar “$0,00” em vermelho para um prejuízo de meio centavo. A subtração passa a ser feita em inteiros e o arredondamento segue o valor decimal.
 6. Remover uma linha ou “usar cenário” perdia o foco do teclado. O foco vai para o controle correspondente.
 7. Um preço digitado no formulário era trocado ao mudar o cenário. Agora é mantido, como as linhas ajustadas.
+
+## Custo, faturamento e lucro bruto
+
+O quadro de resultado cruza os três cenários de venda (linhas, com o faturamento) com os três cenários de custo de produção (colunas, com o custo no cabeçalho). Cada célula é faturamento − custo daquela combinação, calculada em inteiros. As três células em destaque são os cenários usados no resto da página: venda mínima com custo máximo (pior caso), medianos e venda máxima com custo mínimo (melhor caso). A linha do cenário selecionado fica sombreada.

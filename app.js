@@ -44,8 +44,12 @@ function estimateProfit(result) {
   min+=item.produced*Math.round(price[0]*100);
   max+=item.produced*Math.round(price[1]*100);
  }
- const revenue={min:min/10000,median:(min+max)/20000,max:max/10000};
- return {revenue, profit:{min:(min-cost.max)/10000,median:(min+max-cost.min-cost.max)/20000,max:(max-cost.min)/10000}, missing:cost.missing};
+ // Every sale scenario against every cost scenario, subtracted exactly in 1/20000 dollar.
+ const keys=['min','median','max'], sale={min:2*min,median:min+max,max:2*max}, spend={min:2*cost.min,median:cost.min+cost.max,max:2*cost.max};
+ const revenue=Object.fromEntries(keys.map(k=>[k,sale[k]/20000]));
+ const matrix=Object.fromEntries(keys.map(s=>[s,Object.fromEntries(keys.map(c=>[c,(sale[s]-spend[c])/20000]))]));
+ // The page's scenarios pair minimum sales with maximum cost, and maximum sales with minimum cost.
+ return {revenue, profit:{min:matrix.min.max,median:matrix.median.median,max:matrix.max.min}, matrix, missing:cost.missing};
 }
 function formatCost(value, maximumFractionDigits=2) {
  // The sign goes before the currency symbol (-$1,20), and a loss that rounds to zero shows no sign.
@@ -161,13 +165,18 @@ if (typeof document !== 'undefined') {
 
   function showProfit() {
     const estimate=estimateProfit(result);
+    const cost=estimateCosts(result.totals);
     const active=result.units>0;
-    document.getElementById('profit-heading').textContent='Faturamento e lucro bruto';
+    const partial=cost.missing.length ? ' *' : '';
     for (const key of ['min','median','max']) {
+      document.getElementById(`cost-head-${key}`).textContent=active && cost.priced ? formatCost(cost[key]) + partial : '—';
       document.getElementById(`revenue-${key}`).textContent=active ? formatCost(estimate.revenue[key]) : '—';
-      document.getElementById(`profit-${key}`).textContent=active ? formatCost(estimate.profit[key]) : '—';
-      document.getElementById(`profit-${key}`).classList.toggle('negative', active && estimate.profit[key]<0);
-      document.getElementById(`profit-${key}`).closest('tr').classList.toggle('median-row', key===scenario);
+      document.getElementById(`revenue-${key}`).closest('tr').classList.toggle('median-row', key===scenario);
+      for (const costKey of ['min','median','max']) {
+        const cell=document.getElementById(`profit-${key}-${costKey}`), value=estimate.matrix[key][costKey];
+        cell.textContent=active ? formatCost(value) + partial : '—';
+        cell.classList.toggle('negative', active && value<0);
+      }
     }
     document.getElementById('profit-status').textContent=!active ? 'Informe a produção para simular a venda.' : estimate.missing.length
       ? 'Lucro parcial e superestimado. Desconte os ingredientes sem preço antes de decidir.'
