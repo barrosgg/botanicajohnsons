@@ -125,3 +125,12 @@ test('profits subtract exact amounts and half cents round up when formatted',()=
  assert.equal(formatCost(1.665),'$1,67');
  assert.equal(estimateProfit(calculate({buqueLavanda:37})).profit.min,1.665);
 });
+test('profit matrix crosses every sale scenario with every cost scenario',()=>{
+ const r=calculate({combo:1});
+ const p=estimateProfit(r), cost=estimateCosts(r.totals);
+ for(const s of ['min','median','max'])for(const c of ['min','median','max'])
+  assert.ok(Math.abs(p.matrix[s][c]-(p.revenue[s]-cost[c]))<1e-12,`${s}/${c}`);
+ // The page's scenarios stay on the anti-diagonal: worst, middle and best case.
+ assert.deepEqual(p.profit,{min:p.matrix.min.max,median:p.matrix.median.median,max:p.matrix.max.min});
+ assert.ok(p.matrix.max.min>p.matrix.median.median&&p.matrix.median.median>p.matrix.min.max);
+});
