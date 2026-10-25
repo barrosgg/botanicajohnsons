@@ -26,7 +26,7 @@ const ingredientPrices = {
  'Perfume':[12,16], 'Buquê de Flores':[10,15], 'Óleo de Girassol':[10,15],
  'Cera de Abelha':[12,15], 'Garrafa de Álcool':[4,6], 'Embalagem de Papel':[6,8],
  'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6], 'Linha de Algodão':[3,5],
- 'Mel':[4,5], 'Madeira Beneficiada':[14,16], 'Pregos':[3,5], 'Semente Selecionada':[1,1]
+ 'Mel':[4,5], 'Madeira Beneficiada':[14,16], 'Pregos':[3,5], 'Semente Selecionada':[0.1,0.1]
 };
 // Selling prices per finished unit, in cents (Gazeta Comercial, Botânicos).
 // Semente Melhorada is quoted per lot of 100, so one seed sells for 0.4–0.6 cent.
