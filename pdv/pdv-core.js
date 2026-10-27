@@ -68,6 +68,13 @@ function addLine(lines, item, quantity, scenario) {
   return existing || lines[lines.length - 1];
 }
 
-return {normalize, parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, maxQuantity};
+// Lines with a typed price keep it; the others follow the current catalog and scenario,
+// so a sale saved before a price update is charged at the new prices.
+function repriceLines(lines, byName, scenario) {
+  for (const line of lines) if (!line.custom) line.price = unitPrice(byName.get(line.name), scenario);
+  return lines;
+}
+
+return {normalize, parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, repriceLines, maxQuantity};
 })();
 if (typeof module !== 'undefined') module.exports = PdvCore;

@@ -50,3 +50,12 @@ test('lines say when the quantity makes whole lots',()=>{
  assert.equal(P.lotLabel(25,10),'2 lotes de 10 + 5 un.');
  assert.equal(P.lotLabel(5,1),'');
 });
+test('a sale saved before a price update follows the new prices, except typed ones',()=>{
+ const byName=new Map(catalog.map(entry=>[entry.name,entry]));
+ // Saved with the XLII ranges: Vela $0.19–0.21 (median $0.20).
+ const lines=[{name:'Vela',quantity:2,price:'0.20000',custom:false},{name:'Isqueiro',quantity:1,price:'0.40000',custom:true}];
+ P.repriceLines(lines,byName,'median');
+ assert.deepEqual(lines.map(line=>line.price),['0.25000','0.40000']);
+ P.repriceLines(lines,byName,'max');
+ assert.deepEqual(lines.map(line=>line.price),['0.28000','0.40000']);
+});

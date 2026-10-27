@@ -171,7 +171,7 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
 - **Busca de caixa:** digite `10*rosa`, `10x rosa` ou `10 rosa` e aperte Enter para lançar 10 Rosas. O nome exato vem primeiro; Esc limpa.
 - **Venda:** − e + por linha, quantidade e preço editáveis (o preço editado fica como “ajustado” e não muda com o cenário), remover e o mesmo seletor Mínimo / Mediano / Máximo.
 - **Total e troco:** o total exato é somado em inteiros e cobrado arredondado ao centavo (meio centavo para cima; o valor exato aparece abaixo quando difere). “Recebido” calcula o troco ou quanto falta.
-- **Fechamento:** “Copiar comprovante” gera o texto da venda. “Concluir venda” limpa a venda e oferece “Desfazer”. A venda em andamento fica salva no navegador.
+- **Fechamento:** “Copiar comprovante” gera o texto da venda. “Concluir venda” limpa a venda e oferece “Desfazer”. A venda em andamento fica salva no navegador. Ao reabrir o PDV, as linhas salvas passam aos preços atuais do catálogo, como depois de uma atualização da Gazeta; uma linha com preço ajustado mantém o valor digitado.
 
 - **Sem rolagem:** a grade de produtos é paginada (‹ › e Page Up/Down) e o número de blocos por página se ajusta à tela. As abas de seção ficam visíveis quando cabem em até duas linhas; senão, Botica e Todos continuam como abas e as demais seções vão para um seletor. Só a lista da venda rola quando tem muitas linhas.
 - **Tamanho grande:** blocos largos com ícone de 38 px, nomes em 15 px, preços em 17 px, botões de toque de 40–44 px e total em 46 px.
