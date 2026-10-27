@@ -107,12 +107,12 @@ Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em
 | Charuto | Tabacarias | $0,14–$0,17 | $0,18–$0,22 |
 | Combo Tabacaria | Tabacarias | $0,17–$0,22 | $0,22–$0,29 |
 | Isqueiro | Tabacarias | $0,25–$0,35 | $0,18–$0,23 |
-| Cantil Vazio | Armazém (a confirmar) | — | $0,45–$0,58 |
-| Lanterna | Armazém (a confirmar) | — | $8,00–$9,50 |
-| Martelo de Reparo | Armazém (a confirmar) | — | $0,16–$0,20 |
+| Cantil Vazio | Armazém | — | $0,45–$0,58 |
+| Lanterna | Armazém | — | $8,00–$9,50 |
+| Martelo de Reparo | Armazém | — | $0,16–$0,20 |
 | Pena de Ave Pequena | Armazém | $0,02 | removida |
 
-A atualização não informa a seção dos três itens novos; eles ficam em Armazém até confirmação, e a nota de cada um diz isso. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três itens acrescentados não recebem o selo “Novo”, que fica com a edição XLII; os seis alterados mostram a faixa da edição XLII nos detalhes.
+A atualização não informa a seção dos três itens novos; por orientação do usuário, eles ficam em Armazém. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três itens acrescentados não recebem o selo “Novo”, que fica com a edição XLII; os seis alterados mostram a faixa da edição XLII nos detalhes.
 
 ## Receitas do livro da Botica
 

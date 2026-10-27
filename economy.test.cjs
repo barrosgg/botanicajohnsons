@@ -48,7 +48,7 @@ test('the 27/10/2026 price update changes six ranges, adds three items and remov
   for (const [name, [min, max]] of Object.entries(added)) {
     // Only XLII entries carry the "Novo" badge.
     assert.deepEqual([gazette(name).min, gazette(name).max, gazette(name).section, gazette(name).isNew, gazette(name).edition], [min, max, 'Armazém', false, 'atualização de 27/10/2026']);
-    assert.ok(gazette(name).sourceNote.includes('a confirmar'), name);
+    assert.equal(gazette(name).sourceNote, undefined, name);
   }
   assert.equal(item('Pena de Ave Pequena'), undefined);
   assert.deepEqual(gazette('Combo Tabacaria').aliases, ['Combo de Tabacaria']);

@@ -4,7 +4,6 @@
 // A price update sent on 27/10/2026, without an edition number, changes or adds the entries in
 // updatedFromXLII and newInUpdate below, and removes Pena de Ave Pequena.
 const priceUpdate = 'atualização de 27/10/2026';
-const sectionPending = 'A atualização não informa a seção; classificado em Armazém, a confirmar.';
 const gazetteSections = {
   "Fazendas": [
     ["Amido de Milho", 4, 6], ["Açúcar Refinado", 5, 7], ["Caixa de Agarita", 18, 22], ["Caixa de Gaulteria", 18, 22],
@@ -61,9 +60,9 @@ const gazetteSections = {
   ],
   "Armazém": [
     ["Balde Vazio", 20, 22], ["Bolsa Térmica", 25, 28], ["Caixa de Colmeia", 5, 8], ["Caixa de Madeira", 11, 14],
-    ["Cantil Vazio", 45, 58, sectionPending], ["Combo Armazém", 29, 40], ["Corda", 10, 15], ["Cutelo", 25, 30],
+    ["Cantil Vazio", 45, 58], ["Combo Armazém", 29, 40], ["Corda", 10, 15], ["Cutelo", 25, 30],
     ["Câmera", 500, 700], ["Faca de Caça", 20, 25], ["Facas de Arremesso", 30, 35], ["Kit de Reparo de Arma", 16, 20],
-    ["Lanterna", 800, 950, sectionPending], ["Machado", 14, 16], ["Machado Reforçado", 27, 30], ["Martelo de Reparo", 16, 20, sectionPending],
+    ["Lanterna", 800, 950], ["Machado", 14, 16], ["Machado Reforçado", 27, 30], ["Martelo de Reparo", 16, 20],
     ["Mochila de Couro", 20, 22], ["Peneira", 5, 7], ["Peneira Avançada", 14, 16], ["Picareta", 22, 24],
     ["Picareta Reforçada", 25, 27], ["Pomada de Picada", 2, 3], ["Rastelo", 15, 17], ["Rede de Pesca", 12, 15],
     ["Saca Vazia", 4, 6, "Chamado de “Saca” na edição XLII."], ["Vara de Pesca", 30, 35], ["Vela", 22, 28], ["Verniz", 10, 12],
