@@ -2,7 +2,7 @@
 // in this conversation (edition XLII, 25 October 1899, pages 1–21; pages 21–29 are in county-prices.js).
 // Truncated labels stay explicit; recipe names are kept where the edition spells them differently.
 // A price update sent on 27/10/2026, without an edition number, changes or adds the entries in
-// updatedFromXLII and newInUpdate below, and removes Pena de Ave Pequena.
+// fromPriceUpdate below and removes Pena de Ave Pequena. As asked, they carry no badge or note.
 const priceUpdate = 'atualização de 27/10/2026';
 const gazetteSections = {
   "Fazendas": [
@@ -175,23 +175,21 @@ const newInEdition = new Set([
   "Flecha de Fumaça Sagrada", "Flecha de Ocre", "Flecha de Rastreio", "Flecha de Sílex", "Flecha de Trovão", "Aquavit",
   "Jacaré Braseado", "Diamante", "Esmeralda", "Rubi", "Safira", "Enxofre"
 ]);
-// XLII ranges of the entries the price update changed, shown in each item note.
-const updatedFromXLII = {
-  "Bala de Mel":[5, 7], "Caixa de Cigarros":[60, 70], "Charuto":[14, 17], "Combo Tabacaria":[17, 22],
-  "Isqueiro":[25, 35], "Vela":[19, 21]
-};
-const newInUpdate = new Set(["Cantil Vazio", "Lanterna", "Martelo de Reparo"]);
+// Entries the price update changed or added; the README keeps their XLII ranges.
+const fromPriceUpdate = new Set([
+  "Bala de Mel", "Caixa de Cigarros", "Charuto", "Combo Tabacaria", "Isqueiro", "Vela",
+  "Cantil Vazio", "Lanterna", "Martelo de Reparo"
+]);
 // Searchable names: the XLII spelling, the XLI name of a renamed entry, or the update message spelling.
 const gazetteAliases = {"Combo Tabacaria":["Combo de Tabacaria"], "Semente Melhorada":["Semente Melhorada…", "Semente Melhorada de Milho", "Semente Melhorada de Cana", "Semente Melhorada de Milefólio", "Semente Melhorada de Mirtilo-silvestre", "Semente Melhorada de Pera", "Semente Melhorada de Pimenta", "Semente Melhorada de Repolho", "Semente Melhorada de Tanaceto", "Semente Melhorada de Gaulteria"], "Semente Selecionada":["Semente Selecionada…"], "Garrafa de Álcool":["Garrafa de Alcool"], "Saca Vazia":["Saca"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
 const gazetteMoney = cents => '$' + (cents / 100).toFixed(2).replace('.', ',');
 const gazetteNote = (name, sourceNote) => [sourceNote,
   newInEdition.has(name) && 'Novo na edição XLII.',
-  updatedFromXLII[name] && `Na edição XLII: ${gazetteMoney(updatedFromXLII[name][0])} a ${gazetteMoney(updatedFromXLII[name][1])}; faixa da ${priceUpdate}.`,
   previousRanges[name] && `Na edição XLI: ${gazetteMoney(previousRanges[name][0])} a ${gazetteMoney(previousRanges[name][1])}${previousRanges[name][0] > previousRanges[name][1] ? ' (faixa invertida)' : ''}.`
 ].filter(Boolean).join(' ') || undefined;
 // The user confirmed mineral prices apply to the displayed lot, not each unit.
 const gazetteItems = [
-  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: newInUpdate.has(name) || updatedFromXLII[name] ? priceUpdate : 'XLII', isNew: newInEdition.has(name), aliases: gazetteAliases[name] || [],
+  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: fromPriceUpdate.has(name) ? priceUpdate : 'XLII', isNew: newInEdition.has(name), aliases: gazetteAliases[name] || [],
     sourceNote: gazetteNote(name, [sourceNote, lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' '))})))
 ];
 if (typeof module !== 'undefined') module.exports = {gazetteItems};

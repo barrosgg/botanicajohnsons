@@ -97,7 +97,7 @@ Cada item novo ou alterado traz a origem da mudança nos detalhes, e os novos t�
 
 ## Atualização de preços da Gazeta (27/10/2026)
 
-Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em `gazette.js` (`updatedFromXLII` e `newInUpdate`); os demais itens seguem a edição XLII.
+Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em `gazette.js` (`fromPriceUpdate`); os demais itens seguem a edição XLII.
 
 | Item | Seção | Edição XLII | Atualização |
 |---|---|---|---|
@@ -112,7 +112,7 @@ Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em
 | Martelo de Reparo | Armazém | — | $0,16–$0,20 |
 | Pena de Ave Pequena | Armazém | $0,02 | removida |
 
-A atualização não informa a seção dos três itens novos; por orientação do usuário, eles ficam em Armazém. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três itens acrescentados não recebem o selo “Novo”, que fica com a edição XLII; os seis alterados mostram a faixa da edição XLII nos detalhes.
+A atualização não informa a seção dos três itens novos; por orientação do usuário, eles ficam em Armazém. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Por orientação do usuário, os itens da atualização não têm o selo “Novo” nem nota com a faixa anterior; esta tabela é o registro da mudança.
 
 ## Receitas do livro da Botica
 
