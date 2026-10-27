@@ -1,6 +1,6 @@
 const catalog = buildEconomyCatalog().filter(item => item.status === 'listed');
 const byName = new Map(catalog.map(item => [item.name, item]));
-const {parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, maxQuantity} = PdvCore;
+const {parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, repriceLines, maxQuantity} = PdvCore;
 const lotTag = line => { const label = lotLabel(line.quantity, byName.get(line.name).lotSize); return label ? `<span class="lot-tag">${label}</span>` : ''; };
 const storageKey = 'botanica-pdv-v1';
 
@@ -17,6 +17,7 @@ try {
   if (['min', 'median', 'max'].includes(saved?.scenario)) scenario = saved.scenario;
   if ([1, 10, 100].includes(saved?.step)) step = saved.step;
 } catch { /* Storage may be unavailable; the sale still works in memory. */ }
+repriceLines(lines, byName, scenario);
 const save = () => { try { localStorage.setItem(storageKey, JSON.stringify({lines, scenario, step})); } catch { /* Ignore. */ } };
 
 const entry = document.getElementById('entry');
@@ -207,7 +208,7 @@ document.getElementById('received').addEventListener('input', () => showTotals()
 
 document.querySelectorAll('input[name="scenario"]').forEach(input => input.addEventListener('change', () => {
   scenario = input.value;
-  for (const line of lines) if (!line.custom) line.price = unitPrice(byName.get(line.name), scenario);
+  repriceLines(lines, byName, scenario);
   lastAdded = null; renderTiles(); renderSale();
 }));
 

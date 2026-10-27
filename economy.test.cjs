@@ -39,16 +39,16 @@ test('gazette XLII entries match the supplied pages and XLI-only entries are rem
 
 test('the 27/10/2026 price update changes six ranges, adds three items and removes Pena de Ave Pequena', () => {
   const gazette = name => gazetteItems.find(row => row.name === name);
-  const changed = {'Vela':[22, 28, 19, 21], 'Bala de Mel':[6, 8, 5, 7], 'Caixa de Cigarros':[53, 68, 60, 70], 'Charuto':[18, 22, 14, 17], 'Combo Tabacaria':[22, 29, 17, 22], 'Isqueiro':[18, 23, 25, 35]};
-  for (const [name, [min, max, oldMin, oldMax]] of Object.entries(changed)) {
-    assert.deepEqual([gazette(name).min, gazette(name).max, gazette(name).isNew, gazette(name).edition], [min, max, false, 'atualização de 27/10/2026']);
-    assert.ok(gazette(name).sourceNote.includes(`Na edição XLII: $${(oldMin / 100).toFixed(2).replace('.', ',')} a $${(oldMax / 100).toFixed(2).replace('.', ',')}`), name);
+  const changed = {'Vela':[22, 28], 'Bala de Mel':[6, 8], 'Caixa de Cigarros':[53, 68], 'Charuto':[18, 22], 'Combo Tabacaria':[22, 29], 'Isqueiro':[18, 23]};
+  for (const [name, [min, max]] of Object.entries(changed)) {
+    // As asked, the update adds no note with the previous range.
+    assert.deepEqual([gazette(name).min, gazette(name).max, gazette(name).isNew, gazette(name).edition, gazette(name).sourceNote], [min, max, false, 'atualização de 27/10/2026', undefined]);
   }
   const added = {'Cantil Vazio':[45, 58], 'Lanterna':[800, 950], 'Martelo de Reparo':[16, 20]};
   for (const [name, [min, max]] of Object.entries(added)) {
     // Only XLII entries carry the "Novo" badge.
     assert.deepEqual([gazette(name).min, gazette(name).max, gazette(name).section, gazette(name).isNew, gazette(name).edition], [min, max, 'Armazém', false, 'atualização de 27/10/2026']);
-    assert.ok(gazette(name).sourceNote.includes('a confirmar'), name);
+    assert.equal(gazette(name).sourceNote, undefined, name);
   }
   assert.equal(item('Pena de Ave Pequena'), undefined);
   assert.deepEqual(gazette('Combo Tabacaria').aliases, ['Combo de Tabacaria']);

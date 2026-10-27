@@ -97,7 +97,7 @@ Cada item novo ou alterado traz a origem da mudança nos detalhes, e os novos t�
 
 ## Atualização de preços da Gazeta (27/10/2026)
 
-Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em `gazette.js` (`updatedFromXLII` e `newInUpdate`); os demais itens seguem a edição XLII.
+Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em `gazette.js` (`fromPriceUpdate`); os demais itens seguem a edição XLII.
 
 | Item | Seção | Edição XLII | Atualização |
 |---|---|---|---|
@@ -107,12 +107,12 @@ Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em
 | Charuto | Tabacarias | $0,14–$0,17 | $0,18–$0,22 |
 | Combo Tabacaria | Tabacarias | $0,17–$0,22 | $0,22–$0,29 |
 | Isqueiro | Tabacarias | $0,25–$0,35 | $0,18–$0,23 |
-| Cantil Vazio | Armazém (a confirmar) | — | $0,45–$0,58 |
-| Lanterna | Armazém (a confirmar) | — | $8,00–$9,50 |
-| Martelo de Reparo | Armazém (a confirmar) | — | $0,16–$0,20 |
+| Cantil Vazio | Armazém | — | $0,45–$0,58 |
+| Lanterna | Armazém | — | $8,00–$9,50 |
+| Martelo de Reparo | Armazém | — | $0,16–$0,20 |
 | Pena de Ave Pequena | Armazém | $0,02 | removida |
 
-A atualização não informa a seção dos três itens novos; eles ficam em Armazém até confirmação, e a nota de cada um diz isso. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três itens acrescentados não recebem o selo “Novo”, que fica com a edição XLII; os seis alterados mostram a faixa da edição XLII nos detalhes.
+A atualização não informa a seção dos três itens novos; por orientação do usuário, eles ficam em Armazém. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Por orientação do usuário, os itens da atualização não têm o selo “Novo” nem nota com a faixa anterior; esta tabela é o registro da mudança.
 
 ## Receitas do livro da Botica
 
@@ -171,7 +171,7 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
 - **Busca de caixa:** digite `10*rosa`, `10x rosa` ou `10 rosa` e aperte Enter para lançar 10 Rosas. O nome exato vem primeiro; Esc limpa.
 - **Venda:** − e + por linha, quantidade e preço editáveis (o preço editado fica como “ajustado” e não muda com o cenário), remover e o mesmo seletor Mínimo / Mediano / Máximo.
 - **Total e troco:** o total exato é somado em inteiros e cobrado arredondado ao centavo (meio centavo para cima; o valor exato aparece abaixo quando difere). “Recebido” calcula o troco ou quanto falta.
-- **Fechamento:** “Copiar comprovante” gera o texto da venda. “Concluir venda” limpa a venda e oferece “Desfazer”. A venda em andamento fica salva no navegador.
+- **Fechamento:** “Copiar comprovante” gera o texto da venda. “Concluir venda” limpa a venda e oferece “Desfazer”. A venda em andamento fica salva no navegador. Ao reabrir o PDV, as linhas salvas passam aos preços atuais do catálogo, como depois de uma atualização da Gazeta; uma linha com preço ajustado mantém o valor digitado.
 
 - **Sem rolagem:** a grade de produtos é paginada (‹ › e Page Up/Down) e o número de blocos por página se ajusta à tela. As abas de seção ficam visíveis quando cabem em até duas linhas; senão, Botica e Todos continuam como abas e as demais seções vão para um seletor. Só a lista da venda rola quando tem muitas linhas.
 - **Tamanho grande:** blocos largos com ícone de 38 px, nomes em 15 px, preços em 17 px, botões de toque de 40–44 px e total em 46 px.
