@@ -187,14 +187,12 @@ const gazetteAliases = {"Combo Tabacaria":["Combo de Tabacaria"], "Semente Melho
 const gazetteMoney = cents => '$' + (cents / 100).toFixed(2).replace('.', ',');
 const gazetteNote = (name, sourceNote) => [sourceNote,
   newInEdition.has(name) && 'Novo na edição XLII.',
-  newInUpdate.has(name) && `Novo na ${priceUpdate}.`,
   updatedFromXLII[name] && `Na edição XLII: ${gazetteMoney(updatedFromXLII[name][0])} a ${gazetteMoney(updatedFromXLII[name][1])}; faixa da ${priceUpdate}.`,
   previousRanges[name] && `Na edição XLI: ${gazetteMoney(previousRanges[name][0])} a ${gazetteMoney(previousRanges[name][1])}${previousRanges[name][0] > previousRanges[name][1] ? ' (faixa invertida)' : ''}.`
 ].filter(Boolean).join(' ') || undefined;
-const newIn = name => newInEdition.has(name) ? 'edição XLII' : newInUpdate.has(name) ? priceUpdate : undefined;
 // The user confirmed mineral prices apply to the displayed lot, not each unit.
 const gazetteItems = [
-  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: newInUpdate.has(name) || updatedFromXLII[name] ? priceUpdate : 'XLII', isNew: Boolean(newIn(name)), newIn: newIn(name), aliases: gazetteAliases[name] || [],
+  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: newInUpdate.has(name) || updatedFromXLII[name] ? priceUpdate : 'XLII', isNew: newInEdition.has(name), aliases: gazetteAliases[name] || [],
     sourceNote: gazetteNote(name, [sourceNote, lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' '))})))
 ];
 if (typeof module !== 'undefined') module.exports = {gazetteItems};

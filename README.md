@@ -60,7 +60,7 @@ Layout validado com as 16 receitas, sem rolagem da página em 1280×720, 1366×7
 
 `/economia/` é uma consulta compacta, com filtros, ordenação e paginação que adapta o número de linhas à altura disponível. A tela principal reúne a tabela, contagens e ações; fontes, notas das sugestões, detalhes de cada item e calculadora de compras e vendas abrem em janelas. Os estudos de preços médios por setor foram removidos. O layout procura caber na altura da tela sem rolagem da página; em telas muito baixas ou com zoom, o conteúdo continua acessível.
 
-Por orientação do usuário, a consulta, a calculadora e o CSV ocultam **somente Fazenda Coleta e Fazenda Plantação**. As demais origens permanecem: Coleta, Lenhador, Mineração, Fazenda Venda e Gazeta Comercial. `buildEconomyCatalog` tem 464 referências, todas com cotação da edição XLII, da atualização de 27/10/2026 ou da planilha confirmada pela XLII; 76 são novas e aparecem com o selo “Novo”. Plantas de Fazenda Venda aparecem sem `(v)`. A exportação inclui todos os resultados dos filtros, não apenas a página atual.
+Por orientação do usuário, a consulta, a calculadora e o CSV ocultam **somente Fazenda Coleta e Fazenda Plantação**. As demais origens permanecem: Coleta, Lenhador, Mineração, Fazenda Venda e Gazeta Comercial. `buildEconomyCatalog` tem 464 referências, todas com cotação da edição XLII, da atualização de 27/10/2026 ou da planilha confirmada pela XLII; 73 são novas na edição XLII e aparecem com o selo “Novo”. Plantas de Fazenda Venda aparecem sem `(v)`. A exportação inclui todos os resultados dos filtros, não apenas a página atual.
 
 Os dados completos são preservados em `buildPriceCatalog` (528 referências), `county-prices.js`, `gazette.js` e nos arquivos de origem em `data/`. A primeira planilha contém 134 linhas, consolidadas em 132 após remover duas repetições idênticas de Papoula-da-pradaria; o complemento de Coleta contém 16 linhas. Os cinco itens de Fazenda Coleta reenviados são idênticos aos da primeira fonte. Preços unitários e por lote foram conferidos em todas as linhas, sem dividir novamente os valores unitários. “Rosa (coleta)” preserva essa faixa e Humus é padronizado como Húmus. Minérios usam os nomes da nova fonte, com pesquisa pelos nomes anteriores.
 
@@ -112,7 +112,7 @@ Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em
 | Martelo de Reparo | Armazém (a confirmar) | — | $0,16–$0,20 |
 | Pena de Ave Pequena | Armazém | $0,02 | removida |
 
-A atualização não informa a seção dos três itens novos; eles ficam em Armazém até confirmação, e a nota de cada um diz isso. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três novos têm o selo “Novo”; os seis alterados mostram a faixa da edição XLII nos detalhes.
+A atualização não informa a seção dos três itens novos; eles ficam em Armazém até confirmação, e a nota de cada um diz isso. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três itens acrescentados não recebem o selo “Novo”, que fica com a edição XLII; os seis alterados mostram a faixa da edição XLII nos detalhes.
 
 ## Receitas do livro da Botica
 
@@ -158,7 +158,7 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
   - O resultado abre com o resumo do cenário selecionado (custo de produção, faturamento e lucro bruto) e segue com a grade venda × custo. Os custos não aparecem mais duplicados.
 - **Economia:**
   - A coluna “Situação” saiu. Os selos “Novo” e “Sugerido” aparecem ao lado da origem.
-  - O filtro “Novidades” mostra só os 76 itens novos desde a edição XLI: 73 da edição XLII e 3 da atualização de 27/10/2026.
+  - O filtro “Novidades” mostra só os 73 itens novos da edição XLII.
   - As linhas são mais baixas: 10 itens por página em 1366×768.
 - Validado sem rolagem da página em 1280×720, 1366×768, 1920×1080, 800×900 e 375×812.
 

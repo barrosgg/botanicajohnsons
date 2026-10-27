@@ -18,8 +18,8 @@ test('gazette XLII entries match the supplied pages and XLI-only entries are rem
   assert.equal(gazetteItems.filter(row => row.edition === 'XLII').length, 367);
   assert.deepEqual(sections(current), {'Fazendas':49,'Botânicos':19,'Ateliês':5,'Estábulos':8,'Hospital':6,'Tabacarias':8,'Tipografias':17,'Fábricas':24,'Armazém':30,'Armarias':45,'Nativos':47,'Salões':105,'Minérios':13});
   for (const name of ['Polpa de Manga','Pacote de Semente de Agarita','Essência de Fertilidade','Tocha','Tomahawk']) assert.equal(gazetteItems.some(row => row.name === name), false);
-  assert.equal(current.filter(row => row.newIn === 'edição XLII').length, 59);
-  assert.ok(current.filter(row => row.newIn === 'edição XLII').every(row => row.isNew && row.sourceNote.includes('Novo na edição XLII')));
+  assert.equal(current.filter(row => row.isNew).length, 59);
+  assert.ok(current.filter(row => row.isNew).every(row => row.sourceNote.includes('Novo na edição XLII')));
   assert.equal(current.filter(row => row.sourceNote?.includes('Na edição XLI:')).length, 106);
   assert.ok(current.filter(row => row.section === 'Salões').every(row => row.min === 30 && row.max === 35));
   const gazette = name => gazetteItems.find(row => row.name === name);
@@ -46,7 +46,8 @@ test('the 27/10/2026 price update changes six ranges, adds three items and remov
   }
   const added = {'Cantil Vazio':[45, 58], 'Lanterna':[800, 950], 'Martelo de Reparo':[16, 20]};
   for (const [name, [min, max]] of Object.entries(added)) {
-    assert.deepEqual([gazette(name).min, gazette(name).max, gazette(name).section, gazette(name).newIn], [min, max, 'Armazém', 'atualização de 27/10/2026']);
+    // Only XLII entries carry the "Novo" badge.
+    assert.deepEqual([gazette(name).min, gazette(name).max, gazette(name).section, gazette(name).isNew, gazette(name).edition], [min, max, 'Armazém', false, 'atualização de 27/10/2026']);
     assert.ok(gazette(name).sourceNote.includes('a confirmar'), name);
   }
   assert.equal(item('Pena de Ave Pequena'), undefined);
@@ -178,7 +179,7 @@ test('Economia hides only the two requested farm origins and preserves all other
   const visible=buildEconomyCatalog();
   assert.equal(visible.length,464);
   assert.equal(new Set(visible.map(row=>row.name)).size,464);
-  assert.equal(visible.filter(row=>row.isNew).length,76);
+  assert.equal(visible.filter(row=>row.isNew).length,73);
   assert.ok(visible.every(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin)));
   for(const origin of ['Coleta','Lenhador','Mineração','Fazenda Venda','Gazeta Comercial']) assert.ok(visible.some(row=>row.origin===origin));
   for(const row of county.rows.filter(row=>!['Fazenda Coleta','Fazenda Plantação'].includes(row.origin))) {
