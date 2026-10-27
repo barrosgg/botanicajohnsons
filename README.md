@@ -60,16 +60,16 @@ Layout validado com as 16 receitas, sem rolagem da página em 1280×720, 1366×7
 
 `/economia/` é uma consulta compacta, com filtros, ordenação e paginação que adapta o número de linhas à altura disponível. A tela principal reúne a tabela, contagens e ações; fontes, notas das sugestões, detalhes de cada item e calculadora de compras e vendas abrem em janelas. Os estudos de preços médios por setor foram removidos. O layout procura caber na altura da tela sem rolagem da página; em telas muito baixas ou com zoom, o conteúdo continua acessível.
 
-Por orientação do usuário, a consulta, a calculadora e o CSV ocultam **somente Fazenda Coleta e Fazenda Plantação**. As demais origens permanecem: Coleta, Lenhador, Mineração, Fazenda Venda e Gazeta Comercial. `buildEconomyCatalog` tem 462 referências, todas com cotação da edição XLII ou da planilha confirmada por ela; 74 são novas e aparecem com o selo “Novo”. Plantas de Fazenda Venda aparecem sem `(v)`. A exportação inclui todos os resultados dos filtros, não apenas a página atual.
+Por orientação do usuário, a consulta, a calculadora e o CSV ocultam **somente Fazenda Coleta e Fazenda Plantação**. As demais origens permanecem: Coleta, Lenhador, Mineração, Fazenda Venda e Gazeta Comercial. `buildEconomyCatalog` tem 464 referências, todas com cotação da edição XLII, da atualização de 27/10/2026 ou da planilha confirmada pela XLII; 76 são novas e aparecem com o selo “Novo”. Plantas de Fazenda Venda aparecem sem `(v)`. A exportação inclui todos os resultados dos filtros, não apenas a página atual.
 
-Os dados completos são preservados em `buildPriceCatalog` (526 referências), `county-prices.js`, `gazette.js` e nos arquivos de origem em `data/`. A primeira planilha contém 134 linhas, consolidadas em 132 após remover duas repetições idênticas de Papoula-da-pradaria; o complemento de Coleta contém 16 linhas. Os cinco itens de Fazenda Coleta reenviados são idênticos aos da primeira fonte. Preços unitários e por lote foram conferidos em todas as linhas, sem dividir novamente os valores unitários. “Rosa (coleta)” preserva essa faixa e Humus é padronizado como Húmus. Minérios usam os nomes da nova fonte, com pesquisa pelos nomes anteriores.
+Os dados completos são preservados em `buildPriceCatalog` (528 referências), `county-prices.js`, `gazette.js` e nos arquivos de origem em `data/`. A primeira planilha contém 134 linhas, consolidadas em 132 após remover duas repetições idênticas de Papoula-da-pradaria; o complemento de Coleta contém 16 linhas. Os cinco itens de Fazenda Coleta reenviados são idênticos aos da primeira fonte. Preços unitários e por lote foram conferidos em todas as linhas, sem dividir novamente os valores unitários. “Rosa (coleta)” preserva essa faixa e Humus é padronizado como Húmus. Minérios usam os nomes da nova fonte, com pesquisa pelos nomes anteriores.
 
 Desde a edição XLII não há preços sugeridos: Mel e Tomilho têm cotação. O mecanismo continua disponível para um insumo futuro sem cotação (média simples dos pontos médios de itens correlatos, com notas item por item); sem sugestões, o botão de notas e o filtro de sugeridos ficam ocultos. A tabela também exibe os valores completos por padrão; desmarcar a opção reduz a exibição a duas casas, usando `< $0,01` para valores positivos que arredondariam para zero.
 
 Os custos do planejamento principal continuam usando **Fazenda Venda** para a compra das plantas, conforme escolha do usuário. Esterco usa Fazenda Coleta e Húmus usa Coleta; ocultar essas origens em Economia não altera os custos da produção. A memória de cálculo identifica a origem. Os oito preços de venda dos produtos prontos continuam sendo os da Gazeta. Todos os insumos das receitas têm cotação: Mel vem da Gazeta e Tomilho, de Coleta.
 
 
-A tabela compacta exibe valores por unidade na primeira linha e os preços mínimo/máximo do lote na segunda linha, junto da quantidade de unidades. Um lote é de 100 unidades. Quando a fonte informa o lote (Coleta, Plantação, Venda de Fazenda, Lenhador, Minérios), os valores vêm diretamente de `sourceMin`/`sourceMax`, inclusive os tamanhos impressos diferentes de 100 (Ouro: 10; Prata: 20). Quando a fonte informa só o preço por unidade, como nos itens da Gazeta, o lote é calculado: 100 × preço unitário (363 itens, sinalizados nos detalhes). Semente Melhorada e Semente Selecionada são as exceções da Gazeta: o usuário confirmou que os preços são do lote, de 100 e de 1.000 unidades. Assim todos os itens podem ser negociados por unidade ou por lote na calculadora; sugestões, se houver, não recebem lote.
+A tabela compacta exibe valores por unidade na primeira linha e os preços mínimo/máximo do lote na segunda linha, junto da quantidade de unidades. Um lote é de 100 unidades. Quando a fonte informa o lote (Coleta, Plantação, Venda de Fazenda, Lenhador, Minérios), os valores vêm diretamente de `sourceMin`/`sourceMax`, inclusive os tamanhos impressos diferentes de 100 (Ouro: 10; Prata: 20). Quando a fonte informa só o preço por unidade, como nos itens da Gazeta, o lote é calculado: 100 × preço unitário (365 itens, sinalizados nos detalhes). Semente Melhorada e Semente Selecionada são as exceções da Gazeta: o usuário confirmou que os preços são do lote, de 100 e de 1.000 unidades. Assim todos os itens podem ser negociados por unidade ou por lote na calculadora; sugestões, se houver, não recebem lote.
 
 
 A calculadora de compras e vendas substitui o simulador de um único produto. Permite adicionar vários itens, escolher unidade ou lote quando informado, ajustar quantidade e preço em cada linha, remover itens e limpar a lista. O total é a soma dos subtotais, com até cinco casas decimais por preço informado e soma inteira em escala decimal para evitar perda de precisão. A lista permanece ao fechar e reabrir a janela durante a sessão. Valores completos continuam ativados por padrão.
@@ -87,13 +87,32 @@ O botão **+100** soma 100 à quantidade, no formulário e em cada linha, até o
 
 A edição XLII (25 de outubro de 1899) foi transcrita das 29 páginas enviadas (a página 30 está em branco).
 
-- **Páginas 1–21** estão em `gazette.js`: 374 itens, sendo 60 novos e 106 com faixa diferente da edição XLI. Salões passaram a $0,30–$0,35. Minérios ganharam Diamante, Esmeralda, Rubi e Safira ($2,50–$3,50 por unidade) e Enxofre ($0,40–$0,60 o lote de 100). Rainha Mansa, Rainha Selvagem e Ramalhete Silvestre passaram de Armazém para Botânicos. Cerveja aparece duas vezes na página 16, com a mesma faixa, e foi consolidada. Os nomes das receitas foram mantidos: “Saca Vazia” (na edição: “Saca”) e “Garrafa de Álcool” (na edição: “Garrafa de Alcool”); a busca encontra as duas grafias. Tônico Cura Equino passou a Tônico de Cura Equino.
+- **Páginas 1–21** estão em `gazette.js`: 374 itens (376 depois da atualização de 27/10/2026), sendo 60 novos e 106 com faixa diferente da edição XLI. Salões passaram a $0,30–$0,35. Minérios ganharam Diamante, Esmeralda, Rubi e Safira ($2,50–$3,50 por unidade) e Enxofre ($0,40–$0,60 o lote de 100). Rainha Mansa, Rainha Selvagem e Ramalhete Silvestre passaram de Armazém para Botânicos. Cerveja aparece duas vezes na página 16, com a mesma faixa, e foi consolidada. Os nomes das receitas foram mantidos: “Saca Vazia” (na edição: “Saca”) e “Garrafa de Álcool” (na edição: “Garrafa de Alcool”); a busca encontra as duas grafias. Tônico Cura Equino passou a Tônico de Cura Equino.
 - **Páginas 20–29** (Minérios, Coleta, Coleta de Fazenda, Lenhador, Plantação e Venda de Fazenda) republicam a planilha do condado. `county-prices.js` mantém a planilha original (`spreadsheetRows`, conferida com os arquivos de `data/`) e aplica a XLII: Tronco de Madeira sobe de $0,18–$0,26 para $0,70–$0,82 o lote; entram Tora Ruim, Tora Boa, Enxofre, as quatro gemas, Tomilho, Minhoca Viva, oito sementes de Coleta, Café (grão) e Ameixa-do-riacho (plantação e venda). As demais faixas foram confirmadas.
 
 **Mel** ($0,04 a $0,05 por unidade, Gazeta) e **Tomilho** ($0,22 a $0,25 o lote de 100, Coleta) passaram a ter cotação. Os custos de Óleo de Girassol e Ervas Aromáticas ficam completos na calculadora principal.
 
 Cada item novo ou alterado traz a origem da mudança nos detalhes, e os novos têm o selo “Novo” na tabela. A edição XLII é a tabela oficial completa, então os itens que não constam nela foram removidos, por orientação do usuário: Polpa de Manga, cinco Pacotes de Semente, Essência de Fertilidade, Tocha e Tomahawk (edição XLI), e Ayuhasca, Peyote, Leite de Fazenda Coleta e Carne de Peixe de Coleta (planilha do condado). Leite e Carne de Peixe continuam no catálogo pela cotação da Gazeta ($0,04–$0,06 e $0,07–$0,11). A planilha original segue íntegra em `data/` e em `spreadsheetRows`.
 
+
+## Atualização de preços da Gazeta (27/10/2026)
+
+Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em `gazette.js` (`updatedFromXLII` e `newInUpdate`); os demais itens seguem a edição XLII.
+
+| Item | Seção | Edição XLII | Atualização |
+|---|---|---|---|
+| Vela | Armazém | $0,19–$0,21 | $0,22–$0,28 |
+| Bala de Mel | Tabacarias | $0,05–$0,07 | $0,06–$0,08 |
+| Caixa de Cigarros | Tabacarias | $0,60–$0,70 | $0,53–$0,68 |
+| Charuto | Tabacarias | $0,14–$0,17 | $0,18–$0,22 |
+| Combo Tabacaria | Tabacarias | $0,17–$0,22 | $0,22–$0,29 |
+| Isqueiro | Tabacarias | $0,25–$0,35 | $0,18–$0,23 |
+| Cantil Vazio | Armazém (a confirmar) | — | $0,45–$0,58 |
+| Lanterna | Armazém (a confirmar) | — | $8,00–$9,50 |
+| Martelo de Reparo | Armazém (a confirmar) | — | $0,16–$0,20 |
+| Pena de Ave Pequena | Armazém | $0,02 | removida |
+
+A atualização não informa a seção dos três itens novos; eles ficam em Armazém até confirmação, e a nota de cada um diz isso. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Os três novos têm o selo “Novo”; os seis alterados mostram a faixa da edição XLII nos detalhes.
 
 ## Receitas do livro da Botica
 
@@ -139,7 +158,7 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
   - O resultado abre com o resumo do cenário selecionado (custo de produção, faturamento e lucro bruto) e segue com a grade venda × custo. Os custos não aparecem mais duplicados.
 - **Economia:**
   - A coluna “Situação” saiu. Os selos “Novo” e “Sugerido” aparecem ao lado da origem.
-  - O filtro “Novidades” mostra só os 74 itens novos da edição XLII.
+  - O filtro “Novidades” mostra só os 76 itens novos desde a edição XLI: 73 da edição XLII e 3 da atualização de 27/10/2026.
   - As linhas são mais baixas: 10 itens por página em 1366×768.
 - Validado sem rolagem da página em 1280×720, 1366×768, 1920×1080, 800×900 e 375×812.
 
