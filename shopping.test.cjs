@@ -48,5 +48,5 @@ test('every listed item has a lot: 100 units unless the source prints another si
  const ouro=catalog.find(item=>item.name==='Ouro'), girassol=catalog.find(item=>item.name==='Girassol');
  assert.deepEqual([ouro.lotSize,ouro.sourceMin,ouro.lotDerived],[10,20,undefined]);
  assert.deepEqual([girassol.lotSize,girassol.sourceMin,girassol.lotDerived],[100,30,undefined]);
- assert.equal(catalog.filter(item=>item.lotDerived).length,363);
+ assert.equal(catalog.filter(item=>item.lotDerived).length,365);
 });

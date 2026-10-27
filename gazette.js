@@ -1,6 +1,10 @@
 // Cents per unit, transcribed from the Gazeta Comercial screenshots supplied
 // in this conversation (edition XLII, 25 October 1899, pages 1–21; pages 21–29 are in county-prices.js).
 // Truncated labels stay explicit; recipe names are kept where the edition spells them differently.
+// A price update sent on 27/10/2026, without an edition number, changes or adds the entries in
+// updatedFromXLII and newInUpdate below, and removes Pena de Ave Pequena.
+const priceUpdate = 'atualização de 27/10/2026';
+const sectionPending = 'A atualização não informa a seção; classificado em Armazém, a confirmar.';
 const gazetteSections = {
   "Fazendas": [
     ["Amido de Milho", 4, 6], ["Açúcar Refinado", 5, 7], ["Caixa de Agarita", 18, 22], ["Caixa de Gaulteria", 18, 22],
@@ -37,8 +41,8 @@ const gazetteSections = {
     ["Kit de Primeiros Socorros", 15, 20], ["Tônico de Ervas", 10, 15]
   ],
   "Tabacarias": [
-    ["Bala de Mel", 5, 7], ["Caixa de Cigarros", 60, 70], ["Charuto", 14, 17], ["Combo Tabacaria", 17, 22],
-    ["Fósforo", 7, 9], ["Goma de Tabaco", 7, 9], ["Isqueiro", 25, 35], ["Tabaco Curado", 6, 8]
+    ["Bala de Mel", 6, 8], ["Caixa de Cigarros", 53, 68], ["Charuto", 18, 22], ["Combo Tabacaria", 22, 29],
+    ["Fósforo", 7, 9], ["Goma de Tabaco", 7, 9], ["Isqueiro", 18, 23], ["Tabaco Curado", 6, 8]
   ],
   "Tipografias": [
     ["Cartão de Visita", 5, 7], ["Combo Tipografia", 18, 25], ["Diagrama de Escopeta", 67, 71], ["Diagrama de Munição", 20, 23],
@@ -57,12 +61,13 @@ const gazetteSections = {
   ],
   "Armazém": [
     ["Balde Vazio", 20, 22], ["Bolsa Térmica", 25, 28], ["Caixa de Colmeia", 5, 8], ["Caixa de Madeira", 11, 14],
-    ["Combo Armazém", 29, 40], ["Corda", 10, 15], ["Cutelo", 25, 30], ["Câmera", 500, 700],
-    ["Faca de Caça", 20, 25], ["Facas de Arremesso", 30, 35], ["Kit de Reparo de Arma", 16, 20], ["Machado", 14, 16],
-    ["Machado Reforçado", 27, 30], ["Mochila de Couro", 20, 22], ["Pena de Ave Pequena", 2, 2], ["Peneira", 5, 7],
-    ["Peneira Avançada", 14, 16], ["Picareta", 22, 24], ["Picareta Reforçada", 25, 27], ["Pomada de Picada", 2, 3],
-    ["Rastelo", 15, 17], ["Rede de Pesca", 12, 15], ["Saca Vazia", 4, 6, "Chamado de “Saca” na edição XLII."], ["Vara de Pesca", 30, 35],
-    ["Vela", 19, 21], ["Verniz", 10, 12], ["Véu de Apicultor", 3, 5], ["Xarope de Açúcar", 1, 2]
+    ["Cantil Vazio", 45, 58, sectionPending], ["Combo Armazém", 29, 40], ["Corda", 10, 15], ["Cutelo", 25, 30],
+    ["Câmera", 500, 700], ["Faca de Caça", 20, 25], ["Facas de Arremesso", 30, 35], ["Kit de Reparo de Arma", 16, 20],
+    ["Lanterna", 800, 950, sectionPending], ["Machado", 14, 16], ["Machado Reforçado", 27, 30], ["Martelo de Reparo", 16, 20, sectionPending],
+    ["Mochila de Couro", 20, 22], ["Peneira", 5, 7], ["Peneira Avançada", 14, 16], ["Picareta", 22, 24],
+    ["Picareta Reforçada", 25, 27], ["Pomada de Picada", 2, 3], ["Rastelo", 15, 17], ["Rede de Pesca", 12, 15],
+    ["Saca Vazia", 4, 6, "Chamado de “Saca” na edição XLII."], ["Vara de Pesca", 30, 35], ["Vela", 22, 28], ["Verniz", 10, 12],
+    ["Véu de Apicultor", 3, 5], ["Xarope de Açúcar", 1, 2]
   ],
   "Armarias": [
     ["Cabo de Escopeta", 71, 92], ["Cabo de Pistola", 48, 62], ["Cabo de Repetidora", 40, 52], ["Cabo de Revólver", 48, 62],
@@ -164,23 +169,30 @@ const newInEdition = new Set([
   "Polpa de Morango", "Polpa de Pimenta", "Própolis", "Buquê de Girassóis", "Buquê de Lavanda", "Buquê de Rosas",
   "Minhocário", "Perfume Silvestre", "Perfume de Lavanda", "Semente Melhorada", "Semente Selecionada", "Figurino Sob Medida",
   "Treinamento de Cavalo (por treino)", "Antibiótico Potente", "Kit Cirúrgico", "Papel de Imprensa", "Parafusos", "Corda",
-  "Pena de Ave Pequena", "Cabo de Escopeta", "Cabo de Pistola", "Cabo de Repetidora", "Cabo de Revólver", "Cabo de Rifle",
+  "Cabo de Escopeta", "Cabo de Pistola", "Cabo de Repetidora", "Cabo de Revólver", "Cabo de Rifle",
   "Cano de Escopeta", "Cano de Pistola", "Cano de Repetidora", "Cano de Revólver", "Cano de Rifle", "Cilindro de Revólver",
   "Corpo de Escopeta", "Corpo de Pistola", "Corpo de Repetidora", "Corpo de Revólver", "Corpo de Rifle", "Tambor de Repetidora",
   "Arco Melhorado", "Flecha (Fogo)", "Flecha (P)", "Flecha (Veneno)", "Flecha Farpada", "Flecha de Exaustão",
   "Flecha de Fumaça Sagrada", "Flecha de Ocre", "Flecha de Rastreio", "Flecha de Sílex", "Flecha de Trovão", "Aquavit",
   "Jacaré Braseado", "Diamante", "Esmeralda", "Rubi", "Safira", "Enxofre"
 ]);
-// Searchable names: the XLII spelling, or the XLI name of a renamed entry.
-const gazetteAliases = {"Semente Melhorada":["Semente Melhorada…", "Semente Melhorada de Milho", "Semente Melhorada de Cana", "Semente Melhorada de Milefólio", "Semente Melhorada de Mirtilo-silvestre", "Semente Melhorada de Pera", "Semente Melhorada de Pimenta", "Semente Melhorada de Repolho", "Semente Melhorada de Tanaceto", "Semente Melhorada de Gaulteria"], "Semente Selecionada":["Semente Selecionada…"], "Garrafa de Álcool":["Garrafa de Alcool"], "Saca Vazia":["Saca"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
+// XLII ranges of the entries the price update changed, shown in each item note.
+const updatedFromXLII = {
+  "Bala de Mel":[5, 7], "Caixa de Cigarros":[60, 70], "Charuto":[14, 17], "Combo Tabacaria":[17, 22],
+  "Isqueiro":[25, 35], "Vela":[19, 21]
+};
+const newInUpdate = new Set(["Cantil Vazio", "Lanterna", "Martelo de Reparo"]);
+// Searchable names: the XLII spelling, the XLI name of a renamed entry, or the update message spelling.
+const gazetteAliases = {"Combo Tabacaria":["Combo de Tabacaria"], "Semente Melhorada":["Semente Melhorada…", "Semente Melhorada de Milho", "Semente Melhorada de Cana", "Semente Melhorada de Milefólio", "Semente Melhorada de Mirtilo-silvestre", "Semente Melhorada de Pera", "Semente Melhorada de Pimenta", "Semente Melhorada de Repolho", "Semente Melhorada de Tanaceto", "Semente Melhorada de Gaulteria"], "Semente Selecionada":["Semente Selecionada…"], "Garrafa de Álcool":["Garrafa de Alcool"], "Saca Vazia":["Saca"], "Tônico de Cura Equino":["Tônico Cura Equino"], "Lendário · Truta Arco-Íris":["Lendário · Truta Arco-íris"]};
 const gazetteMoney = cents => '$' + (cents / 100).toFixed(2).replace('.', ',');
 const gazetteNote = (name, sourceNote) => [sourceNote,
   newInEdition.has(name) && 'Novo na edição XLII.',
+  updatedFromXLII[name] && `Na edição XLII: ${gazetteMoney(updatedFromXLII[name][0])} a ${gazetteMoney(updatedFromXLII[name][1])}; faixa da ${priceUpdate}.`,
   previousRanges[name] && `Na edição XLI: ${gazetteMoney(previousRanges[name][0])} a ${gazetteMoney(previousRanges[name][1])}${previousRanges[name][0] > previousRanges[name][1] ? ' (faixa invertida)' : ''}.`
 ].filter(Boolean).join(' ') || undefined;
 // The user confirmed mineral prices apply to the displayed lot, not each unit.
 const gazetteItems = [
-  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: 'XLII', isNew: newInEdition.has(name), aliases: gazetteAliases[name] || [],
+  ...Object.entries(gazetteSections).flatMap(([section, rows]) => rows.map(([name, sourceMin, sourceMax, sourceNote, lotSize = 1]) => ({name, min: sourceMin / lotSize, max: sourceMax / lotSize, section, lotSize, sourceMin, sourceMax, edition: newInUpdate.has(name) || updatedFromXLII[name] ? priceUpdate : 'XLII', isNew: newInEdition.has(name), aliases: gazetteAliases[name] || [],
     sourceNote: gazetteNote(name, [sourceNote, lotSize > 1 && `Lote de ${lotSize} un.: ${gazetteMoney(sourceMin)} a ${gazetteMoney(sourceMax)} na Gazeta. Valores da tabela divididos por ${lotSize}, conforme confirmação de que a faixa é por lote.`].filter(Boolean).join(' '))})))
 ];
 if (typeof module !== 'undefined') module.exports = {gazetteItems};
