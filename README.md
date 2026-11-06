@@ -60,16 +60,16 @@ Layout validado com as 16 receitas, sem rolagem da página em 1280×720, 1366×7
 
 `/economia/` é uma consulta compacta, com filtros, ordenação e paginação que adapta o número de linhas à altura disponível. A tela principal reúne a tabela, contagens e ações; fontes, notas das sugestões, detalhes de cada item e calculadora de compras e vendas abrem em janelas. Os estudos de preços médios por setor foram removidos. O layout procura caber na altura da tela sem rolagem da página; em telas muito baixas ou com zoom, o conteúdo continua acessível.
 
-Por orientação do usuário, a consulta, a calculadora e o CSV ocultam **somente Fazenda Coleta e Fazenda Plantação**. As demais origens permanecem: Coleta, Lenhador, Mineração, Fazenda Venda e Gazeta Comercial. `buildEconomyCatalog` tem 464 referências, todas com cotação da edição XLII, da atualização de 27/10/2026 ou da planilha confirmada pela XLII; 73 são novas na edição XLII e aparecem com o selo “Novo”. Plantas de Fazenda Venda aparecem sem `(v)`. A exportação inclui todos os resultados dos filtros, não apenas a página atual.
+Por orientação do usuário, a consulta, a calculadora e o CSV ocultam **somente Fazenda Coleta e Fazenda Plantação**. As demais origens permanecem: Coleta, Lenhador, Mineração, Fazenda Venda e Gazeta Comercial. `buildEconomyCatalog` tem 467 referências, todas com cotação da edição XLIV (diretamente ou pela planilha do condado confirmada ou atualizada por ela); 5 são novas na edição XLIV e aparecem com o selo “Novo”. Plantas de Fazenda Venda aparecem sem `(v)`. A exportação inclui todos os resultados dos filtros, não apenas a página atual.
 
-Os dados completos são preservados em `buildPriceCatalog` (528 referências), `county-prices.js`, `gazette.js` e nos arquivos de origem em `data/`. A primeira planilha contém 134 linhas, consolidadas em 132 após remover duas repetições idênticas de Papoula-da-pradaria; o complemento de Coleta contém 16 linhas. Os cinco itens de Fazenda Coleta reenviados são idênticos aos da primeira fonte. Preços unitários e por lote foram conferidos em todas as linhas, sem dividir novamente os valores unitários. “Rosa (coleta)” preserva essa faixa e Humus é padronizado como Húmus. Minérios usam os nomes da nova fonte, com pesquisa pelos nomes anteriores.
+Os dados completos são preservados em `buildPriceCatalog` (530 referências), `county-prices.js`, `gazette.js` e nos arquivos de origem em `data/`. A primeira planilha contém 134 linhas, consolidadas em 132 após remover duas repetições idênticas de Papoula-da-pradaria; o complemento de Coleta contém 16 linhas. Os cinco itens de Fazenda Coleta reenviados são idênticos aos da primeira fonte. Preços unitários e por lote foram conferidos em todas as linhas, sem dividir novamente os valores unitários. “Rosa (coleta)” preserva essa faixa e Humus é padronizado como Húmus. Minérios usam os nomes da nova fonte, com pesquisa pelos nomes anteriores.
 
 Desde a edição XLII não há preços sugeridos: Mel e Tomilho têm cotação. O mecanismo continua disponível para um insumo futuro sem cotação (média simples dos pontos médios de itens correlatos, com notas item por item); sem sugestões, o botão de notas e o filtro de sugeridos ficam ocultos. A tabela também exibe os valores completos por padrão; desmarcar a opção reduz a exibição a duas casas, usando `< $0,01` para valores positivos que arredondariam para zero.
 
 Os custos do planejamento principal continuam usando **Fazenda Venda** para a compra das plantas, conforme escolha do usuário. Esterco usa Fazenda Coleta e Húmus usa Coleta; ocultar essas origens em Economia não altera os custos da produção. A memória de cálculo identifica a origem. Os oito preços de venda dos produtos prontos continuam sendo os da Gazeta. Todos os insumos das receitas têm cotação: Mel vem da Gazeta e Tomilho, de Coleta.
 
 
-A tabela compacta exibe valores por unidade na primeira linha e os preços mínimo/máximo do lote na segunda linha, junto da quantidade de unidades. Um lote é de 100 unidades. Quando a fonte informa o lote (Coleta, Plantação, Venda de Fazenda, Lenhador, Minérios), os valores vêm diretamente de `sourceMin`/`sourceMax`, inclusive os tamanhos impressos diferentes de 100 (Ouro: 10; Prata: 20). Quando a fonte informa só o preço por unidade, como nos itens da Gazeta, o lote é calculado: 100 × preço unitário (365 itens, sinalizados nos detalhes). Semente Melhorada e Semente Selecionada são as exceções da Gazeta: o usuário confirmou que os preços são do lote, de 100 e de 1.000 unidades. Assim todos os itens podem ser negociados por unidade ou por lote na calculadora; sugestões, se houver, não recebem lote.
+A tabela compacta exibe valores por unidade na primeira linha e os preços mínimo/máximo do lote na segunda linha, junto da quantidade de unidades. Um lote é de 100 unidades. Quando a fonte informa o lote (Coleta, Plantação, Venda de Fazenda, Lenhador, Minérios), os valores vêm diretamente de `sourceMin`/`sourceMax`, inclusive os tamanhos impressos diferentes de 100 (Ouro: 10; Prata: 20). Quando a fonte informa só o preço por unidade, como nos itens da Gazeta, o lote é calculado: 100 × preço unitário (368 itens, sinalizados nos detalhes). Semente Melhorada e Semente Selecionada são as exceções da Gazeta: o usuário confirmou que os preços são do lote, de 100 e de 1.000 unidades. Assim todos os itens podem ser negociados por unidade ou por lote na calculadora; sugestões, se houver, não recebem lote.
 
 
 A calculadora de compras e vendas substitui o simulador de um único produto. Permite adicionar vários itens, escolher unidade ou lote quando informado, ajustar quantidade e preço em cada linha, remover itens e limpar a lista. O total é a soma dos subtotais, com até cinco casas decimais por preço informado e soma inteira em escala decimal para evitar perda de precisão. A lista permanece ao fechar e reabrir a janela durante a sessão. Valores completos continuam ativados por padrão.
@@ -83,7 +83,80 @@ A calculadora tem o seletor de cenário **Mínimo / Mediano / Máximo** (Mediano
 O botão **+100** soma 100 à quantidade, no formulário e em cada linha, até o limite de 1.000.000. No formulário, enquanto o campo mostra o 1 inicial sem edição, o primeiro clique leva a 100, não a 101.
 
 
-## Gazeta Comercial, edição XLII
+## Gazeta Comercial, edição XLIV (vigente)
+
+A edição XLIV (6 de novembro de 1899) foi transcrita das 29 páginas enviadas em 06/11/2026 (a página 30 está em branco). É a tabela oficial completa: os itens que não constam dela foram removidos. A barra lateral da Gazeta soma 531 cartões e cada seção bate com o código; Salões tem 106 cartões porque Cerveja aparece duas vezes na página 16, e o catálogo guarda 105. Cada item alterado traz a faixa anterior nos detalhes; os novos têm o selo “Novo”.
+
+**Páginas 1–21 (`gazette.js`).** Mudaram 31 faixas, por unidade. A marca * indica faixa anterior vinda da atualização de 27/10/2026; as demais vêm da edição XLII.
+
+| Item | Seção | Antes | XLIV |
+|---|---|---|---|
+| Chocolate | Fazendas | $0,04–$0,06 | $0,05–$0,07 |
+| Geléia de Pimenta | Fazendas | $0,04–$0,06 | $0,05–$0,07 |
+| Iogurte | Fazendas | $0,06–$0,08 | $0,09–$0,11 |
+| Queijo | Fazendas | $0,07–$0,09 | $0,10–$0,12 |
+| Linha de Algodão | Ateliês | $0,03–$0,05 | $0,04–$0,06 |
+| Ração de Cavalo | Estábulos | $0,10–$0,13 | $0,12–$0,14 |
+| Tônico de Cura Equino | Estábulos | $0,11–$0,13 | $0,15–$0,17 |
+| Bala de Mel | Tabacarias | $0,06–$0,08* | $0,07–$0,09 |
+| Caixa de Cigarros | Tabacarias | $0,53–$0,68* | $0,68–$0,88 |
+| Charuto | Tabacarias | $0,18–$0,22* | $0,22–$0,28 |
+| Combo Tabacaria | Tabacarias | $0,22–$0,29* | $0,39–$0,50 |
+| Fósforo | Tabacarias | $0,07–$0,09 | $0,10–$0,13 |
+| Goma de Tabaco | Tabacarias | $0,07–$0,09 | $0,09–$0,12 |
+| Isqueiro | Tabacarias | $0,18–$0,23* | $0,26–$0,34 |
+| Jornal | Tipografias | $0,14–$0,17 | $1,30–$1,50 |
+| Cantil Vazio | Armazém | $0,45–$0,58* | $0,70–$0,90 |
+| Combo Armazém | Armazém | $0,29–$0,40 | $0,48–$0,62 |
+| Kit de Reparo de Arma | Armarias (antes Armazém) | $0,16–$0,20 | $0,20–$0,25 |
+| Caixa de Munição Espingarda (N) | Armarias | $0,55–$0,60 | $0,65–$0,70 |
+| Caixa de Munição Pistola (E) | Armarias | $0,55–$0,60 | $0,68–$0,73 |
+| Caixa de Munição Pistola (N) | Armarias | $0,35–$0,40 | $0,40–$0,45 |
+| Caixa de Munição Repetidora (E) | Armarias | $0,80–$0,85 | $0,98–$1,03 |
+| Caixa de Munição Repetidora (N) | Armarias | $0,55–$0,60 | $0,68–$0,73 |
+| Caixa de Munição Revólver (E) | Armarias | $0,50–$0,55 | $0,63–$0,68 |
+| Caixa de Munição Revólver (N) | Armarias | $0,35–$0,40 | $0,43–$0,48 |
+| Caixa de Munição Rifle (E) | Armarias | $0,70–$0,75 | $0,83–$0,88 |
+| Caixa de Munição Rifle (N) | Armarias | $0,42–$0,47 | $0,48–$0,53 |
+| Caixa de Munição Rifle de Caça… | Armarias | $0,60–$0,65 | $0,67–$0,72 |
+| Caixa de Munição Rifle de Elefante… | Armarias | $1,20–$1,30 | $1,47–$1,57 |
+| Combo Armaria | Armarias | $0,66–$0,77 | $1,07–$1,25 |
+| Flecha (N) | Nativos | $0,11–$0,14 | $0,50–$0,75 |
+
+- **Novos:** Cruza de Cavalos (por cruza), Estábulos, $20,00–$30,00; Moedor Fixo, Fábricas, $6,00–$8,40; Rede de Pesca Grande, Armazém, $0,40–$0,50; Tocha, Nativos, $2,00–$4,00.
+- **Removido:** Flecha de Rastreio.
+- **Renomeado:** Carne de Galinha passa a Carne de Ave, com a mesma faixa ($0,04–$0,06). A busca encontra os dois nomes, e uma venda salva no PDV com o nome antigo passa ao novo.
+- **Mudança de seção:** Kit de Reparo de Arma e Lanterna saem de Armazém para Armarias. A Lanterna estava em Armazém por orientação do usuário, porque a atualização de 27/10/2026 não dava a seção; a XLIV a põe em Armarias, com a mesma faixa ($8,00–$9,50).
+- Os demais itens das páginas 1–21 têm a mesma faixa de antes, inclusive os da atualização de 27/10/2026 que não estão na tabela acima (Vela e Martelo de Reparo).
+
+**Páginas 21–29 (`county-prices.js`).** Preços por lote, como impressos:
+
+- **Plantação:** 56 das 59 plantas passam de $0,22–$0,25 para $0,45–$0,50 o lote de 100. Cannabis, Coca e Papoula-do-ópio continuam a $0,22–$0,25.
+- **Venda de Fazenda:** as mesmas 56 passam de $0,30–$0,35 para $0,60–$0,70 o lote de 100; as três exceções continuam a $0,30–$0,35.
+- **Ovo** (Coleta de Fazenda) passa a lote de 50 a $0,50–$0,80; antes, lote de 20 a $0,10–$0,20.
+- **Coleta** ganha Semente de Tabaco, a $0,22–$0,25 o lote de 100.
+- A XLIV lista só Café (grão). O “Café” da planilha do condado, que convivia com Café (grão), foi removido.
+- Minérios, Lenhador e as demais faixas de Coleta e Coleta de Fazenda foram confirmados.
+
+**Efeito na produção.** O planejamento compra as plantas na Venda de Fazenda, então o custo sobe nas receitas com plantas. Lucro bruto de um lote (pior caso / mediano / melhor caso):
+
+| Receita (lote) | Antes | XLIV |
+|---|---|---|
+| Perfume (5) | $0,085 / $0,247 / $0,410 | $0,050 / $0,215 / $0,380 |
+| Óleo de Girassol (5) | $0,083 / $0,259 / $0,435 | $0,065 / $0,242 / $0,420 |
+| Ervas para Defumação (5) | $0,037 / $0,111 / $0,185 | -$0,015 / $0,063 / $0,140 |
+| Ervas Aromáticas (5) | $0,063 / $0,141 / $0,219 | $0,028 / $0,108 / $0,189 |
+| Ervas Medicinais (5) | $0,037 / $0,106 / $0,175 | -$0,015 / $0,058 / $0,130 |
+| Buquê de Flores (5) | $0,145 / $0,328 / $0,510 | -$0,010 / $0,180 / $0,370 |
+| Perfume Silvestre ou de Lavanda (1) | $0,075 / $0,158 / $0,240 | $0,040 / $0,125 / $0,210 |
+| Buquê de Rosas, Lavanda ou Girassóis (1) | $0,045 / $0,133 / $0,220 | -$0,090 / $0,005 / $0,100 |
+| Ramalhete Silvestre (10) | $0,090 / $0,141 / $0,192 | $0,084 / $0,135 / $0,186 |
+
+Combo Botânicos (compra os intermediários prontos), Fertilizante, Minhocário e Semente Melhorada não mudam. Valores em dólar com três casas, sem arredondar ao centavo.
+
+## Gazeta Comercial, edição XLII (anterior)
+
+Registro da edição anterior, substituída pela XLIV.
 
 A edição XLII (25 de outubro de 1899) foi transcrita das 29 páginas enviadas (a página 30 está em branco).
 
@@ -92,12 +165,12 @@ A edição XLII (25 de outubro de 1899) foi transcrita das 29 páginas enviadas 
 
 **Mel** ($0,04 a $0,05 por unidade, Gazeta) e **Tomilho** ($0,22 a $0,25 o lote de 100, Coleta) passaram a ter cotação. Os custos de Óleo de Girassol e Ervas Aromáticas ficam completos na calculadora principal.
 
-Cada item novo ou alterado traz a origem da mudança nos detalhes, e os novos têm o selo “Novo” na tabela. A edição XLII é a tabela oficial completa, então os itens que não constam nela foram removidos, por orientação do usuário: Polpa de Manga, cinco Pacotes de Semente, Essência de Fertilidade, Tocha e Tomahawk (edição XLI), e Ayuhasca, Peyote, Leite de Fazenda Coleta e Carne de Peixe de Coleta (planilha do condado). Leite e Carne de Peixe continuam no catálogo pela cotação da Gazeta ($0,04–$0,06 e $0,07–$0,11). A planilha original segue íntegra em `data/` e em `spreadsheetRows`.
+Na XLII, o selo “Novo” e as notas com a faixa anterior marcavam o que a XLII trouxe; desde a XLIV, marcam o que a XLIV trouxe. A edição XLII era a tabela oficial completa, então os itens que não constavam nela foram removidos, por orientação do usuário: Polpa de Manga, cinco Pacotes de Semente, Essência de Fertilidade, Tocha e Tomahawk (edição XLI), e Ayuhasca, Peyote, Leite de Fazenda Coleta e Carne de Peixe de Coleta (planilha do condado). Leite e Carne de Peixe continuam no catálogo pela cotação da Gazeta ($0,04–$0,06 e $0,07–$0,11). A planilha original segue íntegra em `data/` e em `spreadsheetRows`.
 
 
 ## Atualização de preços da Gazeta (27/10/2026)
 
-Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em `gazette.js` (`fromPriceUpdate`); os demais itens seguem a edição XLII.
+Substituída pela edição XLIV, que traz todos esses itens; a tabela da XLIV mostra o que mudou. Registro: preços enviados pelo usuário em 27/10/2026, sem número de edição; os demais itens seguiam a edição XLII.
 
 | Item | Seção | Edição XLII | Atualização |
 |---|---|---|---|
@@ -112,7 +185,7 @@ Preços enviados pelo usuário em 27/10/2026, sem número de edição. Estão em
 | Martelo de Reparo | Armazém | — | $0,16–$0,20 |
 | Pena de Ave Pequena | Armazém | $0,02 | removida |
 
-A atualização não informa a seção dos três itens novos; por orientação do usuário, eles ficam em Armazém. A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constam da atualização e mantêm a faixa da edição XLII. Por orientação do usuário, os itens da atualização não têm o selo “Novo” nem nota com a faixa anterior; esta tabela é o registro da mudança.
+A atualização não informava a seção dos três itens novos; por orientação do usuário, eles ficaram em Armazém (a XLIV pôs a Lanterna em Armarias). A mensagem chama o combo de “Combo de Tabacaria”; o item mantém o nome “Combo Tabacaria”, como os outros combos, e a busca encontra as duas formas. Fósforo, Goma de Tabaco e Tabaco Curado não constavam da atualização e mantiveram a faixa da edição XLII. Por orientação do usuário, os itens da atualização não tiveram selo “Novo” nem nota com a faixa anterior; esta tabela é o registro da mudança.
 
 ## Receitas do livro da Botica
 
@@ -158,7 +231,7 @@ O quadro de resultado cruza os três cenários de venda (linhas, com o faturamen
   - O resultado abre com o resumo do cenário selecionado (custo de produção, faturamento e lucro bruto) e segue com a grade venda × custo. Os custos não aparecem mais duplicados.
 - **Economia:**
   - A coluna “Situação” saiu. Os selos “Novo” e “Sugerido” aparecem ao lado da origem.
-  - O filtro “Novidades” mostra só os 73 itens novos da edição XLII.
+  - O filtro “Novidades” mostra só os 5 itens novos da edição XLIV.
   - As linhas são mais baixas: 10 itens por página em 1366×768.
 - Validado sem rolagem da página em 1280×720, 1366×768, 1920×1080, 800×900 e 375×812.
 

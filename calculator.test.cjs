@@ -14,13 +14,15 @@ test('combo prices all purchased intermediates with a precise midpoint',()=>{
 });
 test('expanded combo charges raw ingredients without double counting intermediates',()=>{
  const cost=estimateCosts(calculate({combo:5},true).totals);
- // Mel is quoted since Gazeta XLII: 5 units at $0.04–$0.05 add 0.20, 0.225 and 0.25 cents.
- assert.equal(cost.min,1.055);assert.equal(cost.median,1.24125);assert.equal(cost.max,1.4275);
+ // Raw inputs: Rosa 15, Girassol 20, Papoula-da-pradaria 10 (Fazenda Venda, XLIV: 0.60–0.70 cent),
+ // Garrafa 2 × 4–6, Frasco 7 × 2–3, Cera 2 × 12–15, Linha 5 × 4–6, Mel 5 × 4–5, Caixa de Madeira 11–14.
+ // Minimum 27 + 8 + 14 + 24 + 20 + 20 + 11 = 124 cents; maximum 31.5 + 12 + 21 + 30 + 30 + 25 + 14 = 163.5.
+ assert.equal(cost.min,1.24);assert.equal(cost.median,1.4375);assert.equal(cost.max,1.635);
  assert.deepEqual(cost.missing,[]);
 });
 test('unknown prices stay missing and a midpoint is not rounded per unit',()=>{
  assert.deepEqual(estimateCosts({'Item sem cotação':10}),{min:0,median:0,max:0,priced:0,missing:['Item sem cotação']});
- assert.deepEqual(estimateCosts({'Rosa':1000}),{min:3,median:3.25,max:3.5,priced:1,missing:[]});
+ assert.deepEqual(estimateCosts({'Rosa':1000}),{min:6,median:6.5,max:7,priced:1,missing:[]});
  assert.equal(estimateCosts({'Frasco Vazio':100}).median,2.5);
  assert.deepEqual(estimateCosts({}),{min:0,median:0,max:0,priced:0,missing:[]});
 });
@@ -65,7 +67,8 @@ test('fertilizer and incense use new official costs without per-unit rounding',(
  const fertilizer=estimateCosts(calculate({fertilizante:50}).totals);
  assert.deepEqual(fertilizer,{min:0.106,median:0.1205,max:0.135,priced:3,missing:[]});
  const incense=estimateCosts(calculate({defumacao:5}).totals);
- assert.deepEqual(incense,{min:0.165,median:0.18875,max:0.2125,priced:4,missing:[]});
+ // 15 plants at 0.60–0.70 cent (Fazenda Venda, XLIV) + 2 Embalagem de Papel at 6–8 cents.
+ assert.deepEqual(incense,{min:0.21,median:0.2375,max:0.265,priced:4,missing:[]});
 });
 
 test('Botica recipes yield one unit per batch with their book ingredients and time',()=>{
@@ -81,9 +84,9 @@ test('Botica recipes are fully priced from the Gazeta and origin tables',()=>{
  // 4 × Madeira Beneficiada (14–16) + 4 × Fibra Vegetal (0.22–0.25) + 3 × Pregos (3–5), in cents.
  assert.deepEqual([cost.min,cost.max,cost.missing],[0.6588,0.8,[]]);
  const profit=estimateProfit(calculate({buqueLavanda:1}));
- // Sale 30–40; cost 30 × Lavanda (Fazenda Venda 0.30–0.35) + 3 × Linha de Algodão (3–5).
+ // Sale 30–40; cost 30 × Lavanda (Fazenda Venda 0.60–0.70) + 3 × Linha de Algodão (4–6) = 30–39.
  assert.deepEqual([profit.revenue.min,profit.revenue.max],[0.3,0.4]);
- assert.ok(Math.abs(profit.profit.min-(0.3-0.255))<1e-10);
+ assert.ok(Math.abs(profit.profit.min-(0.3-0.39))<1e-10);
  assert.deepEqual(profit.missing,[]);
 });
 test('Perfume Silvestre and Ramalhete Silvestre follow the book',()=>{
@@ -123,7 +126,10 @@ test('profits subtract exact amounts and half cents round up when formatted',()=
  const {formatCost}=require('./app.js');
  assert.equal(formatCost(-0.005),'-$0,01');
  assert.equal(formatCost(1.665),'$1,67');
- assert.equal(estimateProfit(calculate({buqueLavanda:37})).profit.min,1.665);
+ // Median: 37 × (35 − 34.5) = 18.5 cents, exact, and charged half up.
+ const median=estimateProfit(calculate({buqueLavanda:37})).profit.median;
+ assert.equal(median,0.185);
+ assert.equal(formatCost(median),'$0,19');
 });
 test('profit matrix crosses every sale scenario with every cost scenario',()=>{
  const r=calculate({combo:1});

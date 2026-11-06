@@ -21,11 +21,11 @@ const recipes = [
  // Every improved seed variety (de Milho, de Cana, de Pimenta...) shares this recipe.
  {id:'sementeMelhorada',name:'Semente Melhorada',yield:100,ingredients:{'Semente Selecionada':100,'Embalagem de Papel':2,'Húmus':10}}
 ].map(recipe => ({time:30, ...recipe}));
-// Unit prices in cents, transcribed from the supplied Gazeta Comercial tables (edition XLII).
+// Unit prices in cents, transcribed from the supplied Gazeta Comercial tables (edition XLIV).
 const ingredientPrices = {
  'Perfume':[12,16], 'Buquê de Flores':[10,15], 'Óleo de Girassol':[10,15],
  'Cera de Abelha':[12,15], 'Garrafa de Álcool':[4,6], 'Embalagem de Papel':[6,8],
- 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6], 'Linha de Algodão':[3,5],
+ 'Frasco Vazio':[2,3], 'Pilão':[2,3], 'Caixa de Madeira':[11,14], 'Saca Vazia':[4,6], 'Linha de Algodão':[4,6],
  'Mel':[4,5], 'Madeira Beneficiada':[14,16], 'Pregos':[3,5], 'Semente Selecionada':[0.1,0.1]
 };
 // Selling prices per finished unit, in cents (Gazeta Comercial, Botânicos).
