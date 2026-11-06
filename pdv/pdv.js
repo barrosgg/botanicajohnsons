@@ -1,6 +1,6 @@
 const catalog = buildEconomyCatalog().filter(item => item.status === 'listed');
 const byName = new Map(catalog.map(item => [item.name, item]));
-const {parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, repriceLines, maxQuantity} = PdvCore;
+const {parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, repriceLines, renameLines, maxQuantity} = PdvCore;
 const lotTag = line => { const label = lotLabel(line.quantity, byName.get(line.name).lotSize); return label ? `<span class="lot-tag">${label}</span>` : ''; };
 const storageKey = 'botanica-pdv-v1';
 
@@ -13,7 +13,7 @@ const tabs = [['botica', 'Botica'], ['all', 'Todos'], ...sections.map(section =>
 let lines = [], scenario = 'median', step = 1, tab = 'botica', lastAdded = null, undo = null, page = 0, perPage = 12;
 try {
   const saved = JSON.parse(localStorage.getItem(storageKey));
-  if (saved && Array.isArray(saved.lines)) lines = saved.lines.filter(line => byName.has(line.name) && Number.isInteger(line.quantity) && line.quantity > 0 && line.quantity <= maxQuantity);
+  if (saved && Array.isArray(saved.lines)) lines = renameLines(saved.lines, catalog).filter(line => byName.has(line.name) && Number.isInteger(line.quantity) && line.quantity > 0 && line.quantity <= maxQuantity);
   if (['min', 'median', 'max'].includes(saved?.scenario)) scenario = saved.scenario;
   if ([1, 10, 100].includes(saved?.step)) step = saved.step;
 } catch { /* Storage may be unavailable; the sale still works in memory. */ }

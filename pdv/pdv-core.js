@@ -75,6 +75,13 @@ function repriceLines(lines, byName, scenario) {
   return lines;
 }
 
-return {normalize, parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, repriceLines, maxQuantity};
+// A line saved under an item's earlier name (Carne de Galinha, now Carne de Ave) follows the new name.
+function renameLines(lines, items) {
+  const names = new Set(items.map(item => item.name));
+  const current = new Map(items.flatMap(item => (item.aliases || []).map(alias => [alias, item.name])));
+  return lines.map(line => names.has(line.name) || !current.has(line.name) ? line : {...line, name: current.get(line.name)});
+}
+
+return {normalize, parseEntry, rankMatches, unitPrice, saleTotals, changeDue, formatAmount, formatPrice, lotLabel, addLine, repriceLines, renameLines, maxQuantity};
 })();
 if (typeof module !== 'undefined') module.exports = PdvCore;

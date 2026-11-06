@@ -166,14 +166,36 @@ const gazetteXLIIAdditions = [
 // XLII is the complete official table, so spreadsheet rows missing from it are removed.
 const absentFromXLII = new Set(['Leite', 'Ayuhasca', 'Carne de Peixe', 'Peyote']);
 const lotMoney = cents => '$' + (cents / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2});
-const rows = [
+const quote = (name, origin, lotSize, sourceMin, sourceMax) => ({name, origin, min: sourceMin / lotSize, max: sourceMax / lotSize, lotSize, sourceMin, sourceMax});
+const xliiRows = [
   ...spreadsheetRows.filter(row => !absentFromXLII.has(row.name)).map(row => {
     const change = gazetteXLIIChanges[row.name];
-    if (change) return {...row, min: change[0] / row.lotSize, max: change[1] / row.lotSize, sourceMin: change[0], sourceMax: change[1], source: 'Gazeta Comercial XLII',
-      note: `Na planilha do condado: lote de ${lotMoney(row.sourceMin)} a ${lotMoney(row.sourceMax)}.`};
-    return {...row, note: 'Faixa confirmada na Gazeta Comercial XLII.'};
+    if (change) return {...row, ...quote(row.name, row.origin, row.lotSize, ...change), source: 'Gazeta Comercial XLII'};
+    return row;
   }),
-  ...gazetteXLIIAdditions.map(([name, origin, lotSize, sourceMin, sourceMax]) => ({name, origin, min: sourceMin / lotSize, max: sourceMax / lotSize, lotSize, sourceMin, sourceMax, source: 'Gazeta Comercial XLII', isNew: true, note: 'Novo na Gazeta Comercial XLII.'}))
+  ...gazetteXLIIAdditions.map(args => ({...quote(...args), source: 'Gazeta Comercial XLII'}))
+];
+// Gazeta Comercial XLIV (06/11/1899), pages 21–29, is the current complete table. It raises the
+// farm plant lots (Cannabis, Coca and Papoula-do-ópio keep theirs), sells Ovo by the lot of 50
+// and adds Semente de Tabaco. It lists only Café (grão), so the spreadsheet's plain Café leaves.
+const keepPlantLots = new Set(['Cannabis', 'Coca', 'Papoula-do-ópio']);
+const xlivLot = row => {
+  if (row.name === 'Ovo') return [50, 50, 80];
+  if (keepPlantLots.has(row.name.replace(/ \(v\)$/, ''))) return null;
+  if (row.origin === 'Fazenda Plantação') return [100, 45, 50];
+  if (row.origin === 'Fazenda Venda') return [100, 60, 70];
+  return null;
+};
+const absentFromXLIV = new Set(['Café', 'Café (v)']);
+const gazetteXLIVAdditions = [['Semente de Tabaco', 'Coleta', 100, 22, 25]];
+const rows = [
+  ...xliiRows.filter(row => !absentFromXLIV.has(row.name)).map(row => {
+    const lot = xlivLot(row);
+    if (!lot) return {...row, note: 'Faixa confirmada na Gazeta Comercial XLIV.'};
+    return {...row, ...quote(row.name, row.origin, ...lot), source: 'Gazeta Comercial XLIV',
+      note: `Na edição XLII: ${lotMoney(row.sourceMin)} a ${lotMoney(row.sourceMax)} o lote de ${row.lotSize}.`};
+  }),
+  ...gazetteXLIVAdditions.map(args => ({...quote(...args), source: 'Gazeta Comercial XLIV', isNew: true, note: 'Novo na Gazeta Comercial XLIV.'}))
 ];
 const aliases = {'Carvão':'Carvão Bruto', 'Cobre bruto':'Cobre', 'Ferro bruto':'Ferro', 'Ouro bruto':'Ouro', 'Prata bruta':'Prata'};
 const canonicalName = name => aliases[name] || name;
@@ -181,6 +203,6 @@ function find(name, preferSale = false) {
   const canonical = canonicalName(name);
   return (preferSale && rows.find(row => row.name === canonical + ' (v)' && row.origin === 'Fazenda Venda')) || rows.find(row => row.name === canonical);
 }
-return {rows, spreadsheetRows, absentFromXLII, aliases, canonicalName, find};
+return {rows, spreadsheetRows, absentFromXLII, absentFromXLIV, aliases, canonicalName, find};
 })();
 if (typeof module !== 'undefined') module.exports = CountyPrices;

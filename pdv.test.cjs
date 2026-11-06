@@ -21,14 +21,14 @@ test('search puts the exact product first',()=>{
 test('the same product adds to one line and totals stay exact',()=>{
  const lines=[];
  P.addLine(lines,item('Perfume'),1,'median');P.addLine(lines,item('Perfume'),1,'median');
- P.addLine(lines,item('Buquê de Rosas'),10,'median');P.addLine(lines,item('Rosa'),100,'median');P.addLine(lines,item('Minhocário'),2,'median');
- assert.deepEqual(lines.map(line=>[line.name,line.quantity,line.price]),[['Perfume',2,'0.14000'],['Buquê de Rosas',10,'0.35000'],['Rosa',100,'0.00325'],['Minhocário',2,'1.25000']]);
+ P.addLine(lines,item('Buquê de Rosas'),10,'median');P.addLine(lines,item('Rosa'),10,'median');P.addLine(lines,item('Minhocário'),2,'median');
+ assert.deepEqual(lines.map(line=>[line.name,line.quantity,line.price]),[['Perfume',2,'0.14000'],['Buquê de Rosas',10,'0.35000'],['Rosa',10,'0.00650'],['Minhocário',2,'1.25000']]);
  const totals=P.saleTotals(lines);
- // 0.28 + 3.50 + 0.325 + 2.50 = 6.605; the charge rounds half up to $6.61.
- assert.deepEqual([totals.exact,totals.charge,totals.items],[660500n,661000n,114]);
- assert.equal(P.formatAmount(totals.exact,5),'$6,605');
- assert.equal(P.formatAmount(P.changeDue(totals.charge,'10')),'$3,39');
- assert.equal(P.formatAmount(P.changeDue(totals.charge,'5,00')),'-$1,61');
+ // 0.28 + 3.50 + 0.065 + 2.50 = 6.345; the charge rounds half up to $6.35.
+ assert.deepEqual([totals.exact,totals.charge,totals.items],[634500n,635000n,24]);
+ assert.equal(P.formatAmount(totals.exact,5),'$6,345');
+ assert.equal(P.formatAmount(P.changeDue(totals.charge,'10')),'$3,65');
+ assert.equal(P.formatAmount(P.changeDue(totals.charge,'5,00')),'-$1,35');
  assert.equal(P.changeDue(totals.charge,'abc'),null);
 });
 test('quantities are capped at one million per line',()=>{
@@ -58,4 +58,10 @@ test('a sale saved before a price update follows the new prices, except typed on
  assert.deepEqual(lines.map(line=>line.price),['0.25000','0.40000']);
  P.repriceLines(lines,byName,'max');
  assert.deepEqual(lines.map(line=>line.price),['0.28000','0.40000']);
+});
+test('a sale saved under a renamed item follows the new name',()=>{
+ const lines=P.renameLines([{name:'Carne de Galinha',quantity:3,price:'0.05000',custom:false},{name:'Rosa',quantity:2,price:'0.00650',custom:false},{name:'Flecha de Rastreio',quantity:1,price:'0.19000',custom:false}],catalog);
+ assert.deepEqual(lines.map(line=>[line.name,line.quantity]),[['Carne de Ave',3],['Rosa',2],['Flecha de Rastreio',1]]);
+ // An item removed from the edition has no new name; the page drops that line.
+ assert.equal(item('Flecha de Rastreio'),undefined);
 });

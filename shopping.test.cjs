@@ -23,8 +23,8 @@ const {buildEconomyCatalog,scenarioPrice}=require('./price-catalog.js');
 test('scenarios price units and lots from the source ranges',()=>{
  const catalog=buildEconomyCatalog();
  const girassol=catalog.find(item=>item.name==='Girassol');
- assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(girassol,scenario)),[0.3,0.325,0.35]);
- assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(girassol,scenario,'lot')),[30,32.5,35]);
+ assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(girassol,scenario)),[0.6,0.65,0.7]);
+ assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(girassol,scenario,'lot')),[60,65,70]);
  const suggestion={status:'suggested',suggested:0.325};
  assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(suggestion,scenario)),[0.325,0.325,0.325]);
  assert.throws(()=>scenarioPrice(girassol,'average'));
@@ -47,6 +47,6 @@ test('every listed item has a lot: 100 units unless the source prints another si
  assert.deepEqual(['min','median','max'].map(scenario=>scenarioPrice(perfume,scenario,'lot')),[1200,1400,1600]);
  const ouro=catalog.find(item=>item.name==='Ouro'), girassol=catalog.find(item=>item.name==='Girassol');
  assert.deepEqual([ouro.lotSize,ouro.sourceMin,ouro.lotDerived],[10,20,undefined]);
- assert.deepEqual([girassol.lotSize,girassol.sourceMin,girassol.lotDerived],[100,30,undefined]);
- assert.equal(catalog.filter(item=>item.lotDerived).length,365);
+ assert.deepEqual([girassol.lotSize,girassol.sourceMin,girassol.lotDerived],[100,60,undefined]);
+ assert.equal(catalog.filter(item=>item.lotDerived).length,368);
 });
